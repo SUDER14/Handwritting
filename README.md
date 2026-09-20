@@ -104,6 +104,29 @@ noise-added) sample generator is included:
 venv\Scripts\python scripts\make_synthetic_sample.py
 ```
 
+## Real data: IAM (writer-disjoint splits)
+
+The IAM Handwriting Database is licensed and is **not** in this repo. Put it
+under `data/iam/` in the standard layout (`ascii/{forms,lines,words}.txt`,
+`lines/a01/a01-000u/*.png`, `words/...`); `src/data/iam.py` reads it, groups
+samples by writer via `forms.txt`, and exposes a writer-disjoint train/val/test
+split that is a pure function of `data.iam.split_seed` in `config/config.yaml`.
+The writer-ID lists are written to `data/splits/{train,val,test}.json` and are
+re-verified on every load.
+
+```powershell
+venv\Scripts\python scripts\check_split.py      # asserts zero writer overlap, prints per-split counts
+```
+
+```python
+from src.data.iam import load_iam
+val = load_iam("val", unit="lines")
+image, transcription, writer_id = val[0]   # uint8 gray, fixed height, variable width
+```
+
+`data/samples/{quick,hello}_sample.png` are font-rendered and exist **only as a
+smoke test**; never report metrics computed on them as results.
+
 ## Training the neural style encoder
 
 ```powershell

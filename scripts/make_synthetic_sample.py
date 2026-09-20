@@ -5,8 +5,9 @@ render a word with a handwriting-style system font (Segoe Print — visually
 distinct from Segoe Script, which the baseline generator uses as its
 reference font, so this remains a meaningful, non-circular test) and add
 mild photo-realistic noise/rotation/lighting variation. This is ONLY a
-development/testing aid — real usage is via actual uploaded photos in the
-Streamlit app.
+development/testing aid (smoke tests only, never an evaluation set — real
+evaluation uses writer-disjoint IAM splits, see src/data/iam.py) — real usage
+is via actual uploaded photos in the Streamlit app.
 """
 from __future__ import annotations
 

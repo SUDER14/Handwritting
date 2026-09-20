@@ -16,3 +16,7 @@ outputs/generated_text/*
 .streamlit/
 *.log
 .DS_Store
+
+# IAM is licensed: never commit the dataset, but do commit data/splits/*.json (auditable writer lists)
+data/iam/*
+!data/iam/.gitkeep
