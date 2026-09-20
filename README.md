@@ -162,6 +162,25 @@ epochs (~40 min on a 4-core CPU, no GPU) — adjust
 `recognition_training.max_train_samples` / `.epochs` in `config/config.yaml`
 for a longer run.
 
+## Evaluation harness
+
+```powershell
+venv\Scripts\python scripts\evaluate.py --split val                 # baseline generator, validation writers
+venv\Scripts\python scripts\evaluate.py --split val --backend neural
+venv\Scripts\python scripts\evaluate.py --smoke                     # synthetic samples: smoke test, NOT a result
+```
+
+Two headline metrics, always reported together: **legibility** = CER of the CNN
+recognizer reading the generated text back, and **style fidelity** = cosine
+distance between writer-ID embeddings of the generated and the reference image.
+The writer-ID model is not trained yet; `src/evaluation/writer_id.py` provides
+the interface plus a rule-based **stub**, and every run records `is_stub`.
+Each run writes `results/<utc-timestamp>_<git-sha>/metrics.json` (git SHA, full
+resolved config, checkpoint paths + SHA-256, split, per-sample and aggregate
+metrics) and appends a row to `results/index.csv`. The test split needs
+`--allow-test`. Leave-one-out SSIM rebuilds the style profile from the remaining
+characters only (`src/evaluation/loo.py`).
+
 ## Evaluation
 
 ```powershell

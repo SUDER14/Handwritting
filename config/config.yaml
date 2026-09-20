@@ -80,3 +80,13 @@ data:
       val: 0.1
       test: 0.1
     image_height: 64                 # IAMDataset[i] images are resized to this height, width scales, aspect kept
+
+# Evaluation harness (scripts/evaluate.py, src/evaluation/harness.py).
+evaluation:
+  results_dir: "results"            # each run -> results/<utc-timestamp>_<git-sha>/metrics.json, plus results/index.csv
+  writer_embedder: "stub"           # WriterEmbedder used for style fidelity. "stub" is a rule-based PLACEHOLDER until a
+                                    # trained writer-ID model exists (src/evaluation/writer_id.py); runs are flagged.
+  targets_per_writer: 2             # per writer: 1 reference line conditions the generator, this many other lines are targets
+  max_target_chars: 40              # target text is truncated to this many characters (letters and spaces only)
+  min_reference_letters: 12         # a line must have at least this many letters to be used as reference/target
+  smoke_texts: ["the quick fox", "hello world"]   # --smoke only: text rendered for data/samples/*_sample.png

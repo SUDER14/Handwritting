@@ -66,3 +66,11 @@ def test_style_profile_aggregates_multiple_glyphs(extractor):
     assert len(profile.glyph_features) == 2
     assert profile.feature_vector.shape == (8,)
     assert profile.mean_height_px > 0
+
+
+def test_stroke_width_of_solid_crop_is_finite(extractor):
+    """A tight crop that is entirely ink has no background pixel; the distance transform used to
+    return ~1e37 there and the stroke width overflowed to inf/NaN."""
+    solid = np.full((60, 12), 255, dtype=np.uint8)
+    width = extractor.extract_glyph_features("l", solid).stroke_width_px
+    assert np.isfinite(width) and 4 <= width <= 14

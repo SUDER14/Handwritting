@@ -1,130 +1,147 @@
-"""Runs the baseline-vs-proposed comparison described in docs/experiments.md
-against a handwriting sample, including the leave-one-out SSIM protocol.
+"""Evaluate the generators on writer-disjoint IAM data and persist the run.
+
+Reports BOTH headline metrics, always together:
+  * legibility     = CER of the CNN recognizer reading the generated text back (lower = better)
+  * style fidelity = cosine distance between writer-ID embeddings of generated vs reference image (lower = better)
+plus leave-one-out SSIM (secondary; the held-out glyph is excluded from the style profile).
+
+Every run writes  results/<utc-timestamp>_<git-sha>/metrics.json  (run id, git SHA, full resolved config,
+checkpoint paths + hashes, split name, per-sample and aggregate metrics) and appends one row to
+results/index.csv so runs can be compared without parsing JSON.
 
 Usage:
-    python scripts/evaluate.py --image data/samples/quick_sample.png --label quick
+    python scripts/evaluate.py --split val                       # baseline generator, validation writers
+    python scripts/evaluate.py --split val --backend neural
+    python scripts/evaluate.py --split val --max-writers 10      # quick look
+    python scripts/evaluate.py --split test --allow-test         # final numbers only; the test split is guarded
+    python scripts/evaluate.py --smoke                           # synthetic font-rendered samples: pipeline smoke
+                                                                 # test only, flagged is_smoke_test=true, NOT a result
+
+Needs the IAM dataset under data/iam (see src/data/iam.py) and a trained CNN checkpoint
+(scripts/train_cnn_recognizer.py). The writer-ID embedder is currently a STUB (see
+src/evaluation/writer_id.py); runs record that, and style-fidelity numbers from a stub are not results.
 """
 from __future__ import annotations
 
 import argparse
+import copy
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import cv2
-import numpy as np
-
-from src.evaluation.metrics import (
-    character_recognition_accuracy,
-    ssim_against_reference,
-    writer_style_similarity,
-)
-from src.generator.baseline_generator import BaselineGlyphGenerator
-from src.pipeline import analyze_sample, generate_alphabet_baseline
+from src.data.iam import SPLIT_NAMES, load_iam
+from src.evaluation import harness
+from src.evaluation.writer_id import get_writer_embedder
+from src.recognition.cnn_recognizer import CNNRecognizer
 from src.utils.config import load_config, resolve_path
 from src.utils.logging_setup import get_logger
 
 logger = get_logger(__name__)
 
 
-def leave_one_out_ssim(image_bgr: np.ndarray, label: str, cfg: dict, use_neural: bool) -> dict[str, float]:
-    """For each observed character, regenerate it from the OTHER observed characters'
-    style and score it against its real withheld glyph via SSIM.
-    """
-    scores = {}
-    unique_chars = sorted(set(label))
-    if len(unique_chars) < 2:
-        logger.warning("Need at least 2 distinct characters for leave-one-out; skipping.")
-        return scores
-
-    full_analysis = analyze_sample(image_bgr, label, cfg)
-
-    for held_out in unique_chars:
-        remaining_glyphs = {c: g for c, g in full_analysis.observed_glyphs.items() if c != held_out}
-        if not remaining_glyphs:
-            continue
-
-        if use_neural:
-            from src.style_encoder.inference import StyleEncoderInference
-
-            engine = StyleEncoderInference()
-            writer_style = engine.encode_writer_style(remaining_glyphs)
-            generated = engine.generate_char(held_out, writer_style)
-        else:
-            generator = BaselineGlyphGenerator(cfg)
-            generated = generator.generate_unobserved(held_out, full_analysis.style_profile)[0]
-
-        real = full_analysis.observed_glyphs[held_out]
-        scores[held_out] = ssim_against_reference(generated, real)
-
-    return scores
-
-
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--image", required=True)
-    parser.add_argument("--label", required=True)
-    parser.add_argument("--skip-neural", action="store_true", help="Skip neural backend (no trained checkpoint).")
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--split", choices=SPLIT_NAMES, default="val")
+    parser.add_argument("--backend", choices=["baseline", "neural"], default="baseline")
+    parser.add_argument("--max-writers", type=int, default=None, help="evaluate a deterministic subset of the split's writers")
+    parser.add_argument("--smoke", action="store_true", help="run on data/samples/*.png (NOT an evaluation)")
+    parser.add_argument("--allow-test", action="store_true", help="required to touch the test split")
+    parser.add_argument("--iam-root", default=None)
+    parser.add_argument("--splits-dir", default=None)
+    parser.add_argument("--results-dir", default=None, help="default: evaluation.results_dir from config")
     args = parser.parse_args()
 
     cfg = load_config()
-    image_bgr = cv2.imread(args.image, cv2.IMREAD_COLOR)
-    label = "".join(c for c in args.label.lower() if c.isalpha())
+    resolved_config = copy.deepcopy(cfg)   # recorded verbatim in metrics.json
+    ev = cfg["evaluation"]
 
-    analysis = analyze_sample(image_bgr, label, cfg)
-    logger.info("=" * 70)
-    logger.info("Sample: %r -> detected chars: %s", label, analysis.chars)
+    if not args.smoke and args.split == "test" and not args.allow_test:
+        print("Refusing to evaluate on the test split without --allow-test. Use val while developing.", file=sys.stderr)
+        return 2
 
-    cnn_recognizer = None
-    cnn_checkpoint_path = resolve_path(cfg["recognition"]["cnn_checkpoint_path"])
-    if cnn_checkpoint_path.exists():
-        from src.recognition.cnn_recognizer import CNNRecognizer
+    cnn_path = resolve_path(cfg["recognition"]["cnn_checkpoint_path"])
+    vae_path = resolve_path(cfg["training"]["checkpoint_path"]) if args.backend == "neural" else None
+    try:
+        recognizer = CNNRecognizer(checkpoint_path=str(cnn_path))
+    except FileNotFoundError as e:
+        print(f"Cannot compute legibility (CER) without the CNN recognizer: {e}", file=sys.stderr)
+        return 2
+    if vae_path is not None and not vae_path.exists():
+        print(f"--backend neural needs a VAE checkpoint at {vae_path}", file=sys.stderr)
+        return 2
+    try:
+        embedder = get_writer_embedder(ev["writer_embedder"], cfg)
+    except NotImplementedError as e:
+        print(f"Cannot compute style fidelity: {e}", file=sys.stderr)
+        return 2
 
-        cnn_recognizer = CNNRecognizer(checkpoint_path=str(cnn_checkpoint_path))
+    engine = None
+    if args.backend == "neural":
+        from src.style_encoder.inference import StyleEncoderInference
+        engine = StyleEncoderInference(checkpoint_path=str(vae_path))
+    ctx = harness.EvalContext(config=cfg, backend=args.backend, recognizer=recognizer, embedder=embedder,
+                              neural_checkpoint=str(vae_path) if vae_path else None, neural_engine=engine)
+
+    skipped_writers: list[dict] = []
+    if args.smoke:
+        split_name, unit = "smoke", "synthetic"
+        print("*** SMOKE TEST on synthetic font-rendered samples. This is not an evaluation. ***")
+        records = harness.run_smoke(ctx, resolve_path("data/samples"))
+        split_files = None
     else:
-        logger.info("No CNN recognizer checkpoint at %s; recognition-accuracy OCR proxy "
-                     "will use template matching only.", cnn_checkpoint_path)
+        split_name, unit = args.split, "lines"
+        try:
+            dataset = load_iam(args.split, unit=unit, root=args.iam_root, splits_dir=args.splits_dir)
+        except FileNotFoundError as e:
+            print(f"ERROR: {e}", file=sys.stderr)
+            return 2
+        splits_dir = Path(args.splits_dir) if args.splits_dir else resolve_path(cfg["data"]["iam"]["splits_dir"])
+        split_files = {n: harness.checkpoint_record(splits_dir / f"{n}.json") for n in SPLIT_NAMES}
+        logger.info("Evaluating split=%s: %d writers, %d lines, backend=%s",
+                    args.split, len(dataset.writer_ids), len(dataset), args.backend)
+        records, skipped_writers = harness.run_iam_split(ctx, dataset, max_writers=args.max_writers)
 
-    logger.info("-" * 70)
-    logger.info("BASELINE generator")
-    baseline_alphabet = generate_alphabet_baseline(analysis, cfg)
-    baseline_rec = character_recognition_accuracy(baseline_alphabet)
-    baseline_sim = writer_style_similarity(baseline_alphabet, analysis.observed_glyphs)
-    logger.info("  Recognition accuracy (template OCR proxy): %.1f%%", baseline_rec["__overall__"] * 100)
-    if cnn_recognizer is not None:
-        baseline_rec_cnn = character_recognition_accuracy(baseline_alphabet, recognizer=cnn_recognizer)
-        logger.info("  Recognition accuracy (trained CNN OCR proxy): %.1f%%", baseline_rec_cnn["__overall__"] * 100)
-    logger.info("  Writer-style similarity (cosine, rule-based features): %.3f", baseline_sim)
-    loo_baseline = leave_one_out_ssim(image_bgr, label, cfg, use_neural=False)
-    if loo_baseline:
-        logger.info("  Leave-one-out SSIM per char: %s", {k: round(v, 3) for k, v in loo_baseline.items()})
-        logger.info("  Leave-one-out SSIM mean: %.3f", float(np.mean(list(loo_baseline.values()))))
+    aggregate = harness.aggregate(records)   # raises rather than reporting one metric alone
 
-    checkpoint_path = resolve_path(cfg["training"]["checkpoint_path"])
-    if not args.skip_neural and checkpoint_path.exists():
-        logger.info("-" * 70)
-        logger.info("NEURAL generator (conditional VAE)")
-        from src.pipeline import generate_alphabet_neural
+    record = {
+        "schema_version": harness.SCHEMA_VERSION,
+        "git": harness.git_info(),
+        "split": split_name,
+        "unit": unit,
+        "backend": args.backend,
+        "is_smoke_test": bool(args.smoke),
+        "writer_embedder": embedder.describe(),
+        "cli_args": vars(args),
+        "resolved_config": resolved_config,
+        "checkpoints": {
+            "cnn": harness.checkpoint_record(cnn_path),
+            "vae": harness.checkpoint_record(vae_path),
+        },
+        "split_files": split_files,
+        "skipped_writers": skipped_writers,
+        "samples": records,
+        "aggregate": aggregate,
+    }
+    results_dir = Path(args.results_dir) if args.results_dir else resolve_path(ev["results_dir"])
+    metrics_path = harness.write_run(results_dir, record)
 
-        neural_alphabet = generate_alphabet_neural(analysis, checkpoint_path=str(checkpoint_path))
-        neural_rec = character_recognition_accuracy(neural_alphabet)
-        neural_sim = writer_style_similarity(neural_alphabet, analysis.observed_glyphs)
-        logger.info("  Recognition accuracy (template OCR proxy): %.1f%%", neural_rec["__overall__"] * 100)
-        if cnn_recognizer is not None:
-            neural_rec_cnn = character_recognition_accuracy(neural_alphabet, recognizer=cnn_recognizer)
-            logger.info("  Recognition accuracy (trained CNN OCR proxy): %.1f%%", neural_rec_cnn["__overall__"] * 100)
-        logger.info("  Writer-style similarity (cosine, rule-based features): %.3f", neural_sim)
-        loo_neural = leave_one_out_ssim(image_bgr, label, cfg, use_neural=True)
-        if loo_neural:
-            logger.info("  Leave-one-out SSIM per char: %s", {k: round(v, 3) for k, v in loo_neural.items()})
-            logger.info("  Leave-one-out SSIM mean: %.3f", float(np.mean(list(loo_neural.values()))))
-    else:
-        logger.info("-" * 70)
-        logger.info("Skipping neural backend (no checkpoint at %s)", checkpoint_path)
-
-    logger.info("=" * 70)
+    a = aggregate
+    print()
+    print(f"split={split_name} backend={args.backend} samples={a['n_samples']} (failed {a['n_failed']}) writers={a['n_writers']}")
+    print(f"  legibility     CER (micro / mean)          : {a['cer_micro']:.3f} / {a['cer_mean']:.3f}   (lower is better)")
+    print(f"  style fidelity cosine dist vs reference    : {a['style_distance_reference_mean']:.4f}   (lower is better)")
+    if a["style_distance_heldout_mean"] is not None:
+        print(f"                 cosine dist vs held-out real: {a['style_distance_heldout_mean']:.4f}")
+    if a["loo_ssim_mean"] is not None:
+        print(f"  leave-one-out SSIM (secondary)             : {a['loo_ssim_mean']:.3f}")
+    if embedder.is_stub:
+        print(f"  NOTE: writer embedder is a STUB ({embedder.name}); style-fidelity numbers are placeholders.")
+    if args.smoke:
+        print("  NOTE: smoke test on synthetic samples; do not quote these numbers as results.")
+    print(f"wrote {metrics_path}")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -54,10 +54,13 @@ class StyleFeatureExtractor:
         """Median stroke width via distance transform (2x the medial-axis radius)."""
         if glyph_bin.sum() == 0:
             return 0.0
-        dist = cv2.distanceTransform(glyph_bin, cv2.DIST_L2, 5)
+        # Pad with background: a tight crop that is entirely ink (a solid stem) has no zero
+        # pixel for the transform to measure against and returns ~1e37, which overflows.
+        padded = cv2.copyMakeBorder(glyph_bin, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
+        dist = cv2.distanceTransform(padded, cv2.DIST_L2, 5)
         # Skeleton-ish: only consider local maxima along the ink to avoid
         # averaging in the tapered edges of strokes.
-        ink_distances = dist[glyph_bin > 0]
+        ink_distances = dist[padded > 0]
         if ink_distances.size == 0:
             return 0.0
         return float(np.percentile(ink_distances, 75) * 2)
@@ -117,17 +120,47 @@ class StyleFeatureExtractor:
             curvature_score=self._curvature_score(glyph_bin),
         )
 
+    def extract_style_profile_excluding(
+        self, chars: list[str], glyphs: list[Glyph], exclude_char: str
+    ) -> StyleProfile:
+        """Style profile rebuilt from every glyph EXCEPT those labelled `exclude_char`.
+
+        Used for leave-one-out scoring. Nothing derived from an excluded glyph may
+        influence the result, which means more than dropping it from the feature list:
+          * the baseline / x-height-top medians are recomputed from the retained boxes;
+          * spacing is measured only between glyphs that were adjacent in the original
+            line AND are both retained (the gap that straddles a removed glyph is
+            contaminated by that glyph's width, so it is skipped);
+          * every occurrence is removed (e.g. both 'l' in "hello").
+        """
+        keep = [i for i, c in enumerate(chars) if c.lower() != exclude_char.lower()]
+        if not keep:
+            raise ValueError(f"Excluding {exclude_char!r} leaves no glyphs to build a style profile from")
+        kept = set(keep)
+        spacings = [
+            glyphs[i + 1].bbox[0] - (glyphs[i].bbox[0] + glyphs[i].bbox[2])
+            for i in range(len(glyphs) - 1) if i in kept and (i + 1) in kept
+        ]
+        kept_glyphs = [glyphs[i] for i in keep]
+        baseline_y = int(np.median([g.bbox[1] + g.bbox[3] for g in kept_glyphs]))
+        x_height_top_y = int(np.median([g.bbox[1] for g in kept_glyphs]))
+        return self.extract_style_profile(
+            [chars[i] for i in keep], kept_glyphs, baseline_y, x_height_top_y, spacings=spacings
+        )
+
     def extract_style_profile(
-        self, chars: list[str], glyphs: list[Glyph], baseline_y: int, x_height_top_y: int
+        self, chars: list[str], glyphs: list[Glyph], baseline_y: int, x_height_top_y: int,
+        spacings: list[float] | None = None,
     ) -> StyleProfile:
         glyph_features = [
             self.extract_glyph_features(c, g.image) for c, g in zip(chars, glyphs)
         ]
 
-        spacings = []
-        for i in range(len(glyphs) - 1):
-            gap = glyphs[i + 1].bbox[0] - (glyphs[i].bbox[0] + glyphs[i].bbox[2])
-            spacings.append(gap)
+        if spacings is None:  # default: gaps between consecutive glyphs in the given list
+            spacings = []
+            for i in range(len(glyphs) - 1):
+                gap = glyphs[i + 1].bbox[0] - (glyphs[i].bbox[0] + glyphs[i].bbox[2])
+                spacings.append(gap)
 
         heights = [f.height_px for f in glyph_features]
         widths = [f.width_px for f in glyph_features]

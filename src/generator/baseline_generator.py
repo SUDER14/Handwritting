@@ -65,8 +65,9 @@ def _render_reference_glyph(char: str, font: ImageFont.FreeTypeFont) -> np.ndarr
 def _measure_stroke_width(glyph_bin: np.ndarray) -> float:
     if glyph_bin.sum() == 0:
         return 1.0
-    dist = cv2.distanceTransform(glyph_bin, cv2.DIST_L2, 5)
-    ink_distances = dist[glyph_bin > 0]
+    padded = cv2.copyMakeBorder(glyph_bin, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)  # see style_extractor._stroke_width
+    dist = cv2.distanceTransform(padded, cv2.DIST_L2, 5)
+    ink_distances = dist[padded > 0]
     return float(np.percentile(ink_distances, 75) * 2) if ink_distances.size else 1.0
 
 
