@@ -19,6 +19,7 @@ import numpy as np
 
 from src.features.style_extractor import StyleFeatureExtractor, StyleProfile
 from src.generator.baseline_generator import BaselineGlyphGenerator
+from src.generator.glyph import GlyphBitmap, GlyphPriors, bitmap_from_generated, make_bitmap, writer_spacing_ratio
 from src.preprocessing.pipeline import Preprocessor, PreprocessingResult
 from src.recognition import get_recognizer
 from src.segmentation.segmenter import Segmenter, SegmentationResult
@@ -33,8 +34,9 @@ class SampleAnalysis:
     preprocessing: PreprocessingResult
     segmentation: SegmentationResult
     chars: list[str]
-    observed_glyphs: dict[str, np.ndarray]   # char -> normalized-crop binary image
+    observed_glyphs: dict[str, np.ndarray]   # char -> raw segmented crop (binary, native scale)
     style_profile: StyleProfile
+    observed_bitmaps: dict[str, GlyphBitmap]  # same crops wrapped with GlyphMetrics measured from this sample
 
 
 def analyze_sample(
@@ -68,7 +70,9 @@ def analyze_sample(
     backend = recognition_backend or cfg["recognition"]["backend"]
 
     pre = Preprocessor(cfg)
-    pre_result = pre.process(image_bgr=image_bgr)
+    # The label length tells preprocessing whether there is enough text to estimate skew at all
+    # (see preprocessing.deskew_min_chars); with no label it falls back to counting components.
+    pre_result = pre.process(image_bgr=image_bgr, n_chars=len(label_text) if backend == "labeled" else None)
 
     seg = Segmenter(cfg)
     if backend == "labeled":
@@ -87,10 +91,22 @@ def analyze_sample(
         # "hello" has two 'l's), keep the first occurrence for style extraction.
         observed_glyphs.setdefault(char.lower(), glyph.image)
 
-    extractor = StyleFeatureExtractor()
+    priors = GlyphPriors.from_config(cfg)
+    extractor = StyleFeatureExtractor(priors)
     style_profile = extractor.extract_style_profile(
         chars, seg_result.glyphs, seg_result.baseline_y, seg_result.x_height_top_y
     )
+
+    # Metrics for the real glyphs: x-height and baseline are the writer's, measured on this line, so
+    # descender letters get a negative baseline_offset relative to the SAME baseline as everything else.
+    line = style_profile.line_metrics
+    spacing = writer_spacing_ratio(style_profile.mean_char_spacing_px, line.x_height, priors) * line.x_height
+    observed_bitmaps: dict[str, GlyphBitmap] = {}
+    for char, glyph in zip(chars, seg_result.glyphs):
+        if char.lower() in observed_bitmaps:
+            continue
+        _, y, _, h = glyph.bbox
+        observed_bitmaps[char.lower()] = make_bitmap(glyph.image, line.x_height, line.baseline_y - y, spacing)
 
     return SampleAnalysis(
         preprocessing=pre_result,
@@ -98,6 +114,7 @@ def analyze_sample(
         chars=chars,
         observed_glyphs=observed_glyphs,
         style_profile=style_profile,
+        observed_bitmaps=observed_bitmaps,
     )
 
 
@@ -148,25 +165,37 @@ def recognize_with_cnn(analysis: SampleAnalysis, config: dict | None = None) -> 
 
 def generate_alphabet_baseline(
     analysis: SampleAnalysis, config: dict | None = None, charset: str = string.ascii_lowercase
-) -> dict[str, list[np.ndarray]]:
+) -> dict[str, list[GlyphBitmap]]:
     cfg = config or load_config()
     generator = BaselineGlyphGenerator(cfg)
-    return generator.generate_alphabet(analysis.observed_glyphs, analysis.style_profile, charset=charset)
+    return generator.generate_alphabet(analysis.observed_bitmaps, analysis.style_profile, charset=charset)
 
 
 def generate_alphabet_neural(
-    analysis: SampleAnalysis, checkpoint_path: str | None = None, charset: str = string.ascii_lowercase
-) -> dict[str, list[np.ndarray]]:
-    """Requires a trained checkpoint (python scripts/train_style_encoder.py)."""
+    analysis: SampleAnalysis, checkpoint_path: str | None = None, charset: str = string.ascii_lowercase,
+    config: dict | None = None,
+) -> dict[str, list[GlyphBitmap]]:
+    """Requires a trained checkpoint (python scripts/train_style_encoder.py).
+
+    The VAE emits 28x28 glyphs with no absolute size information; they are wrapped with `GlyphMetrics`
+    from typographic priors (`bitmap_from_generated`) so the renderer can put them at the same x-height
+    and baseline as the real, native-resolution observed glyphs.
+    """
     from src.style_encoder.inference import StyleEncoderInference  # lazy import: torch is heavy
+
+    cfg = config or load_config()
+    priors = GlyphPriors.from_config(cfg)
+    style = analysis.style_profile
+    ratio = writer_spacing_ratio(style.mean_char_spacing_px, style.x_height_px, priors)
 
     engine = StyleEncoderInference(checkpoint_path=checkpoint_path)
     writer_style = engine.encode_writer_style(analysis.observed_glyphs)
-    alphabet = engine.generate_alphabet(writer_style, charset=charset, variants=3)
+    raw = engine.generate_alphabet(writer_style, charset=charset, variants=3)
+    alphabet = {c: [bitmap_from_generated(c, img, ratio, priors) for img in imgs] for c, imgs in raw.items()}
 
     # Hybrid policy (section 25): prefer the real observed glyph over the
     # generated one for characters actually present in the sample.
-    for char, glyph in analysis.observed_glyphs.items():
+    for char, bitmap in analysis.observed_bitmaps.items():
         if char in alphabet:
-            alphabet[char][0] = glyph
+            alphabet[char][0] = bitmap
     return alphabet

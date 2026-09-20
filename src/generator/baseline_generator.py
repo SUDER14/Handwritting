@@ -3,29 +3,37 @@
 This is the non-generative baseline described in docs/experiments.md,
 implemented per the MVP fallback in the design brief (section 25):
 
-- Observed characters (present in the user's sample) are used AS-IS —
-  their real handwritten pixels, just size-normalized.
-- Unobserved characters are synthesized by taking a neutral reference font
-  glyph and warping it (scale, shear/slant, stroke-width morphology) to
-  match the writer's measured StyleProfile.
+- Observed characters (present in the user's sample) are used AS-IS: their
+  real handwritten pixels at native resolution, with the metrics measured
+  from the sample (see src/features/line_metrics.py).
+- Unobserved characters are synthesized from a neutral reference font glyph,
+  transformed to match the writer's StyleProfile: horizontal stretch (letter
+  width relative to x-height), stroke width, and slant.
 
-IMPORTANT — this is intentionally NOT presented as the final AI system.
-It contains no learned representation of handwriting style; it is a
-deterministic image-processing transform, used as (a) a fast fallback that
-always produces a full alphabet even before any model is trained, and
-(b) the baseline that the neural style-encoder + conditional-generator
-pipeline (src/style_encoder/, src/generator/conditional_generator.py) is
-compared against.
+Geometry: nothing is forced into a common box any more. Each glyph keeps its
+own natural proportions (a narrow 'i', a wide 'm', an ascender 'k', a
+descender 'g'), and carries `GlyphMetrics` saying where the writing baseline
+falls in its bitmap (from the font's own baseline, tracked through every
+transform). The renderer normalises to a common x-height and places glyphs by
+baseline (src/renderer/text_renderer.py).
+
+IMPORTANT: this is intentionally NOT presented as the final AI system. It
+contains no learned representation of handwriting style; it is a deterministic
+image-processing transform, used as (a) a fast fallback that always produces a
+full alphabet even before any model is trained, and (b) the baseline that the
+neural style-encoder pipeline (src/style_encoder/) is compared against.
 """
 from __future__ import annotations
 
 import string
+from dataclasses import dataclass
 
 import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 from src.features.style_extractor import StyleProfile
+from src.generator.glyph import GlyphBitmap, GlyphPriors, make_bitmap, tight_crop, writer_spacing_ratio
 
 REFERENCE_FONT_CANDIDATES = [
     "C:/Windows/Fonts/segoesc.ttf",
@@ -33,6 +41,8 @@ REFERENCE_FONT_CANDIDATES = [
     "C:/Windows/Fonts/arial.ttf",
 ]
 RENDER_SIZE = 200
+MAX_STROKE_ITERATIONS = 6
+WIDTH_SCALE_RANGE = (0.5, 1.8)
 
 
 def _load_reference_font(size: int = RENDER_SIZE) -> ImageFont.FreeTypeFont:
@@ -44,22 +54,20 @@ def _load_reference_font(size: int = RENDER_SIZE) -> ImageFont.FreeTypeFont:
     return ImageFont.load_default()
 
 
-def _render_reference_glyph(char: str, font: ImageFont.FreeTypeFont) -> np.ndarray:
-    """Render a character from the neutral reference font, tightly cropped, ink=255."""
-    canvas = RENDER_SIZE * 2
+@dataclass(frozen=True)
+class _FontGlyph:
+    image: np.ndarray      # tight crop, ink=255
+    baseline_row: float    # rows from the top of `image` to the font's baseline
+    x_height: float        # the font's x-height, same pixels
+
+
+def _render_font_glyph(char: str, font: ImageFont.FreeTypeFont) -> tuple[np.ndarray, int]:
+    """Render `char` anchored on its baseline; returns (tight crop, baseline row within the crop)."""
+    canvas, baseline_y = RENDER_SIZE * 3, RENDER_SIZE * 2
     img = Image.new("L", (canvas, canvas), color=0)
-    draw = ImageDraw.Draw(img)
-    bbox = draw.textbbox((0, 0), char, font=font)
-    w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    x = (canvas - w) / 2 - bbox[0]
-    y = (canvas - h) / 2 - bbox[1]
-    draw.text((x, y), char, fill=255, font=font)
-    arr = np.array(img)
-    coords = cv2.findNonZero(arr)
-    if coords is None:
-        return np.zeros((10, 10), dtype=np.uint8)
-    x, y, w, h = cv2.boundingRect(coords)
-    return arr[y:y + h, x:x + w]
+    ImageDraw.Draw(img).text((RENDER_SIZE, baseline_y), char, fill=255, font=font, anchor="ls")
+    crop, _, y0 = tight_crop(np.array(img))
+    return crop, baseline_y - y0
 
 
 def _measure_stroke_width(glyph_bin: np.ndarray) -> float:
@@ -77,7 +85,7 @@ def _adjust_stroke_width(glyph_bin: np.ndarray, target_width_px: float) -> np.nd
     if current <= 0:
         return glyph_bin
     ratio = target_width_px / current
-    iterations = int(round(abs(ratio - 1) * 3))
+    iterations = min(MAX_STROKE_ITERATIONS, int(round(abs(ratio - 1) * 3)))
     if iterations == 0:
         return glyph_bin
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
@@ -86,85 +94,116 @@ def _adjust_stroke_width(glyph_bin: np.ndarray, target_width_px: float) -> np.nd
     return cv2.erode(glyph_bin, kernel, iterations=iterations)
 
 
-def _apply_shear(glyph_bin: np.ndarray, slant_deg: float) -> np.ndarray:
-    """Shear the glyph horizontally to emulate a slant. slant_deg: 0 = upright."""
+def _apply_shear(canvas: np.ndarray, slant_deg: float) -> np.ndarray:
+    """Shear a padded glyph canvas horizontally to emulate a slant. 0 = unchanged.
+
+    Same transform as before (x' = x + tan(slant) * y), but applied in place on a canvas that already
+    has horizontal room, so the vertical layout -- and therefore the baseline row -- is untouched.
+    """
     if abs(slant_deg) < 0.5:
-        return glyph_bin
-    h, w = glyph_bin.shape[:2]
+        return canvas
+    h, w = canvas.shape[:2]
     shear = np.tan(np.radians(slant_deg))
     pad = int(abs(shear) * h) + 2
-    M = np.array([[1, shear, -min(0, shear) * h + 0], [0, 1, 0]], dtype=np.float32)
-    padded = cv2.copyMakeBorder(glyph_bin, 0, 0, pad, pad, cv2.BORDER_CONSTANT, value=0)
-    sheared = cv2.warpAffine(
-        padded, M, (padded.shape[1], padded.shape[0]),
-        flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT, borderValue=0,
-    )
-    coords = cv2.findNonZero(sheared)
-    if coords is None:
-        return glyph_bin
-    x, y, w2, h2 = cv2.boundingRect(coords)
-    return sheared[y:y + h2, x:x + w2]
+    padded = cv2.copyMakeBorder(canvas, 0, 0, pad, pad, cv2.BORDER_CONSTANT, value=0)
+    m = np.array([[1, shear, -min(0, shear) * h], [0, 1, 0]], dtype=np.float32)
+    return cv2.warpAffine(padded, m, (padded.shape[1], padded.shape[0]),
+                          flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
 
 
-def _resize_to_target(glyph_bin: np.ndarray, target_h: int, target_w: int) -> np.ndarray:
-    target_h, target_w = max(4, target_h), max(4, target_w)
-    return cv2.resize(glyph_bin, (target_w, target_h), interpolation=cv2.INTER_AREA)
-
-
-def _jitter(glyph_bin: np.ndarray, rotation_deg: float, rng: np.random.Generator) -> np.ndarray:
-    """Small random rotation to give repeated generations a natural, non-identical look."""
+def _jitter(canvas: np.ndarray, baseline_row: float, rotation_deg: float, rng: np.random.Generator) -> np.ndarray:
+    """Small random rotation about the point (canvas centre x, baseline), so the baseline pixel stays put."""
     angle = rng.uniform(-rotation_deg, rotation_deg)
-    h, w = glyph_bin.shape[:2]
-    M = cv2.getRotationMatrix2D((w / 2, h / 2), angle, 1.0)
-    return cv2.warpAffine(glyph_bin, M, (w, h), flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+    h, w = canvas.shape[:2]
+    m = cv2.getRotationMatrix2D((w / 2, float(baseline_row)), angle, 1.0)
+    return cv2.warpAffine(canvas, m, (w, h), flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
 
 
 class BaselineGlyphGenerator:
     """Generates the missing alphabet via style-transformed reference-font glyphs.
 
-    Observed glyphs are preserved as real handwriting pixels (normalized).
+    Observed glyphs are preserved as real handwriting pixels at native resolution.
     """
 
     def __init__(self, config: dict | None = None):
+        cfg = config or {}
         self.font = _load_reference_font()
         self.rng = np.random.default_rng(42)
-        self.variants_per_char = (config or {}).get("generation", {}).get("variants_per_char", 3)
-        self.jitter_rotation_deg = (config or {}).get("generation", {}).get("jitter_rotation_deg", 1.5)
+        self.variants_per_char = cfg.get("generation", {}).get("variants_per_char", 3)
+        self.jitter_rotation_deg = cfg.get("generation", {}).get("jitter_rotation_deg", 1.5)
+        self.priors = GlyphPriors.from_config(cfg)
+        self._reference_cache: dict[str, _FontGlyph] = {}
+        self._font_x_height: float | None = None
 
-    def generate_observed(self, glyph_bin: np.ndarray, style: StyleProfile) -> np.ndarray:
-        """Normalize a real observed glyph to the writer's mean size (no shape change)."""
-        target_h = int(round(style.mean_height_px))
-        aspect = glyph_bin.shape[1] / max(1, glyph_bin.shape[0])
-        target_w = max(4, int(round(target_h * aspect)))
-        return _resize_to_target(glyph_bin, target_h, target_w)
+    # -- reference font ------------------------------------------------------
 
-    def generate_unobserved(self, char: str, style: StyleProfile) -> list[np.ndarray]:
+    def _x_height(self) -> float:
+        """The font's x-height = how far the top of 'x' rises ABOVE the baseline. (Not the crop height:
+        the reference font is a cursive script whose 'x' has a tail below the line, which would inflate it.)"""
+        if self._font_x_height is None:
+            self._font_x_height = float(_render_font_glyph("x", self.font)[1])
+        return self._font_x_height
+
+    def _reference(self, char: str) -> _FontGlyph:
+        if char not in self._reference_cache:
+            image, baseline_row = _render_font_glyph(char, self.font)
+            self._reference_cache[char] = _FontGlyph(image, float(baseline_row), self._x_height())
+        return self._reference_cache[char]
+
+    def _width_scale(self, style: StyleProfile) -> float:
+        """Horizontal stretch so that letter width RELATIVE TO X-HEIGHT matches the writer's.
+
+        Median over the writer's observed letters of
+        (writer width / writer x-height) / (font width / font x-height); 1.0 with no observed letters.
+        Replaces the old single mean aspect ratio that forced every letter into one box.
+        """
+        ratios = []
+        for f in style.glyph_features:
+            c = f.char.lower()
+            if c in string.ascii_lowercase and f.width_px > 0:
+                ref = self._reference(c)
+                ratios.append((f.width_px / style.x_height_px) / (ref.image.shape[1] / ref.x_height))
+        return float(np.clip(np.median(ratios), *WIDTH_SCALE_RANGE)) if ratios else 1.0
+
+    # -- generation ------------------------------------------------------------
+
+    def generate_unobserved(self, char: str, style: StyleProfile) -> list[GlyphBitmap]:
         """Synthesize `variants_per_char` glyph variants for a character not in the sample."""
-        base = _render_reference_glyph(char, self.font)
-        target_h = int(round(style.mean_height_px))
-        target_w = max(4, int(round(target_h * style.mean_aspect_ratio)))
+        if style.x_height_px <= 0:
+            raise ValueError("StyleProfile has no x_height_px; build it with StyleFeatureExtractor.extract_style_profile")
+        ref = self._reference(char)
+        scale_to_font = ref.x_height / style.x_height_px          # writer pixels -> font pixels
+        width_scale = self._width_scale(style)
+        target_stroke = style.mean_stroke_width_px * scale_to_font
+        ratio = writer_spacing_ratio(style.mean_char_spacing_px, style.x_height_px, self.priors)
 
         variants = []
         for _ in range(self.variants_per_char):
-            g = _resize_to_target(base, target_h, target_w)
-            g = _adjust_stroke_width(g, style.mean_stroke_width_px * (target_h / max(1, style.mean_height_px)))
-            g = _apply_shear(g, style.mean_slant_deg)
-            g = _resize_to_target(g, target_h, target_w)
-            g = _jitter(g, self.jitter_rotation_deg, self.rng)
-            variants.append(g)
+            pad = max(8, ref.image.shape[0] // 6)
+            canvas = cv2.copyMakeBorder(ref.image, pad, pad, pad, pad, cv2.BORDER_CONSTANT, value=0)
+            baseline_row = ref.baseline_row + pad                  # baseline row within the canvas (vertical ops keep it)
+
+            if abs(width_scale - 1.0) > 1e-3:                      # horizontal-only resize: rows, so baseline, unchanged
+                canvas = cv2.resize(canvas, (max(4, int(round(canvas.shape[1] * width_scale))), canvas.shape[0]),
+                                    interpolation=cv2.INTER_AREA if width_scale < 1 else cv2.INTER_CUBIC)
+                canvas = (canvas > 127).astype(np.uint8) * 255
+            canvas = _adjust_stroke_width(canvas, target_stroke)
+            canvas = _apply_shear(canvas, style.mean_slant_deg)
+            canvas = _jitter(canvas, baseline_row, self.jitter_rotation_deg, self.rng)
+
+            crop, _, y0 = tight_crop(canvas)
+            variants.append(make_bitmap(crop, ref.x_height, baseline_row - y0, ratio * ref.x_height))
         return variants
 
     def generate_alphabet(
         self,
-        observed_chars: dict[str, np.ndarray],
+        observed: dict[str, GlyphBitmap],
         style: StyleProfile,
         charset: str = string.ascii_lowercase,
-    ) -> dict[str, list[np.ndarray]]:
-        """Build the full alphabet: real glyphs for observed chars, synthesized for the rest."""
-        alphabet: dict[str, list[np.ndarray]] = {}
+    ) -> dict[str, list[GlyphBitmap]]:
+        """Build the full alphabet: real glyphs (native scale, measured metrics) for observed chars,
+        synthesized for the rest. Sizes are reconciled at render time by x-height, not here."""
+        alphabet: dict[str, list[GlyphBitmap]] = {}
         for char in charset:
-            if char in observed_chars:
-                alphabet[char] = [self.generate_observed(observed_chars[char], style)]
-            else:
-                alphabet[char] = self.generate_unobserved(char, style)
+            alphabet[char] = [observed[char]] if char in observed else self.generate_unobserved(char, style)
         return alphabet

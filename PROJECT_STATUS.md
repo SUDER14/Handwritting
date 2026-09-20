@@ -14,6 +14,34 @@ checkpoints. **Not run by the auditor:** the Streamlit app, `train_style_encoder
 
 ---
 
+> ## Update after the data / evaluation / geometry work (3 commits after the baseline)
+>
+> This report describes the repo **as audited**. These parts are now out of date; `git log -4` has the details.
+>
+> - **AGENTS.md is deleted** (it belonged to a different project).
+> - **§2/§4:** new `src/data/iam.py` (IAM loader, writer-disjoint seed-deterministic split, `data/splits/*.json`),
+>   `scripts/check_split.py`, `src/evaluation/{harness,loo,text_metrics,writer_id}.py`, `src/generator/glyph.py`
+>   (`GlyphMetrics`, `GlyphBitmap`), `src/features/line_metrics.py`. IAM itself is **not in the repo**; nothing has been
+>   run on real IAM data yet.
+> - **§4(c) generation/rendering:** alphabets are now `dict[str, list[GlyphBitmap]]`. The renderer scales every glyph to a
+>   common x-height (`renderer.target_x_height_px`) and places by baseline (descenders drop below the line). The baseline
+>   generator no longer forces every letter into one box. The neural path wraps 28x28 output with prior-derived metrics.
+>   Old saved alphabets (no `metrics` in `glyph_metadata.json`) are rejected with a clear error.
+> - **§5 config:** the seven unread keys are deleted (`preprocessing.gaussian_blur_kernel`, `segmentation.method`,
+>   `recognition_training.emnist_split`, `features.glyph_canvas_size`, `training.dataset`, `training.emnist_split`,
+>   `generation.jitter_position_px`); new blocks `data.iam`, `evaluation`, `glyph_metrics`; new keys
+>   `preprocessing.deskew_min_chars`, `deskew_angle_step_deg`, `segmentation.stack_*`, `renderer.target_x_height_px`.
+>   `deskew_angle_search_deg` is now a true search range; `renderer.char_spacing_px` is extra tracking on top of each glyph's advance.
+> - **§6 results:** `scripts/evaluate.py` is rewritten: CER (CNN legibility) + writer-embedding cosine distance (style
+>   fidelity; **the writer-ID model is a flagged stub**), persisted under `results/<utc>_<sha>/metrics.json` and
+>   `results/index.csv`. The numbers in §6 predate this and were computed with the leaky leave-one-out; do not compare.
+> - **§7 bugs fixed:** the leave-one-out leak; the `mean_char_width` height bug and the fixed-box/no-descender renderer;
+>   `_merge_smallest_gaps` image/bbox mismatch; stroke-width overflow on solid crops; the deskew bias (`minAreaRect` ->
+>   projection profile, plus a `deskew_min_chars` gate) and the split i-dot (new `_merge_stacked`).
+> - **Still true:** the neural generator is undertrained and the CNN is a 2-epoch model. **Open, verified bug, not fixed:**
+>   `_apply_shear` has the opposite sign to `_slant_deg` (a right-leaning stroke measures +20.6 deg; `_apply_shear(+20)` yields a
+>   glyph measuring -20.1 deg), and the reference font is itself slanted, so a correct fix is shear by (writer - font) slant.
+
 ## 1. Overview
 
 This is a **handwriting synthesis** system, not a handwriting recognition system. Given a photo of one short

@@ -14,6 +14,8 @@ from dataclasses import dataclass, field
 import cv2
 import numpy as np
 
+from src.features.line_metrics import LineMetrics, estimate_line_metrics
+from src.generator.glyph import GlyphPriors
 from src.segmentation.segmenter import Glyph
 
 
@@ -45,10 +47,15 @@ class StyleProfile:
     baseline_y: int
     x_height_top_y: int
     feature_vector: np.ndarray = field(repr=False)  # compact numeric summary for downstream use
+    x_height_px: float = 0.0                        # writer x-height (source pixels); 0.0 = not estimated
+    line_metrics: LineMetrics | None = None         # the float-precision estimate behind baseline_y/x_height_*
 
 
 class StyleFeatureExtractor:
     """Extracts per-glyph and writer-level handwriting style features."""
+
+    def __init__(self, priors: GlyphPriors | None = None):
+        self.priors = priors or GlyphPriors()
 
     def _stroke_width(self, glyph_bin: np.ndarray) -> float:
         """Median stroke width via distance transform (2x the medial-axis radius)."""
@@ -127,7 +134,8 @@ class StyleFeatureExtractor:
 
         Used for leave-one-out scoring. Nothing derived from an excluded glyph may
         influence the result, which means more than dropping it from the feature list:
-          * the baseline / x-height-top medians are recomputed from the retained boxes;
+          * the baseline and x-height are re-estimated from the retained glyphs only
+            (`extract_style_profile` does this from the glyphs it is given);
           * spacing is measured only between glyphs that were adjacent in the original
             line AND are both retained (the gap that straddles a removed glyph is
             contaminated by that glyph's width, so it is skipped);
@@ -141,17 +149,21 @@ class StyleFeatureExtractor:
             glyphs[i + 1].bbox[0] - (glyphs[i].bbox[0] + glyphs[i].bbox[2])
             for i in range(len(glyphs) - 1) if i in kept and (i + 1) in kept
         ]
-        kept_glyphs = [glyphs[i] for i in keep]
-        baseline_y = int(np.median([g.bbox[1] + g.bbox[3] for g in kept_glyphs]))
-        x_height_top_y = int(np.median([g.bbox[1] for g in kept_glyphs]))
         return self.extract_style_profile(
-            [chars[i] for i in keep], kept_glyphs, baseline_y, x_height_top_y, spacings=spacings
+            [chars[i] for i in keep], [glyphs[i] for i in keep], 0, 0, spacings=spacings
         )
 
     def extract_style_profile(
         self, chars: list[str], glyphs: list[Glyph], baseline_y: int, x_height_top_y: int,
         spacings: list[float] | None = None,
     ) -> StyleProfile:
+        """Aggregate per-glyph features into a writer profile.
+
+        `baseline_y` / `x_height_top_y` are the segmenter's medians over all glyph boxes and are only
+        kept for callers that have nothing better; the profile's own `baseline_y`, `x_height_top_y` and
+        `x_height_px` come from `estimate_line_metrics` over the labelled glyphs given here (letters
+        that live in the x-height band give the exact values; see src/features/line_metrics.py).
+        """
         glyph_features = [
             self.extract_glyph_features(c, g.image) for c, g in zip(chars, glyphs)
         ]
@@ -184,6 +196,11 @@ class StyleFeatureExtractor:
             dtype=np.float32,
         )
 
+        line = estimate_line_metrics(chars, glyphs, self.priors) if glyphs else None
+        if line is not None:
+            baseline_y = int(round(line.baseline_y))
+            x_height_top_y = int(round(line.baseline_y - line.x_height))
+
         return StyleProfile(
             glyph_features=glyph_features,
             mean_height_px=mean_height,
@@ -197,4 +214,6 @@ class StyleFeatureExtractor:
             baseline_y=baseline_y,
             x_height_top_y=x_height_top_y,
             feature_vector=feature_vector,
+            x_height_px=line.x_height if line is not None else 0.0,
+            line_metrics=line,
         )

@@ -49,17 +49,13 @@ def glyph_to_display(img: np.ndarray) -> np.ndarray:
     return 255 - img
 
 
-def alphabet_strip(alphabet: dict[str, list[np.ndarray]], charset: str = string.ascii_lowercase) -> np.ndarray:
-    """Compose all requested characters into one horizontal strip image for preview."""
-    imgs = [glyph_to_display(alphabet[c][0]) for c in charset if c in alphabet and alphabet[c]]
-    if not imgs:
+def alphabet_strip(alphabet: dict, charset: str = string.ascii_lowercase) -> np.ndarray:
+    """Preview strip: the alphabet rendered through TextRenderer, so every glyph is at a common x-height
+    on a common baseline (descenders drop below it), exactly as it will appear in the output."""
+    present = "".join(c for c in charset if c in alphabet and alphabet[c])
+    if not present:
         return np.full((60, 60), 255, dtype=np.uint8)
-    h = max(im.shape[0] for im in imgs)
-    pad_imgs = []
-    for im in imgs:
-        pad = h - im.shape[0]
-        pad_imgs.append(cv2.copyMakeBorder(im, 0, pad, 4, 4, cv2.BORDER_CONSTANT, value=255))
-    return np.hstack(pad_imgs)
+    return glyph_to_display(TextRenderer(alphabet, CFG).render_line(present))
 
 
 def main():
@@ -180,7 +176,7 @@ def main():
     if st.button("Generate", type="primary"):
         with st.spinner("Generating personalized alphabet..."):
             if backend.startswith("neural"):
-                alphabet = generate_alphabet_neural(analysis, checkpoint_path=str(CHECKPOINT_PATH))
+                alphabet = generate_alphabet_neural(analysis, checkpoint_path=str(CHECKPOINT_PATH), config=CFG)
             else:
                 alphabet = generate_alphabet_baseline(analysis, CFG)
             st.session_state.alphabet = alphabet

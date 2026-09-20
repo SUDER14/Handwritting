@@ -16,14 +16,15 @@ import numpy as np
 from src.evaluation.metrics import ssim_against_reference
 from src.features.style_extractor import StyleFeatureExtractor, StyleProfile
 from src.generator.baseline_generator import BaselineGlyphGenerator
+from src.generator.glyph import GlyphPriors
 from src.utils.logging_setup import get_logger
 
 logger = get_logger(__name__)
 
 
-def style_profile_without(analysis, held_out: str) -> StyleProfile:
+def style_profile_without(analysis, held_out: str, config: dict | None = None) -> StyleProfile:
     """The style profile used to score `held_out`: built from all other characters only."""
-    return StyleFeatureExtractor().extract_style_profile_excluding(
+    return StyleFeatureExtractor(GlyphPriors.from_config(config)).extract_style_profile_excluding(
         analysis.chars, analysis.segmentation.glyphs, held_out
     )
 
@@ -48,7 +49,7 @@ def leave_one_out_ssim(analysis, config: dict, backend: str = "baseline", engine
             remaining = {c: g for c, g in analysis.observed_glyphs.items() if c != held_out}
             generated = engine.generate_char(held_out, engine.encode_writer_style(remaining))
         else:
-            style = style_profile_without(analysis, held_out)
-            generated = BaselineGlyphGenerator(config).generate_unobserved(held_out, style)[0]
+            style = style_profile_without(analysis, held_out, config)
+            generated = BaselineGlyphGenerator(config).generate_unobserved(held_out, style)[0].image
         scores[held_out] = ssim_against_reference(np.asarray(generated), analysis.observed_glyphs[held_out])
     return scores

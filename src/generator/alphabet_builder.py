@@ -6,8 +6,11 @@ the on-disk format described in section 13 of the design brief:
 
 Both the BASELINE (`BaselineGlyphGenerator`) and the PROPOSED
 (`StyleEncoderInference`) backends produce the same in-memory shape
-(`dict[str, list[np.ndarray]]`), so this module is agnostic to which one
+(`dict[str, list[GlyphBitmap]]`), so this module is agnostic to which one
 built the alphabet — swapping backends doesn't change the export format.
+Glyph PNGs are saved at native resolution; each variant's `GlyphMetrics` goes
+into glyph_metadata.json (`glyphs.<c>.metrics`), which is what makes a saved
+alphabet renderable (sizes are reconciled by x-height at render time).
 """
 from __future__ import annotations
 
@@ -20,6 +23,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from src.generator.glyph import GlyphBitmap, GlyphMetrics
 from src.utils.logging_setup import get_logger
 
 logger = get_logger(__name__)
@@ -42,7 +46,7 @@ class AlphabetBuilder:
 
     def save(
         self,
-        alphabet: dict[str, list[np.ndarray]],
+        alphabet: dict[str, list[GlyphBitmap]],
         metadata: AlphabetMetadata,
         session_id: str,
         charset_case: str = "lowercase",
@@ -53,15 +57,16 @@ class AlphabetBuilder:
 
         glyph_meta = {}
         for char, variants in alphabet.items():
-            for v_idx, img in enumerate(variants):
+            for v_idx, glyph in enumerate(variants):
                 fname = f"{char}.png" if v_idx == 0 else f"{char}_variant{v_idx}.png"
-                cv2.imwrite(str(case_dir / fname), img)
-            h, w = variants[0].shape[:2]
+                cv2.imwrite(str(case_dir / fname), glyph.image)
+            h, w = variants[0].image.shape[:2]
             glyph_meta[char] = {
                 "num_variants": len(variants),
                 "width": int(w),
                 "height": int(h),
                 "observed": char in metadata.observed_chars,
+                "metrics": [g.metrics.to_dict() for g in variants],
             }
 
         full_meta = {
@@ -79,24 +84,28 @@ class AlphabetBuilder:
         logger.info("Saved alphabet (%d chars) to %s", len(alphabet), case_dir)
         return session_dir
 
-    def load(self, session_id: str, charset_case: str = "lowercase") -> tuple[dict[str, list[np.ndarray]], dict]:
+    def load(self, session_id: str, charset_case: str = "lowercase") -> tuple[dict[str, list[GlyphBitmap]], dict]:
         session_dir = self.output_root / session_id
         case_dir = session_dir / charset_case
         with (session_dir / "glyph_metadata.json").open("r", encoding="utf-8") as f:
             meta = json.load(f)
 
-        alphabet: dict[str, list[np.ndarray]] = {}
+        alphabet: dict[str, list[GlyphBitmap]] = {}
         for char in string.ascii_lowercase if charset_case == "lowercase" else string.ascii_uppercase:
             if char not in meta["glyphs"]:
                 continue
-            n_variants = meta["glyphs"][char]["num_variants"]
-            imgs = []
-            for v_idx in range(n_variants):
+            entry = meta["glyphs"][char]
+            if "metrics" not in entry:
+                raise ValueError(
+                    f"Alphabet {session_id!r} was saved before glyph metrics existed (no 'metrics' for {char!r}); "
+                    "regenerate it with scripts/generate_alphabet.py."
+                )
+            glyphs = []
+            for v_idx in range(entry["num_variants"]):
                 fname = f"{char}.png" if v_idx == 0 else f"{char}_variant{v_idx}.png"
-                path = case_dir / fname
-                img = cv2.imread(str(path), cv2.IMREAD_GRAYSCALE)
+                img = cv2.imread(str(case_dir / fname), cv2.IMREAD_GRAYSCALE)
                 if img is not None:
-                    imgs.append(img)
-            if imgs:
-                alphabet[char] = imgs
+                    glyphs.append(GlyphBitmap(img, GlyphMetrics.from_dict(entry["metrics"][v_idx])))
+            if glyphs:
+                alphabet[char] = glyphs
         return alphabet, meta

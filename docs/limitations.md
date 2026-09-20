@@ -4,6 +4,9 @@ Documented explicitly per the design brief's instruction not to overstate
 what was built. Grouped by pipeline stage.
 
 ## Preprocessing (src/preprocessing/pipeline.py)
+- Deskew is a row-projection-profile search (it replaced a `cv2.minAreaRect` estimate that was dominated by word
+  shape: -7.8 deg on perfectly horizontal "quick"). It is skipped entirely below `preprocessing.deskew_min_chars`
+  characters, so a tilted short word stays tilted. The search is limited to +/- `deskew_angle_search_deg`.
 - Deskew uses `cv2.minAreaRect` over all ink pixels, which conflates true
   photo tilt with the handwriting's own intrinsic slant. It corrects
   gross page rotation well but is not a precise per-line baseline
@@ -74,6 +77,15 @@ what was built. Grouped by pipeline stage.
   shape (e.g. a glyph with a large enclosed area vs. a thin stem).
 
 ## Generation
+- **Glyph geometry.** Observed glyphs have measured metrics; the neural generator's 28x28 glyphs do not (EMNIST-style
+  output fills its box for every letter), so their x-height, ascender height and descender depth come from typographic
+  *priors* (`glyph_metrics:` in config.yaml), not from anything the model learned. Renderer output is therefore only as
+  good as those priors for generated letters.
+- **Open bug (verified, not fixed):** the baseline generator's shear has the opposite sign to the slant estimator
+  (`_slant_deg` reports a right-leaning stroke as +20.6 deg; `_apply_shear(+20)` produces a glyph that measures -20.1 deg),
+  so a right-slanting writer gets left-leaning synthesized letters. It also applies the writer's ABSOLUTE slant on top of a
+  reference font that is itself slanted. Flipping the sign alone would double the slant; the fix is to shear by
+  (writer slant - font slant).
 - **Baseline generator**: purely a deterministic CV transform of a
   neutral reference font; it has no notion of *this specific writer's*
   letterforms beyond four aggregate numbers (height, width, slant,

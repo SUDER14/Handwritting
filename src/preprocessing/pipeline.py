@@ -40,6 +40,8 @@ class PreprocessingResult:
     deskew_angle_deg: float
     deskewed: np.ndarray        # ink=255, background=0, post-deskew
     cropped: np.ndarray         # deskewed image cropped to the ink bounding box
+    deskew_skipped: bool = False   # True when the sample had too few characters to estimate skew (see process())
+    n_chars_for_deskew: int = 0    # character count the skip decision was based on
 
 
 class Preprocessor:
@@ -48,6 +50,7 @@ class Preprocessor:
     def __init__(self, config: dict | None = None):
         cfg = config or load_config()
         self.cfg = cfg["preprocessing"]
+        self._min_component_area = cfg.get("segmentation", {}).get("min_component_area", 20)
 
     # -- individual steps -------------------------------------------------
 
@@ -110,23 +113,56 @@ class Preprocessor:
         return cleaned
 
     def estimate_skew_angle(self, binary: np.ndarray) -> float:
-        """Estimate baseline skew via minAreaRect over all ink pixels.
+        """Estimate the rotation (degrees) that levels the text baseline; 0.0 if there is no clear winner.
 
-        Searches within +/- `deskew_angle_search_deg` to avoid the classic
-        minAreaRect failure mode of returning a near-90-degree angle for
-        text that is only slightly tilted.
+        Row-projection-profile search: rotate the ink pixels by each candidate angle and keep the angle
+        whose horizontal ink histogram is sharpest (sum of squared row counts), i.e. where text rows
+        line up. The returned angle is the correction to hand straight to `deskew` (same
+        `cv2.getRotationMatrix2D` sign convention), searched within +/- `deskew_angle_search_deg`
+        at `deskew_angle_step_deg` resolution.
+
+        This replaces a `cv2.minAreaRect` estimate over all ink, which fits a rectangle to the
+        convex hull of the whole word and is therefore dominated by where the tallest ascender and
+        deepest descender happen to sit. Measured on a perfectly horizontal 'quick' it returned
+        -7.8 deg (and -11.3 deg on the committed sample, which has 3.5 deg of real tilt baked in),
+        versus -0.6 deg on a full sentence: the error is a function of word shape, not of skew.
+        Slant of individual letters does not affect row sums, so italic writing is not mistaken
+        for tilt. The estimate is still weak for very short samples; `process` skips deskew entirely
+        below `deskew_min_chars`.
         """
-        coords = cv2.findNonZero(binary)
-        if coords is None or len(coords) < 10:
+        ys, xs = np.nonzero(binary)
+        if len(xs) < 10:
             return 0.0
-        angle = cv2.minAreaRect(coords)[-1]
-        # cv2.minAreaRect angle convention: normalize into [-45, 45].
-        if angle < -45:
-            angle = 90 + angle
-        max_search = self.cfg["deskew_angle_search_deg"]
-        if abs(angle) > max_search:
+        max_pts = 60000
+        if len(xs) > max_pts:  # subsample for speed; deterministic stride, not random
+            stride = len(xs) // max_pts + 1
+            xs, ys = xs[::stride], ys[::stride]
+        h, w = binary.shape[:2]
+        x = xs.astype(np.float64) - w / 2.0
+        y = ys.astype(np.float64) - h / 2.0
+
+        limit = float(self.cfg["deskew_angle_search_deg"])
+        step = float(self.cfg.get("deskew_angle_step_deg", 0.25))
+        angles = np.arange(-limit, limit + step / 2, step)
+        scores = np.empty(len(angles))
+        for i, a in enumerate(angles):
+            r = np.radians(a)
+            # y-coordinate after cv2.getRotationMatrix2D(center, a, 1): y' = -sin(a)*x + cos(a)*y
+            y_rot = -np.sin(r) * x + np.cos(r) * y
+            counts = np.bincount(np.round(y_rot - y_rot.min()).astype(np.int64))
+            scores[i] = float(np.sum(counts.astype(np.float64) ** 2))
+
+        best = int(np.argmax(scores))
+        zero_score = scores[int(np.argmin(np.abs(angles)))]
+        if scores[best] < 1.01 * zero_score:  # no meaningful sharpening -> do not rotate on noise
             return 0.0
-        return float(angle)
+        return float(angles[best])
+
+    def count_components(self, binary: np.ndarray) -> int:
+        """Connected components above the noise floor. Only a stand-in for the character count when the
+        caller does not know it (it over-counts dotted/multi-part letters)."""
+        n, _, stats, _ = cv2.connectedComponentsWithStats(binary, connectivity=8)
+        return int(sum(1 for i in range(1, n) if stats[i, cv2.CC_STAT_AREA] >= self._min_component_area))
 
     def deskew(self, binary: np.ndarray, angle_deg: float) -> np.ndarray:
         if abs(angle_deg) < 0.1:
@@ -151,10 +187,18 @@ class Preprocessor:
 
     # -- full pipeline ------------------------------------------------------
 
-    def process(self, path: str | None = None, image_bgr: np.ndarray | None = None) -> PreprocessingResult:
+    def process(
+        self, path: str | None = None, image_bgr: np.ndarray | None = None, n_chars: int | None = None
+    ) -> PreprocessingResult:
         """Run the full preprocessing pipeline end to end.
 
         Provide exactly one of `path` or `image_bgr`.
+
+        `n_chars` is the number of characters in the sample when known (e.g. the length of the typed
+        label). Deskew is skipped entirely, angle 0.0, when it is below `deskew_min_chars`: a handful
+        of letters does not determine a baseline angle, and rotating on a bad estimate does more harm
+        than leaving a small tilt (it shears the dot of an 'i' off its stem). If `n_chars` is None the
+        connected-component count is used instead.
         """
         if image_bgr is not None:
             original = self._resize_to_target_height(image_bgr)
@@ -168,9 +212,13 @@ class Preprocessor:
         denoised = self.denoise(gray)
         contrast = self.normalize_contrast(denoised)
         binary = self.binarize(contrast)
-        angle = self.estimate_skew_angle(binary)
+        chars_for_deskew = n_chars if n_chars is not None else self.count_components(binary)
+        skip_deskew = chars_for_deskew < self.cfg["deskew_min_chars"]
+        angle = 0.0 if skip_deskew else self.estimate_skew_angle(binary)
         deskewed = self.deskew(binary, angle)
         cropped = self.crop_to_content(deskewed)
+        if skip_deskew:
+            logger.info("Deskew skipped: %d characters < deskew_min_chars=%d", chars_for_deskew, self.cfg["deskew_min_chars"])
         logger.info("Deskew angle: %.2f deg, final size: %s", angle, cropped.shape)
 
         return PreprocessingResult(
@@ -182,4 +230,6 @@ class Preprocessor:
             deskew_angle_deg=angle,
             deskewed=deskewed,
             cropped=cropped,
+            deskew_skipped=skip_deskew,
+            n_chars_for_deskew=int(chars_for_deskew),
         )

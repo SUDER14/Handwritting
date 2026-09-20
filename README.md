@@ -104,6 +104,14 @@ noise-added) sample generator is included:
 venv\Scripts\python scripts\make_synthetic_sample.py
 ```
 
+## Glyph geometry
+
+Every glyph carries a `GlyphMetrics` (`advance_width`, `x_height`, `baseline_offset`, `bbox`; conventions in
+`src/generator/glyph.py`). The renderer scales each glyph to a common x-height and places it by baseline, so real
+crops (~100 px), VAE output (28 px) and font-derived glyphs mix correctly and g j p q y drop below the line.
+Observed glyphs get their metrics measured from the sample; the VAE's 28x28 glyphs get them from typographic
+priors (`glyph_metrics:` in `config/config.yaml`) because EMNIST-style output carries no absolute size.
+
 ## Real data: IAM (writer-disjoint splits)
 
 The IAM Handwriting Database is licensed and is **not** in this repo. Put it

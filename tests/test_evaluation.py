@@ -92,7 +92,8 @@ def make_analysis(q_image: np.ndarray | None = None) -> SimpleNamespace:
 def _profile_fields(p) -> dict:
     d = {k: getattr(p, k) for k in (
         "mean_height_px", "mean_width_px", "mean_aspect_ratio", "mean_slant_deg", "slant_std_deg",
-        "mean_stroke_width_px", "mean_curvature_score", "mean_char_spacing_px", "baseline_y", "x_height_top_y")}
+        "mean_stroke_width_px", "mean_curvature_score", "mean_char_spacing_px", "baseline_y", "x_height_top_y",
+        "x_height_px")}
     d["feature_vector"] = p.feature_vector.tolist()
     d["glyph_chars"] = [f.char for f in p.glyph_features]
     return d

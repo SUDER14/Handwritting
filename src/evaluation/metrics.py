@@ -47,7 +47,7 @@ def ssim_against_reference(generated: np.ndarray, reference: np.ndarray) -> floa
 
 
 def character_recognition_accuracy(
-    alphabet: dict[str, list[np.ndarray]],
+    alphabet: dict,
     charset: str = string.ascii_lowercase,
     recognizer: Recognizer | None = None,
 ) -> dict[str, float]:
@@ -70,7 +70,7 @@ def character_recognition_accuracy(
     for char in charset:
         if char not in alphabet or not alphabet[char]:
             continue
-        img = alphabet[char][0]
+        img = alphabet[char][0].image   # GlyphBitmap -> pixels
         predicted = recognizer.recognize([img])[0]
         is_correct = float(predicted == char)
         results[char] = is_correct
@@ -81,7 +81,7 @@ def character_recognition_accuracy(
 
 
 def writer_style_similarity(
-    generated_alphabet: dict[str, list[np.ndarray]],
+    generated_alphabet: dict,
     reference_glyphs: dict[str, np.ndarray],
 ) -> float:
     """Cosine similarity between the writer-level rule-based feature vectors
@@ -104,7 +104,7 @@ def writer_style_similarity(
             np.std([f.slant_deg for f in feats]),
         ], dtype=np.float32)
 
-    gen_glyphs = {c: v[0] for c, v in generated_alphabet.items() if v}
+    gen_glyphs = {c: v[0].image for c, v in generated_alphabet.items() if v}
     v1 = profile_vector(gen_glyphs)
     v2 = profile_vector(reference_glyphs)
 

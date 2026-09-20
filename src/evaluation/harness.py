@@ -136,7 +136,7 @@ def _gray_to_bgr(gray: np.ndarray) -> np.ndarray:
 
 
 def evaluate_pair(ctx: EvalContext, reference_gray: np.ndarray, reference_text: str, target_text: str,
-                  heldout_gray: np.ndarray | None) -> dict:
+                  heldout_gray: np.ndarray | None, heldout_text: str | None = None) -> dict:
     """Score one (reference sample -> generated target text). Raises if EITHER headline metric can't be computed."""
     cfg = ctx.config
     label = letters_only(reference_text)
@@ -151,7 +151,7 @@ def evaluate_pair(ctx: EvalContext, reference_gray: np.ndarray, reference_text: 
     analysis = analyze_sample(reference_bgr, label, cfg)
 
     if ctx.backend == "neural":
-        alphabet = generate_alphabet_neural(analysis, checkpoint_path=ctx.neural_checkpoint)
+        alphabet = generate_alphabet_neural(analysis, checkpoint_path=ctx.neural_checkpoint, config=cfg)
     else:
         alphabet = generate_alphabet_baseline(analysis, cfg)
 
@@ -165,11 +165,13 @@ def evaluate_pair(ctx: EvalContext, reference_gray: np.ndarray, reference_text: 
 
     # (b) style fidelity: writer-ID embedding distance, generated vs reference (and vs a held-out real line).
     pre = Preprocessor(cfg)
-    reference_binary = pre.process(image_bgr=reference_bgr).cropped
+    reference_binary = pre.process(image_bgr=reference_bgr, n_chars=len(label)).cropped
     dist_ref = ctx.embedder.distance(rendered, reference_binary)
     dist_held = None
     if heldout_gray is not None:
-        dist_held = ctx.embedder.distance(rendered, pre.process(image_bgr=_gray_to_bgr(heldout_gray)).cropped)
+        held_chars = len(letters_only(heldout_text if heldout_text is not None else target_text))
+        dist_held = ctx.embedder.distance(
+            rendered, pre.process(image_bgr=_gray_to_bgr(heldout_gray), n_chars=held_chars).cropped)
 
     loo = leave_one_out_ssim(analysis, cfg, backend=ctx.backend, engine=ctx.neural_engine)
 
@@ -233,7 +235,7 @@ def run_iam_split(ctx: EvalContext, dataset, max_writers: int | None = None) -> 
             meta = {"writer_id": writer, "reference_id": ref.sample_id, "target_id": tgt.sample_id}
             records.append(_safe_evaluate(
                 ctx, meta, reference_gray, ref.transcription,
-                truncate_text(tgt.transcription, ev["max_target_chars"]), dataset.read_native(t_i),
+                truncate_text(tgt.transcription, ev["max_target_chars"]), dataset.read_native(t_i), tgt.transcription,
             ))
     return records, skipped
 

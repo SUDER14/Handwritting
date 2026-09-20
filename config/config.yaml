@@ -5,12 +5,18 @@ preprocessing:
   target_line_height: 400          # image is upscaled so the text line is this tall (px) before processing
   adaptive_thresh_block_size: 35
   adaptive_thresh_C: 11
-  deskew_angle_search_deg: 15       # search range for deskewing, +/- degrees
+  deskew_angle_search_deg: 15       # deskew searches this range, +/- degrees (larger tilts are not corrected)
+  deskew_angle_step_deg: 0.25       # search resolution
+  deskew_min_chars: 8               # fewer characters than this -> deskew is skipped (angle 0.0): a short word does not
+                                     # determine a baseline angle. Uses the label length, or the component count if unknown.
   median_filter_kernel: 3
 
 segmentation:
   min_component_area: 20            # px^2, filters out noise specks
-  merge_gap_px: 4                   # horizontal gap below which components are merged (dot on i/j, etc.)
+  merge_gap_px: 4                   # stacked components may overlap vertically by at most this many px and still merge
+  stack_min_x_overlap: 0.25         # ...and must overlap in x by >= this fraction of the narrower box (dot over stem; the
+                                     # slanted "i" in data/samples/quick_sample.png has 0.41, so 0.5 would miss it)
+  stack_max_gap_ratio: 0.6          # ...and be separated vertically by <= this fraction of the taller box's height
   split_touching_glyphs: true       # detect over-wide connected components (touching/cursive-joined
                                      # letters) and split them at projection-profile valleys
   wide_component_width_ratio: 1.6   # a component wider than this * expected char width is treated as touching glyphs
@@ -57,8 +63,18 @@ generation:
   variants_per_char: 3
   jitter_rotation_deg: 1.5
 
+# Typographic priors (in x-heights), used ONLY where a bitmap has no absolute size: the VAE's 28x28 output
+# (EMNIST fills the box for every letter) and samples with no x-height-only letter to measure. See src/generator/glyph.py.
+glyph_metrics:
+  ascender_ratio: 2.0               # total height of b d f h k l
+  t_ratio: 1.5                      # total height of t
+  dotted_ratio: 1.8                 # total height of i (stem + dot); j = this + descender depth
+  descender_depth_ratio: 0.8        # how far g j p q y drop below the baseline
+  spacing_max_ratio: 1.0            # cap on the writer's measured inter-glyph gap
+
 renderer:
-  char_spacing_px: 4
+  target_x_height_px: 40            # every glyph is scaled so its x-height equals this (common x-height, not common box)
+  char_spacing_px: 2                # extra tracking added to each glyph's advance_width (which already carries the writer's spacing)
   word_spacing_px: 22
   line_height_multiplier: 1.6
   baseline_jitter_px: 2

@@ -6,7 +6,7 @@ individual glyph candidates.
 Connected-component segmentation assumes each character is (mostly) a
 separate ink blob. It handles printed/disconnected handwriting well and
 correctly reunites multi-part characters (the dot on "i"/"j", crossed "t")
-via a proximity-merge step. Left on its own it would UNDER-segment true
+via a stacked-component merge (`_merge_stacked`). Left on its own it would UNDER-segment true
 cursive script, where adjacent letters share a continuous stroke (e.g. a
 joined "cl") and show up as one merged component — so a second pass,
 `_split_touching_glyphs`, looks for components much wider than an expected
@@ -54,7 +54,7 @@ class SegmentationResult:
 
 
 class Segmenter:
-    """Connected-component based character segmenter with dot/diacritic merging."""
+    """Connected-component based character segmenter with stacked-component (dot/diacritic) merging."""
 
     def __init__(self, config: dict | None = None):
         cfg = config or load_config()
@@ -74,47 +74,63 @@ class Segmenter:
             boxes.append((int(x), int(y), int(w), int(h), int(area)))
         return boxes
 
-    def _merge_diacritics(
+    def _merge_stacked(
         self, boxes: list[tuple[int, int, int, int, int]]
     ) -> list[tuple[int, int, int, int]]:
-        """Merge small components (dots, accents) into the nearest body component below them.
+        """Merge connected components that are vertically stacked with substantial x-overlap.
 
-        A component is treated as a diacritic candidate if it is small and
-        sits above a taller component with which it horizontally overlaps.
+        This is what puts the dot of an 'i' or 'j' (and the parts of ':', ';', '!', accented
+        letters) back onto its stem. Two components A and B are merged when
+          * their x-ranges overlap by at least `stack_min_x_overlap` of the NARROWER box
+            (0.25 = at least a quarter of the narrower part must sit over the other);
+          * they are stacked, not side by side: the vertical overlap is at most `merge_gap_px`
+            (a small tolerance for touching/overlapping bboxes) and the vertical gap is at most
+            `stack_max_gap_ratio` of the TALLER box's height.
+        Merging is transitive (union-find), so dot + stem + descender collapse into one glyph.
+        Neighbouring letters are not stacked -- their vertical ranges overlap heavily -- so they
+        stay separate even when slant makes their bounding boxes overlap in x.
+
+        Note the size of the dot is deliberately irrelevant: the previous rule only merged
+        components under half the median height, and its pairing window needed the dot to sit
+        directly over the stem, which an ill-judged deskew easily broke.
         """
         if not boxes:
             return []
+        min_x_overlap = self.cfg.get("stack_min_x_overlap", 0.25)
+        max_gap_ratio = self.cfg.get("stack_max_gap_ratio", 0.6)
+        tolerated_v_overlap = self.cfg["merge_gap_px"]
 
-        # Heuristic: "body" components are the tallest ones; anything much
-        # shorter that overlaps horizontally with a body component and sits
-        # above it is merged into that body.
-        heights = [h for _, _, _, h, _ in boxes]
-        median_h = float(np.median(heights))
+        n = len(boxes)
+        parent = list(range(n))
 
-        bodies = [b for b in boxes if b[3] >= 0.5 * median_h]
-        small = [b for b in boxes if b[3] < 0.5 * median_h]
+        def find(i: int) -> int:
+            while parent[i] != i:
+                parent[i] = parent[parent[i]]
+                i = parent[i]
+            return i
 
-        merged = {i: list(b[:4]) for i, b in enumerate(bodies)}
-        gap = self.cfg["merge_gap_px"]
+        for i in range(n):
+            ax, ay, aw, ah, _ = boxes[i]
+            for j in range(i + 1, n):
+                bx, by, bw, bh, _ = boxes[j]
+                x_overlap = min(ax + aw, bx + bw) - max(ax, bx)
+                if x_overlap <= 0 or x_overlap < min_x_overlap * min(aw, bw):
+                    continue
+                v_gap = max(ay, by) - min(ay + ah, by + bh)   # > 0 separated, < 0 overlapping
+                if -tolerated_v_overlap <= v_gap <= max_gap_ratio * max(ah, bh):
+                    parent[find(i)] = find(j)
 
-        for sx, sy, sw, sh, _ in small:
-            best_i, best_overlap = None, 0
-            for i, (bx, by, bw, bh, _area) in enumerate(bodies):
-                overlap = max(0, min(sx + sw, bx + bw) - max(sx, bx))
-                vertical_gap = by - (sy + sh)
-                if overlap > 0 and -gap <= vertical_gap <= 4 * gap:
-                    if overlap > best_overlap:
-                        best_overlap, best_i = overlap, i
-            if best_i is not None:
-                bx, by, bw, bh = merged[best_i]
-                nx0, ny0 = min(bx, sx), min(by, sy)
-                nx1, ny1 = max(bx + bw, sx + sw), max(by + bh, sy + sh)
-                merged[best_i] = [nx0, ny0, nx1 - nx0, ny1 - ny0]
-            else:
-                # No body nearby (rare) — keep it as its own glyph.
-                merged[len(merged)] = [sx, sy, sw, sh]
-
-        return [tuple(v) for v in merged.values()]
+        groups: dict[int, list[int]] = {}
+        for i in range(n):
+            groups.setdefault(find(i), []).append(i)
+        merged = []
+        for members in groups.values():
+            x0 = min(boxes[k][0] for k in members)
+            y0 = min(boxes[k][1] for k in members)
+            x1 = max(boxes[k][0] + boxes[k][2] for k in members)
+            y1 = max(boxes[k][1] + boxes[k][3] for k in members)
+            merged.append((x0, y0, x1 - x0, y1 - y0))
+        return merged
 
     def _projection_profile_splits(self, crop: np.ndarray, expected_w: float, min_w: int) -> list[int]:
         """Column indices (local x within `crop`) at which to cut a touching-glyph blob.
@@ -197,7 +213,7 @@ class Segmenter:
     def segment(self, binary: np.ndarray) -> SegmentationResult:
         """Segment a binarized line image into ordered glyph candidates."""
         boxes_with_area = self._connected_components(binary)
-        merged_boxes = self._merge_diacritics(boxes_with_area)
+        merged_boxes = self._merge_stacked(boxes_with_area)
         merged_boxes = self._split_touching_glyphs(merged_boxes, binary)
 
         # Order left-to-right by x position.
@@ -238,7 +254,7 @@ class Segmenter:
         glyphs = result.glyphs
 
         if len(glyphs) > n_target:
-            glyphs = self._merge_smallest_gaps(glyphs, n_target)
+            glyphs = self._merge_smallest_gaps(glyphs, n_target, binary)
         elif len(glyphs) < n_target and len(glyphs) > 0:
             glyphs = self._split_widest(glyphs, n_target)
 
@@ -248,7 +264,7 @@ class Segmenter:
         result.glyphs = glyphs
         return result
 
-    def _merge_smallest_gaps(self, glyphs: list[Glyph], n_target: int) -> list[Glyph]:
+    def _merge_smallest_gaps(self, glyphs: list[Glyph], n_target: int, binary: np.ndarray) -> list[Glyph]:
         glyphs = sorted(glyphs, key=lambda g: g.bbox[0])
         while len(glyphs) > n_target:
             gaps = [
@@ -262,7 +278,9 @@ class Segmenter:
             nx0, ny0 = min(ax, bx), min(ay, by)
             nx1, ny1 = max(ax + aw, bx + bw), max(ay + ah, by + bh)
             merged_bbox = (nx0, ny0, nx1 - nx0, ny1 - ny0)
-            full = a.image if a.image.shape[0] * a.image.shape[1] >= b.image.shape[0] * b.image.shape[1] else b.image
+            # Re-crop the union box from the source line. (This used to keep only the larger of the two
+            # parts' crops, so the image no longer matched its own bbox.)
+            full = binary[ny0:ny1, nx0:nx1]
             new_glyph = Glyph(index=0, bbox=merged_bbox, image=full, centroid=((nx0 + nx1) / 2, (ny0 + ny1) / 2))
             glyphs = glyphs[:merge_at] + [new_glyph] + glyphs[merge_at + 2:]
         return glyphs

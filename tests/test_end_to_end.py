@@ -61,9 +61,9 @@ def test_end_to_end_baseline_pipeline(config):
     alphabet = generate_alphabet_baseline(analysis, config)
     assert set(alphabet.keys()) == set(string.ascii_lowercase)
     for char in word:
-        assert alphabet[char][0].sum() > 0  # observed glyphs are non-blank
+        assert alphabet[char][0].image.sum() > 0  # observed glyphs are non-blank
     for char in "z":  # a character definitely not in "quick"
-        assert any(img.sum() > 0 for img in alphabet[char])
+        assert any(g.image.sum() > 0 for g in alphabet[char])
 
     # Stage 3: text rendering with the generated alphabet.
     renderer = TextRenderer(alphabet, config)
