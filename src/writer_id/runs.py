@@ -30,10 +30,11 @@ def write_once(path: Path, text: str) -> None:
         f.write(text)
 
 
-def new_run_dir(git_sha: str, dirty: bool, name: str | None = None, root: Path | None = None) -> tuple[str, Path]:
+def new_run_dir(git_sha: str, dirty: bool, name: str | None = None, root: Path | None = None,
+                prefix: str = "writerid") -> tuple[str, Path]:
     root = Path(root) if root is not None else resolve_path(CHECKPOINT_ROOT)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    run_id = f"writerid_{stamp}_{git_sha}{'-dirty' if dirty else ''}" + (f"_{name}" if name else "")
+    run_id = f"{prefix}_{stamp}_{git_sha}{'-dirty' if dirty else ''}" + (f"_{name}" if name else "")
     path = root / run_id
     path.mkdir(parents=True, exist_ok=False)        # a second run in the same second fails rather than sharing a dir
     return run_id, path

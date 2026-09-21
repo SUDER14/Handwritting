@@ -154,3 +154,18 @@ writer_id:
   calibration:
     n_crops: 200                    # scripts/calibrate_legibility.py: real held-out crops scored by the CNN legibility scorer
     seed: 1337
+
+# CRNN-CTC line recognizer = the LEGIBILITY INSTRUMENT (src/recognition/crnn.py, scripts/train_crnn.py). Trained on
+# train-split writers only, frozen afterwards; CER/WER of generated lines under it is the legibility score.
+crnn:
+  input_height: 64                  # same canonical crops as the writer-ID net (ink high, Otsu-binarised, area-resized)
+  hidden: 256                       # LSTM hidden size per direction (2 layers, bidirectional)
+  batch_size: 16
+  epochs: 15                        # ROADMAP cap 60, /4 because CUDA is unavailable (CPU-reduced)
+  early_stop_patience: 3            # epochs without a val-CER improvement
+  lr: 0.001
+  weight_decay: 0.0001
+  width_jitter: 0.1                 # training aug: horizontal rescale by a factor in [1-x, 1+x] (no slant/stroke change)
+  max_line_width: 1400              # training/eval crops wider than this are skipped for speed (few lines, CPU budget)
+  num_threads: 4
+  seed: 1337
