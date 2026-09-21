@@ -44,7 +44,7 @@ def test_writer_embedder_is_abstract_and_stub_is_flagged():
     assert isinstance(stub, RuleBasedStubEmbedder) and stub.is_stub is True
     assert stub.describe() == {"name": "stub_rule_based_v0", "is_stub": True}
     with pytest.raises(NotImplementedError):
-        get_writer_embedder("trained_writer_id_v1")
+        get_writer_embedder("some_unknown_embedder")
 
 
 def test_cosine_distance():

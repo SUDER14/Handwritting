@@ -27,7 +27,8 @@ def _render(text: str, scale: float, thickness: int) -> np.ndarray:
     return img
 
 
-def build_fake_iam(root: Path, n_writers: int = 12, forms_per_writer: int = 2, lines_per_form: int = 3) -> dict:
+def build_fake_iam(root: Path, n_writers: int = 12, forms_per_writer: int = 2, lines_per_form: int = 3,
+                   unique_styles: bool = False) -> dict:
     """Create <root>/{ascii,lines,words}. Returns bookkeeping for assertions:
     {"writers": [...], "form_to_writer": {...}, "line_ids_by_writer": {...}, "n_err": int, "n_missing": int}
     """
@@ -43,6 +44,8 @@ def build_fake_iam(root: Path, n_writers: int = 12, forms_per_writer: int = 2, l
     for wi, writer in enumerate(writers):
         scale = 0.6 + 0.08 * (wi % 5)
         thick = 1 + wi % 2
+        if unique_styles:   # every writer gets a distinct (scale, thickness) pair: learnable, for writer-ID smoke tests
+            scale, thick = 0.5 + 0.045 * wi, 1 + wi % 3
         for _ in range(forms_per_writer):
             form_id = f"a{form_counter // 10 + 1:02d}-{form_counter:03d}u"
             form_counter += 1

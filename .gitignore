@@ -20,3 +20,7 @@ outputs/generated_text/*
 # IAM is licensed: never commit the dataset, but do commit data/splits/*.json (auditable writer lists)
 data/iam/*
 !data/iam/.gitkeep
+
+# per-run checkpoints (models/checkpoints/<run_id>/): weights are ignored, the small json/csv run records are not
+models/checkpoints/**/*.pt
+data/processed/iam_writer_cache/

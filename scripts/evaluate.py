@@ -50,6 +50,9 @@ def main() -> int:
     parser.add_argument("--iam-root", default=None)
     parser.add_argument("--splits-dir", default=None)
     parser.add_argument("--results-dir", default=None, help="default: evaluation.results_dir from config")
+    parser.add_argument("--writer-embedder", choices=["trained", "stub"], default=None,
+                        help="default: evaluation.writer_embedder from config. 'stub' is for smoke tests only.")
+    parser.add_argument("--writer-id-run", default=None, help="writer-ID run dir (default: newest under models/checkpoints)")
     args = parser.parse_args()
 
     cfg = load_config()
@@ -71,8 +74,8 @@ def main() -> int:
         print(f"--backend neural needs a VAE checkpoint at {vae_path}", file=sys.stderr)
         return 2
     try:
-        embedder = get_writer_embedder(ev["writer_embedder"], cfg)
-    except NotImplementedError as e:
+        embedder = get_writer_embedder(args.writer_embedder or ev["writer_embedder"], cfg, run_dir=args.writer_id_run)
+    except (NotImplementedError, FileNotFoundError) as e:
         print(f"Cannot compute style fidelity: {e}", file=sys.stderr)
         return 2
 
@@ -137,6 +140,17 @@ def main() -> int:
         print(f"  leave-one-out SSIM (secondary)             : {a['loo_ssim_mean']:.3f}")
     if embedder.is_stub:
         print(f"  NOTE: writer embedder is a STUB ({embedder.name}); style-fidelity numbers are placeholders.")
+    elif not embedder.usable:
+        tm = embedder.test_metrics
+        top1 = "no test metrics recorded" if tm is None else f"test top-1 {tm['top1']:.3f} < {embedder.min_usable_top1}"
+        print("  !" * 30)
+        print(f"  WARNING: writer-ID embedder {embedder.name} is NOT USABLE ({top1}).")
+        print("  Do NOT quote the style-fidelity numbers above.")
+        print("  !" * 30)
+    else:
+        tm = embedder.test_metrics
+        print(f"  writer embedder {embedder.name}: unseen-writer top-1 {tm['top1']:.3f}, mAP {tm['map']:.3f} "
+              f"(chance {tm['chance_top1']:.3f})")
     if args.smoke:
         print("  NOTE: smoke test on synthetic samples; do not quote these numbers as results.")
     print(f"wrote {metrics_path}")

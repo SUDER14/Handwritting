@@ -103,9 +103,53 @@ data:
 # Evaluation harness (scripts/evaluate.py, src/evaluation/harness.py).
 evaluation:
   results_dir: "results"            # each run -> results/<utc-timestamp>_<git-sha>/metrics.json, plus results/index.csv
-  writer_embedder: "stub"           # WriterEmbedder used for style fidelity. "stub" is a rule-based PLACEHOLDER until a
-                                    # trained writer-ID model exists (src/evaluation/writer_id.py); runs are flagged.
+  writer_embedder: "trained"        # "trained" = the writer-ID ResNet (scripts/train_writer_id.py); "stub" = rule-based
+                                    # PLACEHOLDER for smoke tests only. "trained" never falls back to the stub silently.
+  writer_id_run: null               # run dir under models/checkpoints/; null -> the newest writer-ID run
   targets_per_writer: 2             # per writer: 1 reference line conditions the generator, this many other lines are targets
   max_target_chars: 40              # target text is truncated to this many characters (letters and spaces only)
   min_reference_letters: 12         # a line must have at least this many letters to be used as reference/target
   smoke_texts: ["the quick fox", "hello world"]   # --smoke only: text rendered for data/samples/*_sample.png
+
+# Writer-ID model (src/writer_id/, scripts/train_writer_id.py): a metric-usable embedding of *who wrote it*, trained
+# from scratch on IAM train-split writers and evaluated on unseen TEST writers. Used for the style-fidelity metric.
+writer_id:
+  cache_dir: "data/processed/iam_writer_cache"   # decoded, binarised, height-normalised line crops (uint8 .npy)
+  input_height: 64                  # crops are resized to this height, width scales (aspect preserved)
+  binarize: true                    # Otsu-binarise at native resolution before resizing. The metric compares BINARY renders
+                                     # (generated text vs reference), so the model is trained in that domain.
+  window_width: [160, 256]          # training: per batch, one width drawn from this range; each crop is a random window
+  model:
+    widths: [32, 64, 128, 256]      # stage widths of the ResNet; the last one is the embedding size (GAP output)
+    blocks: [2, 2, 2, 2]            # BasicBlocks per stage
+    stem_stride: 2
+  loss:
+    ntxent_weight: 1.0              # total = cross_entropy + ntxent_weight * NT-Xent
+    temperature: 0.1
+  train:
+    writers_per_batch: 16           # batch = writers_per_batch x crops_per_writer (crops of the same writer are the positives)
+    crops_per_writer: 4
+    epochs: 30
+    steps_per_epoch: null           # null -> ceil(num_train_lines / batch_size)
+    lr: 0.002
+    weight_decay: 0.0001
+    seed: 1337
+    num_threads: 4
+  augment:                          # affine + elastic ONLY. No shear/slant and no stroke-width change: those are the style signal.
+    rotation_deg: 1.0
+    scale: 0.05
+    translate_px: 3
+    elastic_prob: 0.5
+    elastic_alpha: 2.5              # displacement magnitude, px
+    elastic_sigma: 6.0              # smoothness of the displacement field, px
+  eval:
+    mode: "window_mean"             # "window_mean" (mean of window embeddings; matches training) | "full_line"
+    window_width: 224
+    window_stride: 112
+    max_windows: 32
+    max_line_width: 2048            # full_line mode: centre-crop lines wider than this
+    exclude_same_form: true         # gallery excludes lines from the query's own form (page): pen, paper and scan are shared
+    min_usable_top1: 0.6            # below this, the embedding is NOT a usable writer-identity metric
+  calibration:
+    n_crops: 200                    # scripts/calibrate_legibility.py: real held-out crops scored by the CNN legibility scorer
+    seed: 1337

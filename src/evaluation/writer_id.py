@@ -5,15 +5,14 @@ line image and that of a REFERENCE line image from the same writer. Lower is
 better. It is only as meaningful as the embedder, so every result records which
 embedder produced it and whether that embedder is a stub.
 
-A real embedder is a model trained to make same-writer images close and
-different-writer images far (e.g. a metric-learning CNN on IAM train-split
-writers). **It does not exist yet.** Until it does, `RuleBasedStubEmbedder`
-keeps the harness end-to-end runnable; its numbers are a placeholder, flagged
-`is_stub=True` in metrics.json and results/index.csv, and must not be reported
-as writer-identity results.
+`TrainedWriterEmbedder` is the real one: the ResNet trained from scratch on IAM train-split
+writers by scripts/train_writer_id.py (src/writer_id/). It is only a usable metric if its
+retrieval accuracy on UNSEEN test writers clears `writer_id.eval.min_usable_top1`; `describe()`
+reports that as `usable`, evaluate.py prints a loud warning when it is False, and it is recorded
+in metrics.json / results/index.csv.
 
-To plug in the trained model: subclass `WriterEmbedder`, set `name` and
-`is_stub = False`, implement `embed`, and register it in `get_writer_embedder`.
+`RuleBasedStubEmbedder` remains available (`--writer-embedder stub`) for smoke tests only; its
+numbers are placeholders, flagged `is_stub=True`, and must never be reported.
 """
 from __future__ import annotations
 
@@ -95,11 +94,69 @@ class RuleBasedStubEmbedder(WriterEmbedder):
         ], dtype=np.float64)
 
 
-def get_writer_embedder(name: str = "stub", config: dict | None = None) -> WriterEmbedder:
-    """Factory keyed by `evaluation.writer_embedder` in config.yaml."""
+class TrainedWriterEmbedder(WriterEmbedder):
+    """The from-scratch writer-ID ResNet from a run directory (models/checkpoints/<run_id>/)."""
+
+    is_stub = False
+
+    def __init__(self, run_dir, config: dict | None = None):
+        from src.utils.config import load_config
+        from src.writer_id.runs import best_checkpoint, load_encoder, read_test_metrics
+
+        self.run_dir = run_dir
+        self.encoder, self.run_config = load_encoder(run_dir)
+        wid = self.run_config["writer_id"]
+        self._height, self._eval_cfg = wid["input_height"], wid["eval"]
+        self.run_id = self.run_config["run_id"]
+        self.name = f"writer_id:{self.run_id}"
+        self.checkpoint = best_checkpoint(run_dir).name
+        self.test_metrics = read_test_metrics(run_dir)
+        self.min_usable_top1 = float((config or load_config())["writer_id"]["eval"]["min_usable_top1"])
+
+    @property
+    def usable(self) -> bool:
+        """True only if the run recorded test-writer top-1 retrieval >= the usability threshold."""
+        return self.test_metrics is not None and self.test_metrics["top1"] >= self.min_usable_top1
+
+    def embed(self, line_image: np.ndarray) -> np.ndarray:
+        from src.writer_id.data import canonical_from_binary
+        from src.writer_id.retrieval import embed_line
+
+        if not np.any(np.asarray(line_image) > 127):
+            raise ValueError("blank image; cannot embed")
+        return embed_line(self.encoder, canonical_from_binary(line_image, self._height), self._eval_cfg).astype(np.float64)
+
+    def describe(self) -> dict:
+        tm = self.test_metrics or {}
+        return {"name": self.name, "is_stub": False, "run_id": self.run_id, "checkpoint": self.checkpoint,
+                "test_top1": tm.get("top1"), "test_map": tm.get("map"), "test_chance_top1": tm.get("chance_top1"),
+                "min_usable_top1": self.min_usable_top1, "usable": self.usable}
+
+
+def get_writer_embedder(name: str = "trained", config: dict | None = None, run_dir=None) -> WriterEmbedder:
+    """Factory keyed by `evaluation.writer_embedder` in config.yaml ("trained" | "stub").
+
+    "trained" uses `run_dir`, else `evaluation.writer_id_run`, else the newest run under models/checkpoints/.
+    It raises FileNotFoundError when no trained run exists -- it never silently falls back to the stub.
+    """
     if name == "stub":
         return RuleBasedStubEmbedder(config)
-    raise NotImplementedError(
-        f"Writer embedder {name!r} is not available. Only 'stub' exists; a trained writer-ID model must be "
-        "implemented as a WriterEmbedder subclass and registered here (src/evaluation/writer_id.py)."
-    )
+    if name == "trained":
+        from pathlib import Path
+
+        from src.utils.config import resolve_path
+        from src.writer_id.runs import latest_run
+
+        chosen = run_dir or (config or {}).get("evaluation", {}).get("writer_id_run")
+        path = Path(chosen) if chosen else None
+        if path is not None and not path.is_absolute():
+            path = resolve_path(path)
+        path = path or latest_run()
+        if path is None:
+            raise FileNotFoundError(
+                "No trained writer-ID checkpoint found under models/checkpoints/. Train one with "
+                "scripts/train_writer_id.py, pass --writer-id-run, or choose --writer-embedder stub explicitly "
+                "(smoke tests only)."
+            )
+        return TrainedWriterEmbedder(path, config)
+    raise NotImplementedError(f"Unknown writer embedder {name!r}; expected 'trained' or 'stub'.")

@@ -50,12 +50,13 @@ from src.utils.logging_setup import get_logger
 
 logger = get_logger(__name__)
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 INDEX_COLUMNS = [
     "run_id", "timestamp_utc", "git_sha", "git_dirty", "split", "unit", "backend", "is_smoke_test",
     "n_samples", "n_failed", "n_writers",
     "cer_micro", "cer_mean", "style_dist_reference_mean", "style_dist_heldout_mean", "loo_ssim_mean",
-    "writer_embedder", "embedder_is_stub", "cnn_checkpoint_sha256", "vae_checkpoint_sha256", "metrics_path",
+    "writer_embedder", "embedder_is_stub", "embedder_usable", "embedder_test_top1",
+    "cnn_checkpoint_sha256", "vae_checkpoint_sha256", "metrics_path",
 ]
 
 
@@ -341,6 +342,8 @@ def write_run(results_dir: Path, record: dict) -> Path:
         "style_dist_reference_mean": agg["style_distance_reference_mean"],
         "style_dist_heldout_mean": agg["style_distance_heldout_mean"], "loo_ssim_mean": agg["loo_ssim_mean"],
         "writer_embedder": record["writer_embedder"]["name"], "embedder_is_stub": record["writer_embedder"]["is_stub"],
+        "embedder_usable": record["writer_embedder"].get("usable"),
+        "embedder_test_top1": record["writer_embedder"].get("test_top1"),
         "cnn_checkpoint_sha256": (ckpts["cnn"] or {}).get("sha256"),
         "vae_checkpoint_sha256": (ckpts["vae"] or {}).get("sha256"),
         "metrics_path": _display_path(metrics_path),
