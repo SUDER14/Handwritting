@@ -118,9 +118,11 @@ The IAM Handwriting Database is licensed and is **not** in this repo. Put it
 under `data/iam/` in the standard layout (`ascii/{forms,lines,words}.txt`,
 `lines/a01/a01-000u/*.png`, `words/...`); `src/data/iam.py` reads it, groups
 samples by writer via `forms.txt`, and exposes a writer-disjoint train/val/test
-split that is a pure function of `data.iam.split_seed` in `config/config.yaml`.
-The writer-ID lists are written to `data/splits/{train,val,test}.json` and are
-re-verified on every load.
+split. The **canonical** split (`data.iam.split_source: vatr`) is the IAM writer split of HWT/VATr
+(`data/splits/vatr/{train,val,test}.json`, 283/56/161 writers; built by `scripts/make_vatr_split.py`).
+The old self-made split (a pure function of `data.iam.split_seed`, `data/splits/seeded/`) is **fallback only**
+(`split_source: seeded`). Fixed files are checked for writer overlap and unknown writers on every load; the seeded
+files are re-verified against the seed.
 
 ```powershell
 venv\Scripts\python scripts\check_split.py      # asserts zero writer overlap, prints per-split counts

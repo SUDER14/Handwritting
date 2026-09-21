@@ -19,7 +19,8 @@ checkpoints. **Not run by the auditor:** the Streamlit app, `train_style_encoder
 > This report describes the repo **as audited**. These parts are now out of date; `git log -4` has the details.
 >
 > - **AGENTS.md is deleted** (it belonged to a different project).
-> - **§2/§4:** new `src/data/iam.py` (IAM loader, writer-disjoint seed-deterministic split, `data/splits/*.json`),
+> - **§2/§4:** new `src/data/iam.py` (IAM loader; canonical writer split = HWT/VATr lists in `data/splits/vatr/`, seeded split kept as fallback in
+>   `data/splits/seeded/`; see `scripts/join_teklia.py` for the Teklia line -> writer join),
 >   `scripts/check_split.py`, `src/evaluation/{harness,loo,text_metrics,writer_id}.py`, `src/generator/glyph.py`
 >   (`GlyphMetrics`, `GlyphBitmap`), `src/features/line_metrics.py`. IAM itself is **not in the repo**; nothing has been
 >   run on real IAM data yet.
