@@ -104,3 +104,24 @@ class Recognizer:
             for i, text in zip(idx, greedy_decode(self.model(x), lengths, self.charset)):
                 out[i] = text
         return out
+
+
+def load_crnn(run_dir) -> "Recognizer":
+    """Frozen recognizer from a run directory (models/checkpoints/crnn_*/): config.json + best.pt."""
+    import json
+    from pathlib import Path
+    run_dir = Path(run_dir)
+    cfg = json.loads((run_dir / "config.json").read_text(encoding="utf-8"))
+    ck = torch.load(run_dir / "best.pt", map_location="cpu", weights_only=False)
+    model = CRNN(len(ck["charset"]), cfg["crnn"]["hidden"])
+    model.load_state_dict(ck["model_state_dict"])
+    return Recognizer(model, ck["charset"])
+
+
+def latest_crnn_run(root=None):
+    from pathlib import Path
+
+    from src.utils.config import resolve_path
+    root = Path(root) if root else resolve_path("models/checkpoints")
+    runs = sorted(p for p in root.glob("crnn_*") if (p / "best.pt").exists() and (p / "test_metrics.json").exists())
+    return runs[-1] if runs else None

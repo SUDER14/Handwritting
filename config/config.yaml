@@ -106,6 +106,13 @@ evaluation:
   writer_embedder: "trained"        # "trained" = the writer-ID ResNet (scripts/train_writer_id.py); "stub" = rule-based
                                     # PLACEHOLDER for smoke tests only. "trained" never falls back to the stub silently.
   writer_id_run: null               # run dir under models/checkpoints/; null -> the newest writer-ID run
+  crnn_run: null                    # frozen CRNN legibility instrument (models/checkpoints/crnn_*); null -> newest finished run
+  protocol:                         # ROADMAP 1.4 protocol (scripts/evaluate.py --mode protocol), see src/evaluation/protocol.py
+    split: "test"                   # evaluated on TEST writers only (needs --allow-test)
+    n_writers: 20                   # fixed seeded subset of test writers (CPU budget; labelled "subset" in results)
+    targets_per_writer: 10          # held-out lines per writer that are generated and scored
+    ks: [1, 5]                      # numbers of reference lines
+    seed: 1337
   targets_per_writer: 2             # per writer: 1 reference line conditions the generator, this many other lines are targets
   max_target_chars: 40              # target text is truncated to this many characters (letters and spaces only)
   min_reference_letters: 12         # a line must have at least this many letters to be used as reference/target

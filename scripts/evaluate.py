@@ -42,7 +42,14 @@ logger = get_logger(__name__)
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--split", choices=SPLIT_NAMES, default="val")
+    parser.add_argument("--mode", choices=["protocol", "legacy"], default="protocol",
+                        help="protocol = ROADMAP 1.4 (K references -> the writer's other lines; CRNN CER + writer-ID + HWD); "
+                             "legacy = the older single-reference CNN-glyph harness (kept for its tests)")
+    parser.add_argument("--backends", nargs="+", default=["real", "baseline"],
+                        help="protocol mode: any of real baseline glyph_vae (vatr in Stage 3)")
+    parser.add_argument("--ks", nargs="+", type=int, default=None, help="protocol mode: override evaluation.protocol.ks")
+    parser.add_argument("--split", choices=SPLIT_NAMES, default=None,
+                        help="default: val (legacy) / evaluation.protocol.split (protocol)")
     parser.add_argument("--backend", choices=["baseline", "neural"], default="baseline")
     parser.add_argument("--max-writers", type=int, default=None, help="evaluate a deterministic subset of the split's writers")
     parser.add_argument("--smoke", action="store_true", help="run on data/samples/*.png (NOT an evaluation)")
@@ -54,6 +61,10 @@ def main() -> int:
                         help="default: evaluation.writer_embedder from config. 'stub' is for smoke tests only.")
     parser.add_argument("--writer-id-run", default=None, help="writer-ID run dir (default: newest under models/checkpoints)")
     args = parser.parse_args()
+    if args.mode == "protocol":
+        from src.evaluation.protocol_cli import run_protocol_cli
+        return run_protocol_cli(args)
+    args.split = args.split or "val"
 
     cfg = load_config()
     resolved_config = copy.deepcopy(cfg)   # recorded verbatim in metrics.json
