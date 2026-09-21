@@ -25,3 +25,7 @@ data/iam/*
 models/checkpoints/**/*.pt
 data/processed/iam_writer_cache/
 logs/
+
+# official HWD / VATr clones (pinned by SHA in ROADMAP_STATE.md)
+third_party/
+data/processed/hwd_cache/

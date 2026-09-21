@@ -1,0 +1,27 @@
+# ROADMAP_STATE
+
+Format: `<task id> | DONE / FAILED / BLOCKED / DEFERRED | commit SHA | key numbers | notes`
+
+## ENVIRONMENT (recorded 2026-09-21)
+- CUDA NOT AVAILABLE (torch 2.14.0+cpu, no nvidia-smi), 4 CPU cores. Per ROADMAP rules: every training cap is reduced 4x
+  and all trained-model results are labelled **CPU-reduced**; Stage 3 evaluates a fixed 20-test-writer **subset**.
+- Real IAM images are not on disk (data/iam empty). Only allowed source: HF Teklia/IAM-line (images+text, no ids) joined to
+  writers by scripts/join_teklia.py.
+
+## LOG
+0.1 | DONE | 7db28b6 | forms.txt 1539 unique forms, 0 duplicated form_ids (0 conflicting writers); xReniar line source 13354 rows, 13354 distinct line_ids, 0 duplicate line_ids (documented total 13353; the extra line is NOT a duplicate id, cause unidentified); Teklia rows 10373, retained 9297 (match rate 0.896 first pass -> 0.902 after Gate-0 fix e29840e); excluded 1076 = 800 ambiguous_text + 276 unmatched_text, 0 from line source; retained per canonical split: train 5552 lines/282 writers, val 948/56, test 2795/160 (1 retained writer, 347, outside the canonical lists: 2 lines tagged none) | text-only join since Teklia has no ids
+0.2 | DONE | 7db28b6 | Teklia own split writer-disjoint: train/val 0, train/test 0, val/test 0 overlapping writers (retained: 283/56/160 writers) | Teklia splits = VATr split (tr_va 339, test 161) up to writer 347
+0.3 | DONE | 7db28b6 | canonical = VATr/HWT lists (aimagelab/VATr Groundtruth/gan.iam.{tr_va,test}.gt.filter27): train 283 / val 56 / test 161 writers (val = Teklia validation writers, subset of tr_va); 500 of 657 writers; retained set covers 338/339 and 160/161; seeded split kept in data/splits/seeded/ (fallback-only, config split_source) | data.iam.split_source=vatr
+0.4 | DONE | 7db28b6 (A), 19eda04 (B) | commit A join+split+config+conftest, commit B docs only | 
+0.5 | DONE | 5150ef8 | measured: slant delta +0.03..+0.21 deg (spread 0.6 deg) -> augmentation adds NO slant; stroke-width delta +0.86..+1.0 px (1.14-1.17x) with the OLD augment_window (warpAffine then remap = two interpolations, thresholded width/ink mass unchanged, fringe widened); after fix (single composed remap) +0.09 px (1.015x) / +0.37 px (1.06x). Slant assertion of the test used a window-level PCA that reads +-89 deg (degenerate instrument) -> test now measures slant per stroke, tolerances UNCHANGED | No writer-ID checkpoint was ever trained (models/checkpoints has only char_cnn.pt, style_vae.pt): nothing INVALID
+0.6 | DONE | 5150ef8 | AGENTS.md already absent; config keys read nowhere: none (name-grep flagged glyph_metrics.{ascender,t,dotted,descender_depth,spacing_max}_ratio but they are read via GlyphPriors.from_config dataclass fields) -> nothing deleted/wired | also committed the untracked writer-ID stack (src/writer_id, calibration, eval scripts), forms.txt
+GATE 0 | first attempt FAILED (join match rate 0.8963 < 0.90) -> fix attempt 1 (restrict candidates to writers of Teklia's split group, e29840e) -> PASSED: match rate 0.9024 (9360/10373); excluded 1013 = 734 ambiguous + 276 unmatched + 3 outside-split; conflicting form writers 0; canonical train/test writer overlap 0 (also 0 train/val, val/test); full suite 135 passed
+NOTE | | | | a.py (2-line scratch) and words_new.txt (truncated, superseded) left untracked; the mid-turn user message "Next: R1is is verified yet." was garbled/unparseable and not acted on
+1.0 | DONE | 0b9af3b, ed897d0 | test-writer leakage assertion (src/data/leakage.py; sampler pool + every batch; trainer checks train/val sets), best.pt/last.pt naming (ROADMAP wins over old best_epochNNN/final.pt), early_stop_patience 3, writer-ID epoch cap 40/4 = 10 (CPU-reduced), scripts/materialize_iam.py wrote the 9,360 joined lines to data/iam (gitignored) | 136 tests pass
+1.1 | RUNNING | ed897d0 | run writerid_20260921T180911Z_ed897d02_cpu_r1, log logs/writerid_cpu_r1.log; epoch 1: val top-1 0.504 mAP 0.289 (chance 0.034); ~850 s/epoch while other jobs run | architecture note: ResNet-18 block layout [2,2,2,2] but widths 32/64/128/256 (2.87M params, 256-d embedding), NOT the standard 64-512 ResNet-18 -- deviation from "ResNet-18" literal spec, kept because the existing model/tests use it
+1.2 | IN PROGRESS | (uncommitted) | official HWD cloned to third_party/HWD @ eabb5b5 (gitignored); NOTE PyPI package 'hwd' is an unrelated hardware library - do NOT pip install it; backbone VGG16_class_10400.pth (675 MB) cached in ~/.cache/torch/hub; pip-installed torchmetrics transformers editdistance msgpack tiktoken gudhi matplotlib (torch/numpy unchanged); wrapper src/evaluation/hwd_metric.py (HWD = Euclidean distance of mean VGG16 tokens, official transforms) | sanity script pending (200 test-writer pairs)
+
+## RESUME HERE
+1. Wait for training run cpu_r1 (check logs/writerid_cpu_r1.log; results in models/checkpoints/writerid_*_cpu_r1/{run.json,test_metrics.json}). Gate needs test top-1 >= 0.60. If early-stop/epoch cap reached below 0.60: diagnose (max 2 attempts).
+2. Finish 1.2: verify src/evaluation/hwd_metric.py equals official HWDScore on in-memory BaseDataset (scratchpad hwdchk.py), then write scripts/hwd_sanity.py: 200 pairs of test writers, same-writer (A half1 vs A half2) vs different (A vs B); gate needs same<diff in >=90% pairs. Commit, log.
+3. 1.3 CRNN-CTC recognizer (cap 60/4=15 epochs, train-split writers only, leakage assertion), 1.4 protocol in scripts/evaluate.py, then GATE 1.
