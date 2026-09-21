@@ -4,6 +4,7 @@ Usage:
     python scripts/check_split.py                 # uses data.iam.* from config/config.yaml
     python scripts/check_split.py --root D:/IAM   # IAM lives elsewhere
     python scripts/check_split.py --regenerate    # rewrite data/splits/*.json (deliberate changes only)
+    python scripts/check_split.py --expect-official   # also verify a REAL IAM download against the published totals
 
 Exit code 0 = every check passed, 1 = a check failed, 2 = IAM data not found.
 Creates data/splits/{train,val,test}.json on first run; on later runs it
@@ -12,22 +13,48 @@ verifies the files on disk against the seed in config.yaml rather than trusting 
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from itertools import combinations
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.data.iam import SPLIT_NAMES, UNITS, IAMCorpus, get_writer_splits, make_writer_splits, read_split_files
+from src.data.iam import SPLIT_NAMES, UNITS, IAMCorpus, make_writer_splits, read_split_files, resolve_writer_splits
 from src.utils.config import load_config, resolve_path
 
+# Published IAM Handwriting Database totals (Marti & Bunke, 2002; the database's own description page):
+# 1,539 scanned pages by 657 writers, 13,353 text lines, 115,320 words. A complete download reproduces them
+# exactly (rows in lines.txt/words.txt include the segmentation-'err' ones, which the loader skips by default).
+OFFICIAL_IAM = {"writers": 657, "forms": 1539, "lines": 13353, "words": 115320}
 
-def check_unit(unit: str, root, splits_dir: Path, cfg: dict, regenerate: bool) -> list[str]:
+
+def check_official(corpus, unit: str) -> list[str]:
+    """Compare a loaded corpus with the published IAM totals. Only meaningful for the real database."""
+    failures = []
+    rows = corpus.num_samples + sum(corpus.skipped.values())     # every metadata row, kept or skipped
+    for what, got, want in (("writers in forms.txt", len(corpus.all_writer_ids), OFFICIAL_IAM["writers"]),
+                            ("forms in forms.txt", len(corpus.form_to_writer), OFFICIAL_IAM["forms"]),
+                            (f"rows in {unit}.txt", rows, OFFICIAL_IAM[unit])):
+        ok = got == want
+        print(f"official check  {what:<24} {got:>7} (published {want}) {'OK' if ok else 'MISMATCH'}")
+        if not ok:
+            failures.append(f"[{unit}] {what}: {got} != published {want}")
+    for key in ("missing_image", "unknown_form"):
+        if corpus.skipped[key]:
+            failures.append(f"[{unit}] {corpus.skipped[key]} metadata rows with {key.replace('_', ' ')} "
+                            "(incomplete or misplaced download?)")
+    print(f"official check  segmentation-'err' rows skipped: {corpus.skipped['status_err']} (informational)")
+    return failures
+
+
+def check_unit(unit: str, root, splits_dir: Path, cfg: dict, regenerate: bool, expect_official: bool = False) -> list[str]:
     """Run all checks for one unit; returns a list of failure messages (empty = pass)."""
     failures: list[str] = []
     corpus = IAMCorpus(root=root, unit=unit)
     seed, fractions = cfg["split_seed"], cfg["split_fractions"]
-    splits = get_writer_splits(corpus.all_writer_ids, seed, fractions, splits_dir, regenerate=regenerate)
+    seeded = (os.environ.get("IAM_SPLIT_SOURCE") or cfg.get("split_source", "seeded")) == "seeded"
+    splits = resolve_writer_splits(cfg, corpus.all_writer_ids, splits_dir, regenerate=regenerate)
 
     print(f"\n== unit: {unit}  (root={corpus.root}) ==")
     print(f"writers in forms.txt: {len(corpus.all_writer_ids)}   samples indexed: {corpus.num_samples}   "
@@ -60,14 +87,21 @@ def check_unit(unit: str, root, splits_dir: Path, cfg: dict, regenerate: bool) -
 
     # 2. Coverage: every known writer is in exactly one split.
     union = [w for n in SPLIT_NAMES for w in splits[n]]
-    if sorted(union) != corpus.all_writer_ids:
+    if seeded and sorted(union) != corpus.all_writer_ids:      # a fixed (VATr) split need not cover every writer
         failures.append(f"[{unit}] union of splits != all writers in forms.txt")
+    elif not seeded:
+        print(f"canonical split covers {len(union)} of {len(corpus.all_writer_ids)} writers in forms.txt")
 
     # 3. The JSON on disk is what the seed produces (auditability / determinism).
-    on_disk, meta = read_split_files(splits_dir)
-    if on_disk != make_writer_splits(corpus.all_writer_ids, seed, fractions):
-        failures.append(f"[{unit}] {splits_dir}/*.json differ from the split re-derived from seed={seed}")
-    print(f"split files: {splits_dir}  seed={meta['seed']}  fractions={meta['fractions']}")
+    if seeded:
+        on_disk, meta = read_split_files(splits_dir)
+        if on_disk != make_writer_splits(corpus.all_writer_ids, seed, fractions):
+            failures.append(f"[{unit}] {splits_dir}/*.json differ from the split re-derived from seed={seed}")
+        print(f"split files: {splits_dir}  seed={meta['seed']}  fractions={meta['fractions']}")
+    else:
+        print(f"split files: {splits_dir}  (fixed VATr/HWT split, not seed-derived)")
+    if expect_official:
+        failures += check_official(corpus, unit)
     return failures
 
 
@@ -77,17 +111,23 @@ def main() -> int:
     parser.add_argument("--splits-dir", default=None, help="where the writer-ID JSON lives (default: config)")
     parser.add_argument("--unit", choices=[*UNITS, "both"], default="both")
     parser.add_argument("--regenerate", action="store_true", help="rewrite the split JSON files")
+    parser.add_argument("--expect-official", action="store_true",
+                        help="also verify writer/form/line/word counts against the published IAM totals (real data only)")
     args = parser.parse_args()
 
     cfg = load_config()["data"]["iam"]
-    splits_dir = Path(args.splits_dir) if args.splits_dir else resolve_path(cfg["splits_dir"])
+    if args.splits_dir:
+        splits_dir = Path(args.splits_dir)
+    else:
+        source = os.environ.get("IAM_SPLIT_SOURCE") or cfg.get("split_source", "seeded")
+        splits_dir = resolve_path(cfg["splits_dir"] if source == "vatr" else cfg.get("seeded_splits_dir", cfg["splits_dir"]))
     units = UNITS if args.unit == "both" else (args.unit,)
 
     failures: list[str] = []
     try:
         for i, unit in enumerate(units):
             # Only the first unit may (re)write the files; the second must agree with them.
-            failures += check_unit(unit, args.root, splits_dir, cfg, args.regenerate and i == 0)
+            failures += check_unit(unit, args.root, splits_dir, cfg, args.regenerate and i == 0, args.expect_official)
     except FileNotFoundError as e:
         print(f"ERROR: {e}", file=sys.stderr)
         return 2

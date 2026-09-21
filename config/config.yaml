@@ -89,8 +89,11 @@ renderer:
 data:
   iam:
     root: "data/iam"
-    splits_dir: "data/splits"        # writer-ID lists for train/val/test are written here as JSON (auditable)
-    split_seed: 1337                 # the writer-disjoint split is a pure function of this seed + forms.txt
+    split_source: "vatr"             # CANONICAL: the IAM writer split of HWT/VATr (fixed files, see scripts/make_vatr_split.py)
+                                     # "seeded" = FALLBACK ONLY (self-made split below); do not use for reported results
+    splits_dir: "data/splits/vatr"   # canonical writer-ID lists (train/val/test JSON, committed, auditable)
+    seeded_splits_dir: "data/splits/seeded"   # FALLBACK-ONLY seeded split, kept (not deleted) for reference/tests
+    split_seed: 1337                 # fallback only: the seeded split is a pure function of this seed + forms.txt
     split_fractions:                 # fractions of WRITERS (not samples); must sum to 1
       train: 0.8
       val: 0.1

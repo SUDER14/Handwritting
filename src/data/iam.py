@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -219,6 +220,37 @@ def get_writer_splits(writer_ids, seed: int, fractions: dict[str, float], splits
     return on_disk
 
 
+def load_fixed_splits(splits_dir: Path, all_writer_ids) -> dict[str, list[str]]:
+    """Read an externally-defined split (e.g. the VATr/HWT one): verified for disjointness and for every writer
+    being known to forms.txt, but NOT re-derived from a seed. It need not cover every writer."""
+    splits = {n: list(json.loads((splits_dir / f"{n}.json").read_text(encoding="utf-8"))["writer_ids"])
+              for n in SPLIT_NAMES}
+    known = set(all_writer_ids)
+    seen: dict[str, str] = {}
+    for name in SPLIT_NAMES:
+        unknown = set(splits[name]) - known
+        if unknown:
+            raise ValueError(f"{splits_dir}/{name}.json has writers not in forms.txt: {sorted(unknown)}")
+        for w in splits[name]:
+            if w in seen:
+                raise ValueError(f"writer {w} is in both {seen[w]} and {name} in {splits_dir}")
+            seen[w] = name
+    return splits
+
+
+def resolve_writer_splits(iam_cfg: dict, all_writer_ids, splits_dir: Path | None = None,
+                          regenerate: bool = False) -> dict[str, list[str]]:
+    """Writer split per `data.iam.split_source`: "vatr" (canonical, fixed files) or "seeded" (fallback, derived)."""
+    source = os.environ.get("IAM_SPLIT_SOURCE") or iam_cfg.get("split_source", "seeded")   # env: tests / one-off override
+    if source == "vatr":
+        return load_fixed_splits(splits_dir or resolve_path(iam_cfg["splits_dir"]), all_writer_ids)
+    if source != "seeded":
+        raise ValueError(f"data.iam.split_source must be 'vatr' or 'seeded', got {source!r}")
+    return get_writer_splits(all_writer_ids, iam_cfg["split_seed"], iam_cfg["split_fractions"],
+                             splits_dir or resolve_path(iam_cfg.get("seeded_splits_dir", iam_cfg["splits_dir"])),
+                             regenerate=regenerate)
+
+
 # ---------------------------------------------------------------------------
 # Corpus + dataset
 # ---------------------------------------------------------------------------
@@ -322,10 +354,8 @@ def load_iam_splits(unit: str = "lines", config: dict | None = None, root: str |
     """Build {train, val, test} IAMDatasets with the auditable writer-disjoint split."""
     cfg = (config or load_config())["data"]["iam"]
     corpus = IAMCorpus(root=root, unit=unit, include_err=include_err)
-    splits_path = Path(splits_dir) if splits_dir is not None else resolve_path(cfg["splits_dir"])
-    writer_split = get_writer_splits(
-        corpus.all_writer_ids, cfg["split_seed"], cfg["split_fractions"], splits_path, regenerate=regenerate
-    )
+    splits_path = Path(splits_dir) if splits_dir is not None else None
+    writer_split = resolve_writer_splits(cfg, corpus.all_writer_ids, splits_path, regenerate=regenerate)
     datasets = {}
     for name in SPLIT_NAMES:
         samples = [s for w in writer_split[name] for s in corpus.samples_by_writer.get(w, [])]
