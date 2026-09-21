@@ -30,6 +30,7 @@ import torch
 import torch.nn.functional as F
 
 from src.data.iam import load_iam_splits
+from src.data.leakage import assert_no_test_writers
 from src.evaluation.harness import git_info
 from src.utils.config import load_config, resolve_path
 from src.utils.logging_setup import get_logger
@@ -94,6 +95,9 @@ def main() -> int:
     store = LineStore(resolve_path(wid["cache_dir"]), wid["input_height"], wid["binarize"])
     for name in ("train", "val"):
         store.ensure(datasets[name])
+    test_ids = set(datasets["test"].writer_ids)
+    assert_no_test_writers({x.writer_id for x in datasets["train"].samples}, test_ids, "training set")
+    assert_no_test_writers({x.writer_id for x in datasets["val"].samples}, test_ids, "validation set")
     train_by_writer = group_by_writer(datasets["train"].samples)
     train_writers = sorted(train_by_writer)
     writer_to_idx = {w: i for i, w in enumerate(train_writers)}
@@ -116,7 +120,7 @@ def main() -> int:
     net = WriterIDNet(len(train_writers), m["widths"], m["blocks"], m["stem_stride"])
     logger.info("model parameters: %.2fM", sum(p.numel() for p in net.parameters()) / 1e6)
     sampler = WriterBatchSampler(store, train_by_writer, writer_to_idx, tr["writers_per_batch"],
-                                 tr["crops_per_writer"], wid["augment"], tr["seed"])
+                                 tr["crops_per_writer"], wid["augment"], tr["seed"], forbidden_writers=test_ids)
     batch = min(tr["writers_per_batch"], len(train_writers)) * tr["crops_per_writer"]
     steps = tr["steps_per_epoch"] or math.ceil(len(datasets["train"]) / batch)
     total = steps * tr["epochs"]
@@ -131,6 +135,7 @@ def main() -> int:
     log.writerow(["epoch", "train_ce", "train_ntxent", "train_acc", "val_top1", "val_map", "val_chance", "seconds"])
     best = (-1.0, -1.0)
     best_epoch = None
+    epochs_run = tr["epochs"]
     val_metrics = None
     for epoch in range(1, tr["epochs"] + 1):
         t0 = time.time()
@@ -157,15 +162,19 @@ def main() -> int:
             if (val_top1, val_map) > best:
                 best, best_epoch = (val_top1, val_map), epoch
                 torch.save({"model_state_dict": net.state_dict(), "epoch": epoch, "val": val_metrics,
-                            "train_writers": train_writers}, run_dir / f"best_epoch{epoch:03d}.pt")
+                            "train_writers": train_writers}, run_dir / "best.pt")
         dt = time.time() - t0
         log.writerow([epoch, f"{ce_sum/steps:.4f}", f"{nt_sum/steps:.4f}", f"{acc_sum/steps:.4f}",
                       f"{val_top1:.4f}", f"{val_map:.4f}", f"{val_chance:.4f}", f"{dt:.1f}"])
         log_f.flush()
+        torch.save({"model_state_dict": net.state_dict(), "epoch": epoch, "train_writers": train_writers}, run_dir / "last.pt")
         logger.info("epoch %d/%d | ce %.3f nt-xent %.3f train-acc %.3f | val top1 %.3f mAP %.3f (chance %.3f) | %.0fs",
                     epoch, tr["epochs"], ce_sum / steps, nt_sum / steps, acc_sum / steps, val_top1, val_map, val_chance, dt)
+        if best_epoch is not None and epoch - best_epoch >= tr["early_stop_patience"]:
+            logger.info("early stop: no val improvement for %d epochs (best epoch %d)", tr["early_stop_patience"], best_epoch)
+            epochs_run = epoch
+            break
     log_f.close()
-    torch.save({"model_state_dict": net.state_dict(), "epoch": tr["epochs"], "train_writers": train_writers}, run_dir / "final.pt")
 
     test_metrics = None
     if not args.skip_test:
@@ -176,7 +185,7 @@ def main() -> int:
         write_once(run_dir / "test_metrics.json", json.dumps(test_metrics, indent=2) + "\n")
     write_once(run_dir / "run.json", json.dumps({
         "run_id": run_id, "best_epoch": best_epoch, "best_val": {"top1": best[0], "map": best[1]},
-        "epochs": tr["epochs"], "steps_per_epoch": steps, "batch_size": batch,
+        "epochs_cap": tr["epochs"], "epochs_run": epochs_run, "steps_per_epoch": steps, "batch_size": batch,
         "num_train_lines": len(datasets["train"]), "test": test_metrics,
     }, indent=2) + "\n")
 
