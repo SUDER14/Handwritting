@@ -5,8 +5,13 @@ form, and forms.txt maps form -> writer. So the join is  Teklia text -> line_id 
 
 Text is the only key Teklia offers, so a Teklia row is retained only when its match is unambiguous:
   * whitespace-insensitive text key (Teklia tokenises punctuation, xReniar does not); case is significant;
-  * exactly one xReniar line_id has that key AND exactly one Teklia row has that key. Anything else (unmatched,
-    or the same sentence copied by several writers) is EXCLUDED and logged -- never guessed.
+  * candidates are restricted to the writers Teklia's split allows: Teklia's own splits are writer-disjoint and equal
+    the canonical VATr/HWT partition (Teklia test = canonical test writers; Teklia train+validation = canonical
+    train+val writers), so a Teklia "test" row can only come from a test writer, etc. This uses only the published
+    split lists, not the join output;
+  * a row is retained when, within its group, exactly one xReniar line_id AND exactly one Teklia row have that key.
+    Anything else (unmatched, or the same sentence still shared by several writers of one group) is EXCLUDED and
+    logged -- never guessed.
 
 Guards: forms.txt duplicates (same form, different writer => stop); duplicate line_ids in the line source (kept only
 if the copies' text is identical, else excluded); final hard assertion that retained line_ids are unique and each has
@@ -102,17 +107,26 @@ def main() -> int:
     from datasets import load_dataset
     teklia = load_dataset("Teklia/IAM-line")
     tk_rows = [(s, i, t) for s in teklia for i, t in enumerate(teklia[s]["text"])]   # image column not decoded
-    tk_count = Counter(key(t) for _, _, t in tk_rows)
+
+    cfg = load_config()["data"]["iam"]
+    splits = resolve_writer_splits(cfg, sorted(set(forms.values())))     # canonical (split_source) split
+    group_writers = {"test": set(splits["test"]), "trainval": set(splits["train"]) | set(splits["val"])}
+    group_of = {"train": "trainval", "validation": "trainval", "test": "test"}     # Teklia split -> writer group
+    tk_count = Counter((group_of[s], key(t)) for s, _, t in tk_rows)
 
     retained, excluded = [], []
     for s, i, t in tk_rows:
-        k = key(t)
-        cands = src_by_key.get(k, [])
+        k, g = key(t), group_of[s]
+        all_cands = src_by_key.get(k, [])
+        cands = [c for c in all_cands if c["writer_id"] in group_writers[g]]
+        n_tk = tk_count[(g, k)]
         ref = f"{s}[{i}]"
-        if not cands:
+        if not all_cands:
             excluded.append({"ref": ref, "reason": "unmatched_text", "text": t})
-        elif len(cands) > 1 or tk_count[k] > 1:
-            excluded.append({"ref": ref, "reason": f"ambiguous_text({len(cands)} lines, {tk_count[k]} teklia rows)",
+        elif not cands:
+            excluded.append({"ref": ref, "reason": "matched_only_outside_teklia_split_writers", "text": t})
+        elif len(cands) > 1 or n_tk > 1:
+            excluded.append({"ref": ref, "reason": f"ambiguous_text({len(cands)} lines, {n_tk} teklia rows)",
                              "text": t})
         else:
             retained.append({**cands[0], "teklia_split": s, "teklia_index": i})
@@ -128,8 +142,6 @@ def main() -> int:
     bad = [i for i, w in per_id_writers.items() if len(w) != 1]
     assert not bad, f"lines without exactly one writer_id: {bad[:10]}"
 
-    cfg = load_config()["data"]["iam"]
-    splits = resolve_writer_splits(cfg, sorted(set(forms.values())))     # canonical (split_source) split
     w2split = {w: n for n in SPLIT_NAMES for w in splits[n]}
     for r in retained:
         r["split"] = w2split.get(r["writer_id"], "none")                # writers outside the canonical lists
