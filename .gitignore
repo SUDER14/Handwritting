@@ -24,3 +24,4 @@ data/iam/*
 # per-run checkpoints (models/checkpoints/<run_id>/): weights are ignored, the small json/csv run records are not
 models/checkpoints/**/*.pt
 data/processed/iam_writer_cache/
+logs/

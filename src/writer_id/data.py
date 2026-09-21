@@ -19,6 +19,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from src.data.leakage import assert_no_test_writers
 from src.utils.logging_setup import get_logger
 
 logger = get_logger(__name__)
@@ -133,8 +134,11 @@ class WriterBatchSampler:
     """P writers x K crops per batch, so every anchor has K-1 same-writer positives for the contrastive term."""
 
     def __init__(self, store: LineStore, samples_by_writer: dict[str, list], writer_to_idx: dict[str, int],
-                 writers_per_batch: int, crops_per_writer: int, aug_cfg: dict, seed: int):
+                 writers_per_batch: int, crops_per_writer: int, aug_cfg: dict, seed: int,
+                 forbidden_writers=frozenset()):
         self.store, self.by_writer, self.idx = store, samples_by_writer, writer_to_idx
+        self.forbidden = frozenset(forbidden_writers)          # TEST-split writers: must never reach a batch
+        assert_no_test_writers(samples_by_writer, self.forbidden, "WriterBatchSampler's writer pool")
         self.writers = sorted(w for w in samples_by_writer if samples_by_writer[w] and w in writer_to_idx)
         self.P, self.K, self.aug = writers_per_batch, crops_per_writer, aug_cfg
         self.rng = np.random.default_rng(seed)
@@ -143,6 +147,7 @@ class WriterBatchSampler:
 
     def sample(self, width: int) -> tuple[np.ndarray, np.ndarray]:
         chosen = self.rng.choice(self.writers, size=min(self.P, len(self.writers)), replace=False)
+        assert_no_test_writers(chosen, self.forbidden)
         wins, labels = [], []
         for w in chosen:
             samples = self.by_writer[w]

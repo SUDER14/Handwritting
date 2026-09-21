@@ -129,7 +129,8 @@ writer_id:
   train:
     writers_per_batch: 16           # batch = writers_per_batch x crops_per_writer (crops of the same writer are the positives)
     crops_per_writer: 4
-    epochs: 30
+    epochs: 10                      # ROADMAP cap 40, /4 because CUDA is unavailable (CPU-reduced)
+    early_stop_patience: 3          # stop after this many epochs without a val top-1/mAP improvement
     steps_per_epoch: null           # null -> ceil(num_train_lines / batch_size)
     lr: 0.002
     weight_decay: 0.0001

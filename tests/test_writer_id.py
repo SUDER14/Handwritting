@@ -234,7 +234,7 @@ def test_training_script_runs_writes_the_run_record_and_reports_test_retrieval(t
     assert len(runs) == 1
     run = runs[0]
     names = {p.name for p in run.iterdir()}
-    assert {"config.json", "train_log.csv", "final.pt", "run.json", "test_metrics.json"} <= names
+    assert {"config.json", "train_log.csv", "last.pt", "best.pt", "run.json", "test_metrics.json"} <= names
     assert best_checkpoint(run) is not None and latest_run(root) == run
     cfg = json.loads((run / "config.json").read_text())
     assert cfg["kind"] == "writer_id" and cfg["writer_id"]["loss"]["ntxent_weight"] == CFG["writer_id"]["loss"]["ntxent_weight"]
@@ -326,3 +326,15 @@ def test_check_split_expect_official_fails_loudly_on_a_non_official_corpus(tmp_p
     ok = subprocess.run([sys.executable, "scripts/check_split.py", "--root", str(tmp_path / "iam"),
                          "--splits-dir", str(tmp_path / "s"), "--unit", "lines"], cwd=REPO, capture_output=True, text=True)
     assert ok.returncode == 0                       # without the flag the same corpus is fine
+
+
+# -- ROADMAP: test writers must never reach a training batch ----------------------------------------------
+
+def test_sampler_refuses_test_writers_in_its_pool_and_batches():
+    from src.data.leakage import WriterLeakageError, assert_no_test_writers
+    with pytest.raises(WriterLeakageError):
+        assert_no_test_writers(["001", "002"], {"002", "003"})
+    assert_no_test_writers(["001"], {"002"})                       # disjoint -> silent
+    from src.writer_id.data import WriterBatchSampler
+    with pytest.raises(WriterLeakageError):
+        WriterBatchSampler(None, {"w1": [1], "w2": [2]}, {"w1": 0, "w2": 1}, 2, 2, AUG, 0, forbidden_writers={"w2"})
