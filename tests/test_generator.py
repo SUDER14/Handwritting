@@ -45,7 +45,11 @@ def test_generate_unobserved_returns_requested_variant_count(generator, style):
 def test_generated_glyphs_are_not_forced_into_one_box(generator, style):
     """The old generator resized every letter to the same (mean_height x mean_width) box. Now each keeps
     its natural proportions: 'i' narrow, 'm' wide, 'k' taller than 'a', 'g' deeper than 'a'."""
-    g = {c: generator.generate_unobserved(c, style)[0] for c in "imakg"}
+    # Proportions only: give the writer the font's own slant so the (writer - font) shear is zero and bounding-box
+    # widths are not inflated by a shear that widens tall narrow letters more than short wide ones.
+    from dataclasses import replace
+    upright = replace(style, mean_slant_deg=generator._font_slant())
+    g = {c: generator.generate_unobserved(c, upright)[0] for c in "imakg"}
     assert g["m"].image.shape[1] > 2 * g["i"].image.shape[1]
     assert g["k"].image.shape[0] > 1.4 * g["a"].image.shape[0]
     assert len({v.image.shape for v in g.values()}) == len(g)      # no two letters share a box
@@ -71,3 +75,41 @@ def test_generate_alphabet_uses_observed_where_available(generator, style):
     assert set(alphabet.keys()) == {"a", "b", "q"}
     assert len(alphabet["q"]) == 1 and alphabet["q"][0] is observed_q   # observed: the real glyph, untouched
     assert len(alphabet["a"]) == 2                                      # unobserved: variants_per_char
+
+
+# -- ROADMAP 2.1: shear = writer slant - font slant, in the estimator's own sign convention ------------------------
+
+def test_shearing_a_vertical_bar_by_plus_20_is_read_back_as_plus_20_by_the_slant_estimator():
+    from src.features.style_extractor import StyleFeatureExtractor
+    from src.generator.baseline_generator import _apply_shear
+    ex = StyleFeatureExtractor()
+    bar = np.zeros((120, 60), np.uint8)
+    bar[10:110, 26:34] = 255
+    for angle in (20.0, -20.0, 8.0):
+        assert ex._slant_deg(_apply_shear(bar, angle)) == pytest.approx(angle, abs=1.0)
+    assert np.array_equal(_apply_shear(bar, 0.0), bar)
+
+
+def test_font_slant_is_measured_by_our_estimator_and_cached(tmp_path):
+    from src.generator import baseline_generator as bg
+    font = bg._load_reference_font()
+    bg._FONT_SLANT_CACHE.clear()
+    v1 = bg.font_slant_deg(font, cache_dir=str(tmp_path))
+    assert (tmp_path / "font_slant.json").exists()
+    bg._FONT_SLANT_CACHE.clear()
+    assert bg.font_slant_deg(font, cache_dir=str(tmp_path)) == v1              # read back from the disk cache
+    assert -90 < v1 < 90
+
+
+def test_generator_shears_by_writer_slant_minus_font_slant(monkeypatch, style):
+    """A writer whose slant equals the font's own gets NO shear; +/- 15 deg relative to the font shears by exactly that."""
+    from src.generator import baseline_generator as bg
+    seen = []
+    monkeypatch.setattr(bg, "_apply_shear", lambda canvas, deg: (seen.append(deg), canvas)[1])
+    gen = BaselineGlyphGenerator({})
+    monkeypatch.setattr(gen, "_font_slant", lambda: 22.0)
+    from dataclasses import replace
+    for writer_slant, expected in ((22.0, 0.0), (37.0, 15.0), (7.0, -15.0)):
+        seen.clear()
+        gen.generate_unobserved("k", replace(style, mean_slant_deg=writer_slant))
+        assert seen and all(d == pytest.approx(expected) for d in seen)

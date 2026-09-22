@@ -45,6 +45,43 @@ MAX_STROKE_ITERATIONS = 6
 WIDTH_SCALE_RANGE = (0.5, 1.8)
 
 
+_FONT_SLANT_CACHE: dict[str, float] = {}
+
+
+def font_slant_deg(font: ImageFont.FreeTypeFont, cache_dir: str | None = "data/processed") -> float:
+    """Slant of the reference font's own letters, measured ONCE with our own slant estimator
+    (StyleFeatureExtractor._slant_deg, the same statistic the writer's slant is measured with: the mean over a-z)
+    and cached in memory and in <cache_dir>/font_slant.json. The baseline shears by (writer slant - font slant): the
+    font is itself slanted (Segoe Script ~ +20 deg), so applying the writer's full slant on top of it double-counts."""
+    import json
+    from pathlib import Path
+
+    from src.features.style_extractor import StyleFeatureExtractor
+    key = f"{getattr(font, 'path', 'default')}@{RENDER_SIZE}"
+    if key in _FONT_SLANT_CACHE:
+        return _FONT_SLANT_CACHE[key]
+    disk = None
+    if cache_dir:
+        from src.utils.config import resolve_path
+        disk = resolve_path(cache_dir) / "font_slant.json"
+        try:
+            _FONT_SLANT_CACHE.update(json.loads(disk.read_text(encoding="utf-8")))
+        except (OSError, ValueError):
+            pass
+        if key in _FONT_SLANT_CACHE:
+            return _FONT_SLANT_CACHE[key]
+    ex = StyleFeatureExtractor()
+    value = float(np.mean([ex._slant_deg(_render_font_glyph(c, font)[0]) for c in string.ascii_lowercase]))
+    _FONT_SLANT_CACHE[key] = value
+    if disk is not None:
+        try:
+            disk.parent.mkdir(parents=True, exist_ok=True)
+            disk.write_text(json.dumps(_FONT_SLANT_CACHE, indent=2) + "\n", encoding="utf-8")
+        except OSError:
+            pass
+    return value
+
+
 def _load_reference_font(size: int = RENDER_SIZE) -> ImageFont.FreeTypeFont:
     for path in REFERENCE_FONT_CANDIDATES:
         try:
@@ -95,15 +132,17 @@ def _adjust_stroke_width(glyph_bin: np.ndarray, target_width_px: float) -> np.nd
 
 
 def _apply_shear(canvas: np.ndarray, slant_deg: float) -> np.ndarray:
-    """Shear a padded glyph canvas horizontally to emulate a slant. 0 = unchanged.
+    """Shear a padded glyph canvas horizontally by `slant_deg`, in the SAME sign convention as the slant estimator
+    (StyleFeatureExtractor._slant_deg: positive = strokes lean right, i.e. the top of a stroke is right of its bottom).
+    0 = unchanged. Shearing a vertical bar by +20 makes the estimator read +20 (tests/test_generator.py).
 
-    Same transform as before (x' = x + tan(slant) * y), but applied in place on a canvas that already
-    has horizontal room, so the vertical layout -- and therefore the baseline row -- is untouched.
+    x' = x - tan(slant) * y  (image y grows downward, so the top rows move right for a positive slant). Applied in
+    place on a canvas that already has horizontal room, so the vertical layout -- and the baseline row -- is untouched.
     """
     if abs(slant_deg) < 0.5:
         return canvas
     h, w = canvas.shape[:2]
-    shear = np.tan(np.radians(slant_deg))
+    shear = -np.tan(np.radians(slant_deg))
     pad = int(abs(shear) * h) + 2
     padded = cv2.copyMakeBorder(canvas, 0, 0, pad, pad, cv2.BORDER_CONSTANT, value=0)
     m = np.array([[1, shear, -min(0, shear) * h], [0, 1, 0]], dtype=np.float32)
@@ -134,6 +173,7 @@ class BaselineGlyphGenerator:
         self.priors = GlyphPriors.from_config(cfg)
         self._reference_cache: dict[str, _FontGlyph] = {}
         self._font_x_height: float | None = None
+        self._font_slant_deg: float | None = None
 
     # -- reference font ------------------------------------------------------
 
@@ -143,6 +183,12 @@ class BaselineGlyphGenerator:
         if self._font_x_height is None:
             self._font_x_height = float(_render_font_glyph("x", self.font)[1])
         return self._font_x_height
+
+    def _font_slant(self) -> float:
+        """The reference font's own slant (measured once, cached); the writer's slant is applied relative to it."""
+        if self._font_slant_deg is None:
+            self._font_slant_deg = font_slant_deg(self.font)
+        return self._font_slant_deg
 
     def _reference(self, char: str) -> _FontGlyph:
         if char not in self._reference_cache:
@@ -188,7 +234,7 @@ class BaselineGlyphGenerator:
                                     interpolation=cv2.INTER_AREA if width_scale < 1 else cv2.INTER_CUBIC)
                 canvas = (canvas > 127).astype(np.uint8) * 255
             canvas = _adjust_stroke_width(canvas, target_stroke)
-            canvas = _apply_shear(canvas, style.mean_slant_deg)
+            canvas = _apply_shear(canvas, style.mean_slant_deg - self._font_slant())
             canvas = _jitter(canvas, baseline_row, self.jitter_rotation_deg, self.rng)
 
             crop, _, y0 = tight_crop(canvas)
