@@ -1,0 +1,1124 @@
+{
+  "run_id": "20260922T181506Z_95ac8d04_protocol_real_K5",
+  "git": {
+    "sha": "95ac8d04",
+    "dirty": false,
+    "branch": "master"
+  },
+  "split": "test",
+  "subset": "20 of 161 test writers (seed 1337)",
+  "cpu_reduced": true,
+  "backend": "real",
+  "K": 5,
+  "protocol": {
+    "split": "test",
+    "n_writers": 20,
+    "targets_per_writer": 10,
+    "ks": [
+      1,
+      5
+    ],
+    "seed": 1337
+  },
+  "crnn_run": "crnn_20260922T003942Z_d1f87b49_cpu_r1",
+  "writer_id": {
+    "name": "writer_id:writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "is_stub": false,
+    "run_id": "writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "checkpoint": "best.pt",
+    "test_top1": 0.7319291527046433,
+    "test_map": 0.5650027956358793,
+    "test_chance_top1": 0.011032823619246703,
+    "min_usable_top1": 0.6,
+    "usable": true
+  },
+  "aggregate": {
+    "n_writers": 20,
+    "all_cer": 0.09342728797224419,
+    "all_wid_dist": 0.021477814314763956,
+    "all_hwd": 0.8981591027098392,
+    "all_n_writers": 20,
+    "all_n_lines": 90,
+    "oov_cer": 0.10046233743931669,
+    "oov_wid_dist": 0.04759792589175172,
+    "oov_hwd": 1.2873087517695987,
+    "oov_n_writers": 13,
+    "oov_n_lines": 24,
+    "n_failed_generations": 0
+  },
+  "writers": [
+    {
+      "writer": "172",
+      "K": 5,
+      "n_targets": 8,
+      "ref_ids": [
+        "c04-170-00",
+        "c04-170-02",
+        "c04-165-07",
+        "c04-165-06",
+        "c04-165-01"
+      ],
+      "target_ids": [
+        "c04-165-02",
+        "c04-165-03",
+        "c04-165-08",
+        "c04-170-03",
+        "c04-165-04",
+        "c04-165-05",
+        "c04-165-00",
+        "c04-170-01"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.050314465408805034,
+        "wid_dist": 0.06680683844898472,
+        "hwd": 1.1960421399091055,
+        "n_lines": 4,
+        "hyps": [
+          "strike it showed britain today through the eyes",
+          "of an tmerican tv veporter eric sevareid sand",
+          "to the european common uarket",
+          "that in the rece of the moderss nations"
+        ]
+      },
+      "oov": null
+    },
+    {
+      "writer": "173",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "d06-020-02",
+        "d06-063-04",
+        "c06-011-02",
+        "d06-046-00",
+        "d06-046-05"
+      ],
+      "target_ids": [
+        "c06-011-05",
+        "d06-063-07",
+        "d06-020-07",
+        "c06-011-00",
+        "d06-020-08",
+        "d06-008-09",
+        "d06-063-06",
+        "c06-011-04",
+        "d06-020-00",
+        "d06-020-05"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.09278350515463918,
+        "wid_dist": 0.004030050208492231,
+        "hwd": 0.594971219024084,
+        "n_lines": 5,
+        "hyps": [
+          "to fight off the frustation the telephone",
+          "frou muserica weeks from the far east",
+          "has sowething important to do wsith on",
+          "alo prosent is a london jouruahit who",
+          "lives and that the nearer ue get to ains"
+        ]
+      },
+      "oov": {
+        "cer": 0.1282051282051282,
+        "wid_dist": 0.007323318770169784,
+        "hwd": 1.1471600505761474,
+        "n_lines": 1,
+        "hyps": [
+          "alo prosent is a london jouruahit who"
+        ]
+      }
+    },
+    {
+      "writer": "179",
+      "K": 5,
+      "n_targets": 9,
+      "ref_ids": [
+        "d01-085-05",
+        "d01-080-01",
+        "d01-080-00",
+        "d01-080-02",
+        "d01-080-03"
+      ],
+      "target_ids": [
+        "d01-080-07",
+        "d01-085-02",
+        "d01-085-04",
+        "d01-080-06",
+        "d01-080-04",
+        "d01-085-01",
+        "d01-085-03",
+        "d01-080-05",
+        "d01-085-06"
+      ],
+      "oov_flags": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.12209302325581395,
+        "wid_dist": 0.0038131840670979633,
+        "hwd": 0.5828864016172639,
+        "n_lines": 4,
+        "hyps": [
+          "unpasaible to soy",
+          "ornginal ot the gosper whether writen on a roll or codex",
+          "colmmuns this is the invariable practice of oncient",
+          "some woskings would e nsed ough which it is"
+        ]
+      },
+      "oov": {
+        "cer": 0.08771929824561403,
+        "wid_dist": 0.014629360236242506,
+        "hwd": 0.9099046549919495,
+        "n_lines": 1,
+        "hyps": [
+          "ornginal ot the gosper whether uriten on a roll or codex"
+        ]
+      }
+    },
+    {
+      "writer": "190",
+      "K": 5,
+      "n_targets": 7,
+      "ref_ids": [
+        "d04-058-03",
+        "d04-058-05",
+        "d04-058-06",
+        "d04-062-03",
+        "d04-058-04"
+      ],
+      "target_ids": [
+        "d04-058-00",
+        "d04-058-01",
+        "d04-062-00",
+        "d04-062-01",
+        "d04-062-02",
+        "d04-058-02",
+        "d04-062-04"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.044585987261146494,
+        "wid_dist": 0.01582189748296925,
+        "hwd": 0.7289341340251769,
+        "n_lines": 3,
+        "hyps": [
+          "and you setve mammon and god and you cannot seeve",
+          "two nasters and you worsip selfinterest isolating",
+          "for withaut the ision to serve the lord your bod with all"
+        ]
+      },
+      "oov": null
+    },
+    {
+      "writer": "196",
+      "K": 5,
+      "n_targets": 6,
+      "ref_ids": [
+        "d04-111-11",
+        "d04-111-03",
+        "d04-111-08",
+        "d04-111-06",
+        "d04-111-02"
+      ],
+      "target_ids": [
+        "d04-111-00",
+        "d04-111-05",
+        "d04-111-04",
+        "d04-111-07",
+        "d04-111-10",
+        "d04-111-09"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.12244897959183673,
+        "wid_dist": 0.015319182939368736,
+        "hwd": 1.2561927544032463,
+        "n_lines": 3,
+        "hyps": [
+          "i matro representr peshat imorour",
+          "is ralled the heast of makos the",
+          "fhe literal meauing of pesach which"
+        ]
+      },
+      "oov": null
+    },
+    {
+      "writer": "283",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "f04-087-00",
+        "f04-087-04",
+        "f04-083-01",
+        "f04-083-07",
+        "f04-087-03"
+      ],
+      "target_ids": [
+        "f04-083-09",
+        "f04-083-04",
+        "f04-087-01",
+        "f04-083-08",
+        "f04-083-05",
+        "f04-087-02",
+        "f04-083-02",
+        "f04-083-03",
+        "f04-087-05",
+        "f04-083-06"
+      ],
+      "oov_flags": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false
+      ],
+      "all": {
+        "cer": 0.13191489361702127,
+        "wid_dist": 0.004649213524518303,
+        "hwd": 0.9473839873272374,
+        "n_lines": 5,
+        "hyps": [
+          "whon she worped as a bookkeeser",
+          "circulated aud a uo robert noney cane forward to",
+          "eveving at about seven o clock felling ner loounate earnla",
+          "clachau ou the arenises of a dairymau pridger por",
+          "ldentify ner as nis sister mary money aged tweutytwo"
+        ]
+      },
+      "oov": {
+        "cer": 0.1375,
+        "wid_dist": 0.008172654065563001,
+        "hwd": 1.1043345838997443,
+        "n_lines": 2,
+        "hyps": [
+          "whon she worped as a bookkeeser",
+          "clachau ou the arenises of a dairymau ridger por"
+        ]
+      }
+    },
+    {
+      "writer": "286",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "f07-002-00",
+        "f07-002-08",
+        "f07-002-01",
+        "f07-000b-05",
+        "f07-000b-03"
+      ],
+      "target_ids": [
+        "f07-002-02",
+        "f07-009-08",
+        "f07-009-00",
+        "f07-000b-04",
+        "f07-009-05",
+        "f07-006-03",
+        "f07-000b-01",
+        "f07-006-01",
+        "f07-006-04",
+        "f07-009-04"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ],
+      "all": {
+        "cer": 0.026200873362445413,
+        "wid_dist": 0.024847684776513446,
+        "hwd": 1.2503273563898016,
+        "n_lines": 5,
+        "hyps": [
+          "the progress of civilisation which allows a dish",
+          "day the desire to share pomething more intimnate",
+          "and if certain dishes and modes of food have",
+          "music to which the frenichman would not dance",
+          "a meal in those earhieit dangerous days wras an"
+        ]
+      },
+      "oov": null
+    },
+    {
+      "writer": "292",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "f07-081a-00",
+        "f07-092a-00",
+        "f07-081a-03",
+        "f07-088a-05",
+        "f07-088a-04"
+      ],
+      "target_ids": [
+        "f07-092a-02",
+        "f07-084a-01",
+        "f07-084a-05",
+        "f07-081a-04",
+        "f07-084a-09",
+        "f07-076a-05",
+        "f07-076a-07",
+        "f07-081a-05",
+        "f07-076a-06",
+        "f07-088a-03"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "all": {
+        "cer": 0.01639344262295082,
+        "wid_dist": 0.0022021988291439643,
+        "hwd": 0.80896083748081,
+        "n_lines": 5,
+        "hyps": [
+          "been blind to the charms of turbot and",
+          "institution in france as is tea clrinking",
+          "waked enthusiastic about bouilla",
+          "there is the same finesse about their",
+          "sorts of fishes that greenwich never"
+        ]
+      },
+      "oov": {
+        "cer": 0.02040816326530612,
+        "wid_dist": 0.0039043881121992863,
+        "hwd": 0.9760951176408521,
+        "n_lines": 4,
+        "hyps": [
+          "been blind to the charms of turbot and",
+          "institution in france as is tea clrinking",
+          "waked enthusiastic about bouilla",
+          "there is the same finesse about their"
+        ]
+      }
+    },
+    {
+      "writer": "315",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "n02-120-02",
+        "n02-127-02",
+        "r03-053-07",
+        "n02-120-06",
+        "n02-120-07"
+      ],
+      "target_ids": [
+        "g03-049-05",
+        "r03-053-00",
+        "r03-053-08",
+        "n02-114-02",
+        "n02-114-09",
+        "n02-127-07",
+        "n02-127-06",
+        "n02-114-06",
+        "n02-109-06",
+        "n02-120-00"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.2857142857142857,
+        "wid_dist": 0.023515292059367976,
+        "hwd": 0.9755109379848751,
+        "n_lines": 5,
+        "hyps": [
+          "socrelisos gpii sacs men wto bac fe",
+          "mes voice cvaes lile srs sloacz and pinshipe",
+          "hhe foke friend of le family rize",
+          "se said icily s you pricf roosself on",
+          "cousage"
+        ]
+      },
+      "oov": {
+        "cer": 0.37662337662337664,
+        "wid_dist": 0.02726673517178635,
+        "hwd": 1.0557639265513166,
+        "n_lines": 2,
+        "hyps": [
+          "socrelisos gpii sacs men wt bac fe",
+          "mes voice cvaes lile srs sloacz and pinshipe"
+        ]
+      }
+    },
+    {
+      "writer": "513",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "m01-121-02",
+        "m01-104-06",
+        "m01-104-03",
+        "m01-121-03",
+        "m01-121-00"
+      ],
+      "target_ids": [
+        "m01-121-01",
+        "m01-121-08",
+        "m01-121-05",
+        "m01-104-05",
+        "m01-121-04",
+        "m01-104-07",
+        "m01-104-04",
+        "m01-104-02",
+        "m01-121-07",
+        "m01-104-00"
+      ],
+      "oov_flags": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.05434782608695652,
+        "wid_dist": 0.02622310087060109,
+        "hwd": 0.5564937352957602,
+        "n_lines": 5,
+        "hyps": [
+          "pome weakness and find a way of figating",
+          "neverthellss",
+          "wonking out it occuvred to steve that this may",
+          "kenow now because of prisn hypnosts we lave es",
+          "ting how the thetan machinations had been"
+        ]
+      },
+      "oov": {
+        "cer": 0.08235294117647059,
+        "wid_dist": 0.031274550131161094,
+        "hwd": 0.8180592889424212,
+        "n_lines": 2,
+        "hyps": [
+          "pome weakness and find a way of figating",
+          "kenow now because of prisn hypnosts we lave es"
+        ]
+      }
+    },
+    {
+      "writer": "514",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "m01-110-10",
+        "m01-110-06",
+        "m01-110-01",
+        "m01-110-00",
+        "m01-131-03"
+      ],
+      "target_ids": [
+        "m01-131-04",
+        "m01-110-03",
+        "m01-110-04",
+        "m01-110-11",
+        "m01-110-09",
+        "m01-110-05",
+        "m01-131-06",
+        "m01-110-08",
+        "m01-110-02",
+        "m01-131-02"
+      ],
+      "oov_flags": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "all": {
+        "cer": 0.10588235294117647,
+        "wid_dist": 0.07122347162028031,
+        "hwd": 1.1074268453899188,
+        "n_lines": 5,
+        "hyps": [
+          "of their precence they just stared at him tuning",
+          "treatasent i we cans avoid unsere",
+          "prominence it usay be that we can",
+          "wr may orm the nuclens arorend",
+          "are beyond persond security"
+        ]
+      },
+      "oov": {
+        "cer": 0.04081632653061224,
+        "wid_dist": 0.311687843672362,
+        "hwd": 2.575646730935576,
+        "n_lines": 1,
+        "hyps": [
+          "of their precence they just stared at him tuning"
+        ]
+      }
+    },
+    {
+      "writer": "542",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "m03-110-06",
+        "m03-114-04",
+        "m03-110-00",
+        "m03-114-00",
+        "m03-114-06"
+      ],
+      "target_ids": [
+        "m03-110-04",
+        "m03-114-07",
+        "m03-110-05",
+        "m03-110-07",
+        "m03-114-05",
+        "m03-114-01",
+        "m03-114-03",
+        "m03-110-08",
+        "m03-110-01",
+        "m03-110-09"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.08866995073891626,
+        "wid_dist": 0.05845335000826135,
+        "hwd": 0.692378066426752,
+        "n_lines": 5,
+        "hyps": [
+          "b strange the cnwelcome the almost",
+          "savege tnbes never approached this reglion at",
+          "inconveniancalle idea hat ariodnes arrival",
+          "a somewhat vulgar impulse which i refused",
+          "mood even the lindion servants relased knowing"
+        ]
+      },
+      "oov": {
+        "cer": 0.06666666666666667,
+        "wid_dist": 0.059590539109457774,
+        "hwd": 1.1418438611825124,
+        "n_lines": 1,
+        "hyps": [
+          "mood even the lindion servants relased knowing"
+        ]
+      }
+    },
+    {
+      "writer": "547",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "m04-113-04",
+        "m04-138-08",
+        "m04-113-07",
+        "m04-113-10",
+        "m04-138-03"
+      ],
+      "target_ids": [
+        "m04-131-06",
+        "m04-131-03",
+        "m04-123-00",
+        "m04-113-08",
+        "m04-138-05",
+        "m04-131-05",
+        "m04-138-06",
+        "m04-131-07",
+        "m04-113-05",
+        "m04-113-06"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.09497206703910614,
+        "wid_dist": 0.006234538795589772,
+        "hwd": 0.9200570529906938,
+        "n_lines": 5,
+        "hyps": [
+          "looked at his forlorn flock what",
+          "onthe bach neat ltan hlapballembraced",
+          "but disappointrment owaited him a",
+          "therefore mr robets must have beenmintaton",
+          "fror their lethargy lomething wwas"
+        ]
+      },
+      "oov": null
+    },
+    {
+      "writer": "552",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "m06-056-05",
+        "m06-031-02",
+        "m06-042-02",
+        "m06-106-06",
+        "m06-076-01"
+      ],
+      "target_ids": [
+        "m06-083-01",
+        "m06-056-04",
+        "m06-106-02",
+        "m06-067-05",
+        "m06-067-04",
+        "m06-048-05",
+        "m06-076-03",
+        "m06-091-01",
+        "m06-031-00",
+        "m06-098-04"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.012396694214876033,
+        "wid_dist": 0.012844988572763172,
+        "hwd": 0.694068261859328,
+        "n_lines": 5,
+        "hyps": [
+          "are slaves to it only an outcast is free because",
+          "the boneless arns added some may be born wrong",
+          "the creatures participating in them for lilyyo flor",
+          "well we can think tthis tribe of the true world",
+          "in life to bnow is also good because we cannot move"
+        ]
+      },
+      "oov": null
+    },
+    {
+      "writer": "553",
+      "K": 5,
+      "n_targets": 9,
+      "ref_ids": [
+        "n01-000-06",
+        "n01-009-04",
+        "n01-000-00",
+        "n01-000-05",
+        "n01-009-03"
+      ],
+      "target_ids": [
+        "n01-009-07",
+        "n01-009-02",
+        "n01-009-05",
+        "n01-000-04",
+        "n01-009-08",
+        "n01-000-02",
+        "n01-000-01",
+        "n01-000-03",
+        "n01-009-06"
+      ],
+      "oov_flags": [
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.14361702127659576,
+        "wid_dist": 0.015934717544832555,
+        "hwd": 0.6904355827842156,
+        "n_lines": 4,
+        "hyps": [
+          "counded so charming and appeared to erso",
+          "evening and s suale loode fowrard to marting yeu",
+          "tastair admitted that uever in a not altogetn",
+          "his own wife but geoffry sas wele to a stionge ggirl"
+        ]
+      },
+      "oov": {
+        "cer": 0.2127659574468085,
+        "wid_dist": 0.04395232427266893,
+        "hwd": 1.8231663733098018,
+        "n_lines": 1,
+        "hyps": [
+          "evening and s suale loode fowrard to marting yeu"
+        ]
+      }
+    },
+    {
+      "writer": "557",
+      "K": 5,
+      "n_targets": 8,
+      "ref_ids": [
+        "n01-052-10",
+        "n01-052-07",
+        "n01-052-02",
+        "n01-052-12",
+        "n01-052-04"
+      ],
+      "target_ids": [
+        "n01-052-00",
+        "n01-052-05",
+        "n01-052-11",
+        "n01-052-09",
+        "n01-052-06",
+        "n01-052-01",
+        "n01-052-08",
+        "n01-052-03"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.046632124352331605,
+        "wid_dist": 0.041391959786310606,
+        "hwd": 1.301224920135813,
+        "n_lines": 4,
+        "hyps": [
+          "they were nearing modewa geofrey focused the radar scamner",
+          "more thatn twentylour hours earlies since then",
+          "of the jhurney fack to the place where every",
+          "parade to boscombe down slept for six blesed"
+        ]
+      },
+      "oov": {
+        "cer": 0.033707865168539325,
+        "wid_dist": 0.05012339640094199,
+        "hwd": 1.7718008187863847,
+        "n_lines": 2,
+        "hyps": [
+          "of the jhurney fack to the place where every",
+          "parade to boscombe down slept for six blesed"
+        ]
+      }
+    },
+    {
+      "writer": "561",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "n02-049-05",
+        "n02-049-02",
+        "n02-028-00",
+        "n02-028-07",
+        "n02-049-00"
+      ],
+      "target_ids": [
+        "n02-028-08",
+        "n02-028-04",
+        "n02-028-05",
+        "n02-028-03",
+        "n02-028-02",
+        "n02-049-04",
+        "n02-028-01",
+        "n02-028-06",
+        "n02-028-09",
+        "n02-049-01"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        false
+      ],
+      "all": {
+        "cer": 0.234375,
+        "wid_dist": 0.009043404073681316,
+        "hwd": 0.9897529392676557,
+        "n_lines": 5,
+        "hyps": [
+          "carnad grotrity they his notise illage at the",
+          "pouited ord nateron the prijeet frerpone ho dedared",
+          "ined had a fhrollyged tine and it voull tale themn",
+          "suggested hesing a scaond pusty the flbowing wed he",
+          "of his gresto but ficn remawed alof and when berpl"
+        ]
+      },
+      "oov": null
+    },
+    {
+      "writer": "577",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "n03-097-04",
+        "n03-097-07",
+        "n03-097-03",
+        "n03-103-09",
+        "n03-103-02"
+      ],
+      "target_ids": [
+        "n03-103-03",
+        "n03-103-00",
+        "n03-103-05",
+        "n03-097-02",
+        "n03-097-05",
+        "n03-103-01",
+        "n03-097-01",
+        "n03-103-04",
+        "n03-097-00",
+        "n03-103-07"
+      ],
+      "oov_flags": [
+        false,
+        true,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true,
+        false
+      ],
+      "all": {
+        "cer": 0.02247191011235955,
+        "wid_dist": 0.005337489273358864,
+        "hwd": 0.8916822543804985,
+        "n_lines": 5,
+        "hyps": [
+          "end of the wharf but by pressing",
+          "ot seemed to the frightened judge",
+          "same time dopping the small sheet",
+          "weather side of that pier he l sreck",
+          "quick shift of tiller and at the same time"
+        ]
+      },
+      "oov": {
+        "cer": 0.013333333333333334,
+        "wid_dist": 0.0346817170064001,
+        "hwd": 1.2016274987260902,
+        "n_lines": 2,
+        "hyps": [
+          "ot seemed to the frightened judge",
+          "quick shift of tiller and at the same time"
+        ]
+      }
+    },
+    {
+      "writer": "594",
+      "K": 5,
+      "n_targets": 6,
+      "ref_ids": [
+        "p02-008-08",
+        "p02-008-07",
+        "p02-008-03",
+        "p02-008-06",
+        "p02-008-02"
+      ],
+      "target_ids": [
+        "p02-008-05",
+        "p02-008-00",
+        "p02-008-04",
+        "p02-008-09",
+        "p02-008-10",
+        "p02-008-01"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        false,
+        true,
+        true,
+        false
+      ],
+      "all": {
+        "cer": 0.05952380952380952,
+        "wid_dist": 0.01666049751929688,
+        "hwd": 0.8980277766876066,
+        "n_lines": 3,
+        "hyps": [
+          "went quiclly back to fetch them",
+          "gay went out to the waiting",
+          "glasses on the veramode he"
+        ]
+      },
+      "oov": {
+        "cer": 0.034482758620689655,
+        "wid_dist": 0.017794624507314838,
+        "hwd": 1.0306542806081673,
+        "n_lines": 2,
+        "hyps": [
+          "went quiclly back to fetch then",
+          "gay went out to the waiting"
+        ]
+      }
+    },
+    {
+      "writer": "598",
+      "K": 5,
+      "n_targets": 10,
+      "ref_ids": [
+        "p02-090-00",
+        "p02-069-04",
+        "p02-090-03",
+        "p02-090-06",
+        "p02-069-07"
+      ],
+      "target_ids": [
+        "p02-069-05",
+        "p02-069-02",
+        "p02-069-03",
+        "p02-069-08",
+        "p02-090-08",
+        "p02-090-05",
+        "p02-090-07",
+        "p02-069-06",
+        "p02-090-04",
+        "p02-069-00"
+      ],
+      "oov_flags": [
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        false,
+        false,
+        false,
+        true
+      ],
+      "all": {
+        "cer": 0.11320754716981132,
+        "wid_dist": 0.005203225893846586,
+        "hwd": 0.8804248508169429,
+        "n_lines": 5,
+        "hyps": [
+          "lilyous remonsteated they wand to be",
+          "sitting jut inside having cotfee",
+          "come and vin us and being youe",
+          "tonight so come and join us itf you",
+          "feld weelched beyound woeads"
+        ]
+      },
+      "oov": {
+        "cer": 0.07142857142857142,
+        "wid_dist": 0.008371585136504711,
+        "hwd": 1.1789565868538214,
+        "n_lines": 3,
+        "hyps": [
+          "sitting jut inside having cotfee",
+          "come and vin us and being youe",
+          "tonight so come and join us itf you"
+        ]
+      }
+    }
+  ],
+  "coverage": null,
+  "note": "real row = half of each writer's held-out real lines scored against the other half"
+}

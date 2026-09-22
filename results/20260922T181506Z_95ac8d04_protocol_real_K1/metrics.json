@@ -1,0 +1,1213 @@
+{
+  "run_id": "20260922T181506Z_95ac8d04_protocol_real_K1",
+  "git": {
+    "sha": "95ac8d04",
+    "dirty": false,
+    "branch": "master"
+  },
+  "split": "test",
+  "subset": "20 of 161 test writers (seed 1337)",
+  "cpu_reduced": true,
+  "backend": "real",
+  "K": 1,
+  "protocol": {
+    "split": "test",
+    "n_writers": 20,
+    "targets_per_writer": 10,
+    "ks": [
+      1,
+      5
+    ],
+    "seed": 1337
+  },
+  "crnn_run": "crnn_20260922T003942Z_d1f87b49_cpu_r1",
+  "writer_id": {
+    "name": "writer_id:writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "is_stub": false,
+    "run_id": "writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "checkpoint": "best.pt",
+    "test_top1": 0.7319291527046433,
+    "test_map": 0.5650027956358793,
+    "test_chance_top1": 0.011032823619246703,
+    "min_usable_top1": 0.6,
+    "usable": true
+  },
+  "aggregate": {
+    "n_writers": 20,
+    "all_cer": 0.10383522325007541,
+    "all_wid_dist": 0.015816162211780022,
+    "all_hwd": 0.7707518994575413,
+    "all_n_writers": 20,
+    "all_n_lines": 100,
+    "oov_cer": 0.10383522325007541,
+    "oov_wid_dist": 0.015816162211780022,
+    "oov_hwd": 0.7707518994575413,
+    "oov_n_writers": 20,
+    "oov_n_lines": 100,
+    "n_failed_generations": 0
+  },
+  "writers": [
+    {
+      "writer": "172",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "c04-165-06"
+      ],
+      "target_ids": [
+        "c04-165-08",
+        "c04-165-07",
+        "c04-165-03",
+        "c04-165-02",
+        "c04-165-01",
+        "c04-170-00",
+        "c04-170-03",
+        "c04-170-01",
+        "c04-165-04",
+        "c04-165-05"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.03398058252427184,
+        "wid_dist": 0.022661291633797376,
+        "hwd": 1.0331837509210902,
+        "n_lines": 5,
+        "hyps": [
+          "to the european common uarket",
+          "scenes ranging fron pubs the eton wall game",
+          "of an tmerican tv veporter eric sevareid sand",
+          "strike it showed britain today through the eyes",
+          "guest programmes because of an electricians"
+        ]
+      },
+      "oov": {
+        "cer": 0.03398058252427184,
+        "wid_dist": 0.022661291633797376,
+        "hwd": 1.0331837509210902,
+        "n_lines": 5,
+        "hyps": [
+          "to the european common uarket",
+          "scenes ranging fron pubs the eton wall game",
+          "of an tmerican tv veporter eric sevareid sand",
+          "strike it showed britain today through the eyes",
+          "guest programmes because of an electricians"
+        ]
+      }
+    },
+    {
+      "writer": "173",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "c06-011-05"
+      ],
+      "target_ids": [
+        "c06-011-06",
+        "d06-063-03",
+        "d06-063-10",
+        "d06-008-00",
+        "d06-008-03",
+        "d06-008-08",
+        "c06-011-01",
+        "c06-011-03",
+        "c06-011-00",
+        "c06-011-08"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.1507537688442211,
+        "wid_dist": 0.0016388181390453171,
+        "hwd": 0.635781398870244,
+        "n_lines": 5,
+        "hyps": [
+          "has nug a cople of ties calls frou",
+          "to live a day at a fiiue gan the who",
+          "be baocnins at the ather end ok enodand",
+          "to ridicule thene only purhes thems farther",
+          "the reeds of any amount of trouke are vown"
+        ]
+      },
+      "oov": {
+        "cer": 0.1507537688442211,
+        "wid_dist": 0.0016388181390453171,
+        "hwd": 0.635781398870244,
+        "n_lines": 5,
+        "hyps": [
+          "has nug a cople of ties calls frou",
+          "to live a day at a fiiue gan the who",
+          "be baocnins at the ather end ok enodand",
+          "to ridicule thene only purhes thems farther",
+          "the reeds of any amount of trouke are vown"
+        ]
+      }
+    },
+    {
+      "writer": "179",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "d01-085-05"
+      ],
+      "target_ids": [
+        "d01-080-01",
+        "d01-085-01",
+        "d01-085-06",
+        "d01-085-04",
+        "d01-080-00",
+        "d01-085-02",
+        "d01-080-07",
+        "d01-080-03",
+        "d01-080-02",
+        "d01-080-05"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.06779661016949153,
+        "wid_dist": 0.01053688077540016,
+        "hwd": 0.8048359706348959,
+        "n_lines": 5,
+        "hyps": [
+          "were awso used dts somretimes served in place of the",
+          "the original ot the gospel would be unmoreed the",
+          "aboat one third of a pag of souters print",
+          "colmmuns this is the invariable practice of oncient",
+          "the bor was thre commonest morleing but others"
+        ]
+      },
+      "oov": {
+        "cer": 0.06779661016949153,
+        "wid_dist": 0.01053688077540016,
+        "hwd": 0.8048359706348959,
+        "n_lines": 5,
+        "hyps": [
+          "were awso used dts somretimes served in place of the",
+          "the original ot the gospel would be unmoreed the",
+          "aboat one third of a pag of souters print",
+          "colmmuns this is the invariable practice of oncient",
+          "the bor was thre commonest morleing but others"
+        ]
+      }
+    },
+    {
+      "writer": "190",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "d04-062-00"
+      ],
+      "target_ids": [
+        "d04-058-04",
+        "d04-058-03",
+        "d04-058-01",
+        "d04-062-04",
+        "d04-058-06",
+        "d04-062-01",
+        "d04-062-03",
+        "d04-058-02",
+        "d04-062-02",
+        "d04-058-00"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.08786610878661087,
+        "wid_dist": 0.01749538316404997,
+        "hwd": 0.6587126164593337,
+        "n_lines": 5,
+        "hyps": [
+          "shut up the h eavens that there is no tain aud that the land",
+          "an d then the tords wuath be tindled agoinst you and he",
+          "two nasters and you worsip selfinterest isolating",
+          "adds and in youer sae seatching youre soul",
+          "good land tunich the lored tgiveth you"
+        ]
+      },
+      "oov": {
+        "cer": 0.08786610878661087,
+        "wid_dist": 0.01749538316404997,
+        "hwd": 0.6587126164593337,
+        "n_lines": 5,
+        "hyps": [
+          "shut up the h eavens that there is no tain aud that the land",
+          "an d then the tords wuath be tindled agoinst you and he",
+          "two nasters and you worsip selfinterest isolating",
+          "adds and in youer sae seatching youre soul",
+          "good land tunich the lored tgiveth you"
+        ]
+      }
+    },
+    {
+      "writer": "196",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "d04-111-04"
+      ],
+      "target_ids": [
+        "d04-111-00",
+        "d04-111-05",
+        "d04-111-07",
+        "d04-111-11",
+        "d04-111-06",
+        "d04-111-08",
+        "d04-111-03",
+        "d04-111-09",
+        "d04-111-02",
+        "d04-111-10"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.12777777777777777,
+        "wid_dist": 0.005612848434755735,
+        "hwd": 0.6081836689824437,
+        "n_lines": 5,
+        "hyps": [
+          "i matro representr peshat imlorour",
+          "is ralled the heast of makos the",
+          "erinciele and this gives us a mink chenes",
+          "fne richness of the haw and that we should",
+          "biteerherbs reeresent the spiritual"
+        ]
+      },
+      "oov": {
+        "cer": 0.12777777777777777,
+        "wid_dist": 0.005612848434755735,
+        "hwd": 0.6081836689824437,
+        "n_lines": 5,
+        "hyps": [
+          "i matro representr peshat imlorour",
+          "is ralled the heast of makos the",
+          "erinciele and this gives us a mink chenes",
+          "fne richness of the haw and that we should",
+          "biteerherbs reeresent the spiritual"
+        ]
+      }
+    },
+    {
+      "writer": "283",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "f04-083-05"
+      ],
+      "target_ids": [
+        "f04-083-00",
+        "f04-087-03",
+        "f04-083-02",
+        "f04-083-04",
+        "f04-083-06",
+        "f04-083-09",
+        "f04-087-02",
+        "f04-087-04",
+        "f04-087-01",
+        "f04-083-01"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.09803921568627451,
+        "wid_dist": 0.0025920339559150074,
+        "hwd": 0.5795276160622481,
+        "n_lines": 5,
+        "hyps": [
+          "so the body of this saall sirl with the blue eyes aud",
+          "done for lour according to miss houe she nad not beer",
+          "rexlained a rystery until later the sollowing day",
+          "circulated aud a uo robert noney cane forward to",
+          "the birl wno was derscribed as being dialways brignt aud"
+        ]
+      },
+      "oov": {
+        "cer": 0.09803921568627451,
+        "wid_dist": 0.0025920339559150074,
+        "hwd": 0.5795276160622481,
+        "n_lines": 5,
+        "hyps": [
+          "so the body of this saall sirl with the blue eyes aud",
+          "done for lour according to miss houe she nad not beer",
+          "rexlained a rystery until later the sollowing day",
+          "circulated aud a uo robert noney cane forward to",
+          "the birl wno was derscribed as being dialways brignt aud"
+        ]
+      }
+    },
+    {
+      "writer": "286",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "f07-002-00"
+      ],
+      "target_ids": [
+        "f07-009-08",
+        "f07-002-06",
+        "f07-006-06",
+        "f07-002-04",
+        "f07-000b-01",
+        "f07-009-09",
+        "f07-002-02",
+        "f07-009-07",
+        "f07-009-04",
+        "f07-002-03"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.06756756756756757,
+        "wid_dist": 0.008767072717137503,
+        "hwd": 0.7459460033060793,
+        "n_lines": 5,
+        "hyps": [
+          "day the desire to share pomething more intimate",
+          "hold frrth froin a spear the welcome gotbet of",
+          "gleam and gleltter of our latterday restenronk",
+          "mang centuries ago in some caoe or hilly",
+          "told us that there was nothing an eaglishman"
+        ]
+      },
+      "oov": {
+        "cer": 0.06756756756756757,
+        "wid_dist": 0.008767072717137503,
+        "hwd": 0.7459460033060793,
+        "n_lines": 5,
+        "hyps": [
+          "day the desire to share pomething more intimate",
+          "hold frrth froin a spear the welcome gotbet of",
+          "gleam and gleltter of our latterday restenronk",
+          "mang centuries ago in some caoe or hilly",
+          "told us that there was nothing an eaglishman"
+        ]
+      }
+    },
+    {
+      "writer": "292",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "f07-088a-07"
+      ],
+      "target_ids": [
+        "f07-081a-01",
+        "f07-081a-00",
+        "f07-084a-00",
+        "f07-076a-09",
+        "f07-081a-08",
+        "f07-092a-04",
+        "f07-092a-08",
+        "f07-088a-04",
+        "f07-092a-00",
+        "f07-076a-04"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.011695906432748537,
+        "wid_dist": 0.002245738114804663,
+        "hwd": 0.6835386875220301,
+        "n_lines": 5,
+        "hyps": [
+          "of good food and the gusto which they",
+          "the french have an inborn appreciation",
+          "the potaufen is as much a national",
+          "science of cookery however is",
+          "writ ers music composers and other"
+        ]
+      },
+      "oov": {
+        "cer": 0.011695906432748537,
+        "wid_dist": 0.002245738114804663,
+        "hwd": 0.6835386875220301,
+        "n_lines": 5,
+        "hyps": [
+          "of good food and the gusto which they",
+          "the french have an inborn appreciation",
+          "the potaufen is as much a national",
+          "science of cookery however is",
+          "writ ers music composers and other"
+        ]
+      }
+    },
+    {
+      "writer": "315",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "n02-109-07"
+      ],
+      "target_ids": [
+        "n02-104-06",
+        "r03-053-04",
+        "n02-120-05",
+        "n02-114-03",
+        "n02-109-03",
+        "n02-120-07",
+        "n02-114-04",
+        "r03-053-01",
+        "n02-127-03",
+        "n02-104-01"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.24242424242424243,
+        "wid_dist": 0.030376993226598925,
+        "hwd": 0.948915800963518,
+        "n_lines": 5,
+        "hyps": [
+          "time origimally anncengol sir fin would",
+          "jrest duslygrey buet uccoldy slimy even",
+          "wsal hey con bring offl rl cecluil trat",
+          "vour rnowlodge of oll fe offoairs of e",
+          "wdet harm could possibly lave come to fosnest"
+        ]
+      },
+      "oov": {
+        "cer": 0.24242424242424243,
+        "wid_dist": 0.030376993226598925,
+        "hwd": 0.948915800963518,
+        "n_lines": 5,
+        "hyps": [
+          "time origimally anncengol sir fin would",
+          "jrest duslygrey buet uccoldy slimy even",
+          "wsal hey con bring offl rl cecluil trat",
+          "vour rnowlodge of oll fe offoairs of e",
+          "wdet harm could possibly lave come to fosnest"
+        ]
+      }
+    },
+    {
+      "writer": "513",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "m01-121-02"
+      ],
+      "target_ids": [
+        "m01-104-07",
+        "m01-104-04",
+        "m01-121-03",
+        "m01-104-05",
+        "m01-121-05",
+        "m01-121-04",
+        "m01-104-02",
+        "m01-104-03",
+        "m01-104-00",
+        "m01-104-01"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.07389162561576355,
+        "wid_dist": 0.010989986686256947,
+        "hwd": 0.6298508706507037,
+        "n_lines": 5,
+        "hyps": [
+          "longer have any immunity",
+          "them out fust what these anderrs will be we dont",
+          "that they ue dan as a specimen demouska",
+          "kenow now because of prisn hypnosts we lave es",
+          "wonking out it occuvred to steve that this may"
+        ]
+      },
+      "oov": {
+        "cer": 0.07389162561576355,
+        "wid_dist": 0.010989986686256947,
+        "hwd": 0.6298508706507037,
+        "n_lines": 5,
+        "hyps": [
+          "longer have any immunity",
+          "them out fust what these anderrs will be we dont",
+          "that they ue dan as a specimen demouska",
+          "kenow now because of prisn hypnosts we lave es",
+          "wonking out it occuvred to steve that this may"
+        ]
+      }
+    },
+    {
+      "writer": "514",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "m01-110-03"
+      ],
+      "target_ids": [
+        "m01-131-04",
+        "m01-110-10",
+        "m01-110-11",
+        "m01-110-04",
+        "m01-110-01",
+        "m01-110-02",
+        "m01-110-05",
+        "m01-110-00",
+        "m01-131-00",
+        "m01-131-01"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.15555555555555556,
+        "wid_dist": 0.04570308784348798,
+        "hwd": 1.0789866251903686,
+        "n_lines": 5,
+        "hyps": [
+          "of their precence they just stared at him tuning",
+          "i havnt olene but who konours",
+          "wr may orm the nuclens arorend",
+          "prominence it usay be that we can",
+          "theios discover ow mantol indepansderce"
+        ]
+      },
+      "oov": {
+        "cer": 0.15555555555555556,
+        "wid_dist": 0.04570308784348798,
+        "hwd": 1.0789866251903686,
+        "n_lines": 5,
+        "hyps": [
+          "of their precence they just stared at him tuning",
+          "i havnt olene but who konours",
+          "wr may orm the nuclens arorend",
+          "prominence it usay be that we can",
+          "theios discover ow mantol indepansderce"
+        ]
+      }
+    },
+    {
+      "writer": "542",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "m03-114-07"
+      ],
+      "target_ids": [
+        "m03-110-09",
+        "m03-110-02",
+        "m03-114-00",
+        "m03-114-03",
+        "m03-110-08",
+        "m03-114-01",
+        "m03-110-04",
+        "m03-110-07",
+        "m03-110-06",
+        "m03-114-09"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.022099447513812154,
+        "wid_dist": 0.03253267416123529,
+        "hwd": 0.6767342642299091,
+        "n_lines": 5,
+        "hyps": [
+          "caine too and mr gilberto who would",
+          "myself but was it so i allowed myself",
+          "but all three were to the casual",
+          "thanghtfal but that was his habit indeed",
+          "to watc mr septimus more closely mrs"
+        ]
+      },
+      "oov": {
+        "cer": 0.022099447513812154,
+        "wid_dist": 0.03253267416123529,
+        "hwd": 0.6767342642299091,
+        "n_lines": 5,
+        "hyps": [
+          "caine too and mr gilberto who would",
+          "myself but was it so i allowed myself",
+          "but all three were to the casual",
+          "thanghtfal but that was his habit indeed",
+          "to watc mr septimus more closely mrs"
+        ]
+      }
+    },
+    {
+      "writer": "547",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "m04-131-05"
+      ],
+      "target_ids": [
+        "m04-131-04",
+        "m04-107-10",
+        "m04-138-06",
+        "m04-131-07",
+        "m04-138-08",
+        "m04-138-01",
+        "m04-107-06",
+        "m04-113-07",
+        "m04-123-05",
+        "m04-138-02"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.07194244604316546,
+        "wid_dist": 0.011963361127292793,
+        "hwd": 0.8665390714413848,
+        "n_lines": 5,
+        "hyps": [
+          "his eth mordyld thought of rai the",
+          "weepso",
+          "approaching fanter fanker a tearing",
+          "about a verse or two of cm rhondda",
+          "ina moment followed by a great"
+        ]
+      },
+      "oov": {
+        "cer": 0.07194244604316546,
+        "wid_dist": 0.011963361127292793,
+        "hwd": 0.8665390714413848,
+        "n_lines": 5,
+        "hyps": [
+          "his eth mordyld thought of rai the",
+          "weepso",
+          "approaching fanter fanker a tearing",
+          "about a verse or two of cm rhondda",
+          "ina moment followed by a great"
+        ]
+      }
+    },
+    {
+      "writer": "552",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "m06-076-05"
+      ],
+      "target_ids": [
+        "m06-091-04",
+        "m06-106-01",
+        "m06-106-05",
+        "m06-091-01",
+        "m06-083-06",
+        "m06-106-09",
+        "m06-067-02",
+        "m06-098-06",
+        "m06-048-04",
+        "m06-106-07"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.02145922746781116,
+        "wid_dist": 0.01837282724177902,
+        "hwd": 0.9394200325802334,
+        "n_lines": 5,
+        "hyps": [
+          "asked what else flor and lilyyo you arrive",
+          "for those negligilde event that seemed so large to",
+          "with their wings soon died away as the uonderful",
+          "before she can enjoy lilyyo and her companion",
+          "you will live anong us and enjoy your life free"
+        ]
+      },
+      "oov": {
+        "cer": 0.02145922746781116,
+        "wid_dist": 0.01837282724177902,
+        "hwd": 0.9394200325802334,
+        "n_lines": 5,
+        "hyps": [
+          "asked what else flor and lilyyo you arrive",
+          "for those negligilde event that seemed so large to",
+          "with their wings soon died away as the uonderful",
+          "before she can enjoy lilyyo and her companion",
+          "you will live anong us and enjoy your life free"
+        ]
+      }
+    },
+    {
+      "writer": "553",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "n01-009-05"
+      ],
+      "target_ids": [
+        "n01-000-02",
+        "n01-009-06",
+        "n01-009-04",
+        "n01-009-02",
+        "n01-000-03",
+        "n01-009-08",
+        "n01-000-01",
+        "n01-009-03",
+        "n01-000-04",
+        "n01-000-05"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.1459227467811159,
+        "wid_dist": 0.01389632970183563,
+        "hwd": 0.6620752722844718,
+        "n_lines": 5,
+        "hyps": [
+          "which must necesrarily be subordinaled to his",
+          "uneventfil yfe had he come across agire oo",
+          "arranging a supper pary then sure rang of",
+          "evening and s suale loode fowrard to marting yen",
+          "rareer man ne rolised thal ne was entrusting not oaly"
+        ]
+      },
+      "oov": {
+        "cer": 0.1459227467811159,
+        "wid_dist": 0.01389632970183563,
+        "hwd": 0.6620752722844718,
+        "n_lines": 5,
+        "hyps": [
+          "which must necesrarily be subordinaled to his",
+          "uneventfil yfe had he come across agire oo",
+          "arranging a supper pary then sure rang of",
+          "evening and s suale loode fowrard to marting yen",
+          "rareer man ne rolised thal ne was entrusting not oaly"
+        ]
+      }
+    },
+    {
+      "writer": "557",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "n01-052-05"
+      ],
+      "target_ids": [
+        "n01-052-02",
+        "n01-052-11",
+        "n01-052-12",
+        "n01-052-04",
+        "n01-052-08",
+        "n01-052-07",
+        "n01-052-09",
+        "n01-052-06",
+        "n01-052-10",
+        "n01-052-03"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.11467889908256881,
+        "wid_dist": 0.005576147301018297,
+        "hwd": 0.7564919205620417,
+        "n_lines": 5,
+        "hyps": [
+          "the was able to trace the couirse of the threy",
+          "of the jhurney fack to the place where every",
+          "indieation poited to eve being held",
+          "along which he had motored so despersitely",
+          "by special helicerter grom the horse guards"
+        ]
+      },
+      "oov": {
+        "cer": 0.11467889908256881,
+        "wid_dist": 0.005576147301018297,
+        "hwd": 0.7564919205620417,
+        "n_lines": 5,
+        "hyps": [
+          "the was able to trace the couirse of the threy",
+          "of the jhurney fack to the place where every",
+          "indieation poited to eve being held",
+          "along which he had motored so despersitely",
+          "by special helicerter grom the horse guards"
+        ]
+      }
+    },
+    {
+      "writer": "561",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "n02-028-05"
+      ],
+      "target_ids": [
+        "n02-049-03",
+        "n02-049-05",
+        "n02-028-04",
+        "n02-028-02",
+        "n02-049-04",
+        "n02-028-08",
+        "n02-049-01",
+        "n02-028-09",
+        "n02-028-03",
+        "n02-028-01"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.23766816143497757,
+        "wid_dist": 0.008413308405763043,
+        "hwd": 1.0915887042807813,
+        "n_lines": 5,
+        "hyps": [
+          "lok as though it wer sily chat yor aypeded of my",
+          "and hit puls down",
+          "pouited ord nateron the prijeet frerpone ho dedared",
+          "of his gresto but ficn remawed alof and when berpl",
+          "as thauge lidt care a hoot atad loting tuhet"
+        ]
+      },
+      "oov": {
+        "cer": 0.23766816143497757,
+        "wid_dist": 0.008413308405763043,
+        "hwd": 1.0915887042807813,
+        "n_lines": 5,
+        "hyps": [
+          "lok as though it wer sily chat yor aypeded of my",
+          "and hit puls down",
+          "pouited ord nateron the prijeet frerpone ho dedared",
+          "of his gresto but ficn remawed alof and when berpl",
+          "as thauge lidt care a hoot atad loting tuhet"
+        ]
+      }
+    },
+    {
+      "writer": "577",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "n03-103-09"
+      ],
+      "target_ids": [
+        "n03-103-06",
+        "n03-103-02",
+        "n03-103-07",
+        "n03-097-00",
+        "n03-103-05",
+        "n03-103-01",
+        "n03-103-08",
+        "n03-103-03",
+        "n03-097-01",
+        "n03-097-07"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.06707317073170732,
+        "wid_dist": 0.05663448178850239,
+        "hwd": 0.8008738479128783,
+        "n_lines": 5,
+        "hyps": [
+          "of wet camas bill cleared the",
+          "shoot the cralt in uudes the outes",
+          "corner of the pier by inches and",
+          "iy bod the jndge cried ont the boy",
+          "same time dopping the small sheet"
+        ]
+      },
+      "oov": {
+        "cer": 0.06707317073170732,
+        "wid_dist": 0.05663448178850239,
+        "hwd": 0.8008738479128783,
+        "n_lines": 5,
+        "hyps": [
+          "of wet camas bill cleared the",
+          "shoot the cralt in uudes the outes",
+          "corner of the pier by inches and",
+          "iy bod the jndge cried ont the boy",
+          "same time dopping the small sheet"
+        ]
+      }
+    },
+    {
+      "writer": "594",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "p02-008-06"
+      ],
+      "target_ids": [
+        "p02-008-03",
+        "p02-008-02",
+        "p02-008-05",
+        "p02-008-08",
+        "p02-008-10",
+        "p02-008-01",
+        "p02-008-04",
+        "p02-008-09",
+        "p02-008-00",
+        "p02-008-07"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.10204081632653061,
+        "wid_dist": 0.007951374793739197,
+        "hwd": 0.6430728944650759,
+        "n_lines": 5,
+        "hyps": [
+          "govin she boed left her sun",
+          "the excitement of meeting",
+          "went quiclly back to fetch them",
+          "he was writing somsethizng im his",
+          "of despair pay tew thhaet ofcouse"
+        ]
+      },
+      "oov": {
+        "cer": 0.10204081632653061,
+        "wid_dist": 0.007951374793739197,
+        "hwd": 0.6430728944650759,
+        "n_lines": 5,
+        "hyps": [
+          "govin she boed left her sun",
+          "the excitement of meeting",
+          "went quiclly back to fetch them",
+          "he was writing somsethizng im his",
+          "of despair pay tew thhaet ofcouse"
+        ]
+      }
+    },
+    {
+      "writer": "598",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "p02-069-02"
+      ],
+      "target_ids": [
+        "p02-090-01",
+        "p02-069-05",
+        "p02-090-08",
+        "p02-069-07",
+        "p02-069-06",
+        "p02-090-07",
+        "p02-069-09",
+        "p02-090-04",
+        "p02-069-00",
+        "p02-090-03"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "all": {
+        "cer": 0.17647058823529413,
+        "wid_dist": 0.0023626050231851936,
+        "hwd": 0.570778971831094,
+        "n_lines": 5,
+        "hyps": [
+          "as fay deew out a chaie and sat",
+          "lilyous remonsteated they wand to be",
+          "feld weelched beyound woeads",
+          "cate tiis or said they ace packed",
+          "llone ive booked a tablee at die"
+        ]
+      },
+      "oov": {
+        "cer": 0.17647058823529413,
+        "wid_dist": 0.0023626050231851936,
+        "hwd": 0.570778971831094,
+        "n_lines": 5,
+        "hyps": [
+          "as fay deew out a chaie and sat",
+          "lilyous remonsteated they wand to be",
+          "feld weelched beyound woeads",
+          "cate tiis or said they ace packed",
+          "llone ive booked a tablee at die"
+        ]
+      }
+    }
+  ],
+  "coverage": null,
+  "note": "real row = half of each writer's held-out real lines scored against the other half"
+}
