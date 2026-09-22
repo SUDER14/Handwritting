@@ -1,0 +1,25 @@
+{
+  "run_id": "writerid_20260921T180911Z_ed897d02_cpu_r1",
+  "best_epoch": 9,
+  "best_val": {
+    "top1": 0.8125,
+    "map": 0.6927647611637102
+  },
+  "epochs_cap": 10,
+  "epochs_run": 10,
+  "steps_per_epoch": 88,
+  "batch_size": 64,
+  "num_train_lines": 5612,
+  "test": {
+    "top1": 0.7319291527046433,
+    "map": 0.5650027956358793,
+    "chance_top1": 0.011032823619246703,
+    "n_queries": 2089,
+    "n_lines": 2798,
+    "n_writers": 160,
+    "exclude_same_form": true,
+    "split": "test",
+    "checkpoint": "best.pt",
+    "eval_mode": "window_mean"
+  }
+}

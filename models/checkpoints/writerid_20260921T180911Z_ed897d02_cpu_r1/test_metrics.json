@@ -1,0 +1,12 @@
+{
+  "top1": 0.7319291527046433,
+  "map": 0.5650027956358793,
+  "chance_top1": 0.011032823619246703,
+  "n_queries": 2089,
+  "n_lines": 2798,
+  "n_writers": 160,
+  "exclude_same_form": true,
+  "split": "test",
+  "checkpoint": "best.pt",
+  "eval_mode": "window_mean"
+}

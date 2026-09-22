@@ -1,0 +1,77 @@
+{
+  "kind": "writer_id",
+  "run_id": "writerid_20260921T180911Z_ed897d02_cpu_r1",
+  "git": {
+    "sha": "ed897d02",
+    "dirty": false,
+    "branch": "master"
+  },
+  "writer_id": {
+    "cache_dir": "data/processed/iam_writer_cache",
+    "input_height": 64,
+    "binarize": true,
+    "window_width": [
+      160,
+      256
+    ],
+    "model": {
+      "widths": [
+        32,
+        64,
+        128,
+        256
+      ],
+      "blocks": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "stem_stride": 2
+    },
+    "loss": {
+      "ntxent_weight": 1.0,
+      "temperature": 0.1
+    },
+    "train": {
+      "writers_per_batch": 16,
+      "crops_per_writer": 4,
+      "epochs": 10,
+      "early_stop_patience": 3,
+      "steps_per_epoch": null,
+      "lr": 0.002,
+      "weight_decay": 0.0001,
+      "seed": 1337,
+      "num_threads": 4
+    },
+    "augment": {
+      "rotation_deg": 1.0,
+      "scale": 0.05,
+      "translate_px": 3,
+      "elastic_prob": 0.5,
+      "elastic_alpha": 2.5,
+      "elastic_sigma": 6.0
+    },
+    "eval": {
+      "mode": "window_mean",
+      "window_width": 224,
+      "window_stride": 112,
+      "max_windows": 32,
+      "max_line_width": 2048,
+      "exclude_same_form": true,
+      "min_usable_top1": 0.6
+    },
+    "calibration": {
+      "n_crops": 200,
+      "seed": 1337
+    }
+  },
+  "split_seed": 1337,
+  "split_writer_fingerprints": {
+    "train": "16a4801642223b0e",
+    "val": "37236f2964443efb",
+    "test": "d8fb8c07d1fb44cc"
+  },
+  "num_train_writers": 282,
+  "note": "no pretrained weights; ImageNet initialisation was NOT compared"
+}

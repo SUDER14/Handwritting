@@ -1,0 +1,31 @@
+{
+  "run_id": "crnn_20260922T003942Z_d1f87b49_cpu_r1",
+  "best_epoch": 13,
+  "best_val_cer": 0.07008932163836806,
+  "epochs_cap": 15,
+  "epochs_run": 15,
+  "test": {
+    "cer": 0.10225009868853897,
+    "wer": 0.32724563644103877,
+    "n_lines": 2666,
+    "examples": [
+      [
+        "assuredness \" Bella Bella Marie \" ( Parlophone ) , a lively song that changes tempo mid-way .",
+        "assuredness \" Bella Bella Marie \" ( Parlophone ) , a lively song that changes tempo mid-way ."
+      ],
+      [
+        "I don't think he will storm the charts with this one , but it 's a good start .",
+        "I don't thinn he will storm the charts with this one , bat it's a good start ."
+      ],
+      [
+        "\" My September Love , \" the big David Whitfield hit of 1956 .",
+        "\"Hy Septerioer love \" , the big Dovid whitpield hit or 1955 ."
+      ]
+    ],
+    "split": "test",
+    "checkpoint": "best.pt",
+    "best_epoch": 13,
+    "skipped_wider_than": 1400,
+    "n_test_lines_total": 2798
+  }
+}
