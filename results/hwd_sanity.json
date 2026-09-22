@@ -1,0 +1,13 @@
+{
+  "pairs": 200,
+  "writers_used": 158,
+  "seed": 1337,
+  "frac_same_lt_diff": 1.0,
+  "hwd_same_mean": 0.7075294373880824,
+  "hwd_diff_mean": 3.0597354849794285,
+  "git": {
+    "sha": "eea1a874",
+    "dirty": true,
+    "branch": "master"
+  }
+}
