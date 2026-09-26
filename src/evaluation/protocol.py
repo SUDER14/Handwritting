@@ -18,6 +18,7 @@ Test-writer leakage: nothing here trains; the trained instruments were fitted on
 """
 from __future__ import annotations
 
+import gc
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -26,7 +27,10 @@ import numpy as np
 from src.evaluation.harness import letters_only, render_text_clean, truncate_text
 from src.evaluation.hwd_metric import hwd, set_mean
 from src.evaluation.text_metrics import levenshtein
+from src.utils.logging_setup import get_logger
 from src.writer_id.data import canonical_from_iam_gray
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -148,17 +152,28 @@ def run_writer(scorer: Scorer, backend: Backend | None, dataset, samples, K: int
                       if oov_idx else None)
         return out
     ref_objs = [Ref(dataset.read_native(index[r.sample_id]), r.transcription) for r in refs]
-    gens, ok = [], []
+    gens, ok, errors = [], [], []
     for t in texts:
-        try:
-            g = backend.generate(ref_objs, t) if t.strip() else None
-        except Exception:                                        # noqa: BLE001 -- a failed generation is counted
-            g = None
+        g = None
+        for attempt in range(2):
+            try:
+                g = backend.generate(ref_objs, t) if t.strip() else None
+                break
+            except MemoryError as e:                             # host out of RAM: infrastructure, retry once
+                errors.append(f"MemoryError(attempt {attempt + 1}): {e}")
+                logger.warning("writer %s K=%d: MemoryError generating %r (attempt %d)", writer, K, t[:30], attempt + 1)
+                gc.collect()
+            except Exception as e:                               # noqa: BLE001 -- a failed generation is counted
+                errors.append(f"{type(e).__name__}: {e}")
+                logger.warning("writer %s K=%d: generation failed for %r: %r", writer, K, t[:30], e)
+                break
         gens.append(g)
         ok.append(g is not None and np.any(np.asarray(g) < 128))
     out["n_failed"] = int(len(ok) - sum(ok))
+    out["gen_errors"] = errors
     keep = [i for i, o in enumerate(ok) if o]
     if len(keep) < 1:
+        logger.warning("writer %s K=%d: every generation failed (%s) -> writer skipped", writer, K, errors[:3])
         return None
     out["all"] = score_set(scorer, [gens[i] for i in keep], [texts[i] for i in keep], real, keys)
     oov = [i for i in keep if oov_flags[i]]

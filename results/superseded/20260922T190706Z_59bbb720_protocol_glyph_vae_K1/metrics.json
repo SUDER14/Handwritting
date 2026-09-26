@@ -1,0 +1,234 @@
+{
+  "run_id": "20260922T190706Z_59bbb720_protocol_glyph_vae_K1",
+  "git": {
+    "sha": "59bbb720",
+    "dirty": false,
+    "branch": "master"
+  },
+  "split": "test",
+  "subset": "20 of 161 test writers (seed 1337)",
+  "cpu_reduced": true,
+  "backend": "glyph_vae",
+  "K": 1,
+  "protocol": {
+    "split": "test",
+    "n_writers": 20,
+    "targets_per_writer": 10,
+    "ks": [
+      1,
+      5
+    ],
+    "seed": 1337
+  },
+  "crnn_run": "crnn_20260922T003942Z_d1f87b49_cpu_r1",
+  "writer_id": {
+    "name": "writer_id:writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "is_stub": false,
+    "run_id": "writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "checkpoint": "best.pt",
+    "test_top1": 0.7319291527046433,
+    "test_map": 0.5650027956358793,
+    "test_chance_top1": 0.011032823619246703,
+    "min_usable_top1": 0.6,
+    "usable": true
+  },
+  "aggregate": {
+    "n_writers": 1,
+    "all_cer": 0.8495297805642633,
+    "all_wid_dist": 0.5196288993661922,
+    "all_hwd": 5.102826873090267,
+    "all_n_writers": 1,
+    "all_n_lines": 10,
+    "oov_cer": 0.8495297805642633,
+    "oov_wid_dist": 0.5196288993661922,
+    "oov_hwd": 5.102826873090267,
+    "oov_n_writers": 1,
+    "oov_n_lines": 10,
+    "n_failed_generations": 0
+  },
+  "writers": [
+    {
+      "writer": "598",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "p02-069-02"
+      ],
+      "target_ids": [
+        "p02-090-01",
+        "p02-069-05",
+        "p02-090-08",
+        "p02-069-07",
+        "p02-069-06",
+        "p02-090-07",
+        "p02-069-09",
+        "p02-090-04",
+        "p02-069-00",
+        "p02-090-03"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "n_failed": 0,
+      "all": {
+        "cer": 0.8495297805642633,
+        "wid_dist": 0.5196288993661922,
+        "hwd": 5.102826873090267,
+        "n_lines": 10,
+        "hyps": [
+          "smplmas anp prs opmp",
+          "sxrpms nrarpecposlr",
+          "rarimakrarlor",
+          "respreveapoar ae",
+          "rar sr spit",
+          "seremmpreprrrobers",
+          "ourratperkeapass",
+          "mprtparr rroamrmararey",
+          "rrrrplr or rs wa",
+          "arsw prar srrpmaisabs"
+        ]
+      },
+      "oov": {
+        "cer": 0.8495297805642633,
+        "wid_dist": 0.5196288993661922,
+        "hwd": 5.102826873090267,
+        "n_lines": 10,
+        "hyps": [
+          "smplmas anp prs opmp",
+          "sxrpms nrarpecposlr",
+          "rarimakrarlor",
+          "respreveapoar ae",
+          "rar sr spit",
+          "seremmpreprrrobers",
+          "ourratperkeapass",
+          "mprtparr rroamrmararey",
+          "rrrrplr or rs wa",
+          "arsw prar srrpmaisabs"
+        ]
+      },
+      "gen_examples": [
+        [
+          "as gay drew out a chair and sat",
+          "smplmas anp prs opmp"
+        ],
+        [
+          "lilyan remonstrated they want to be",
+          "sxrpms nrarpecposlr"
+        ],
+        [
+          "felt wretched beyond words",
+          "rarimakrarlor"
+        ]
+      ]
+    }
+  ],
+  "coverage": {
+    "letters_in_references": 203,
+    "letters_absent": 62,
+    "fallback_rate": 0.2339622641509434,
+    "per_char": {
+      "a": {
+        "seen": 29,
+        "missing": 0
+      },
+      "b": {
+        "seen": 0,
+        "missing": 5
+      },
+      "c": {
+        "seen": 6,
+        "missing": 0
+      },
+      "d": {
+        "seen": 16,
+        "missing": 0
+      },
+      "e": {
+        "seen": 35,
+        "missing": 0
+      },
+      "f": {
+        "seen": 6,
+        "missing": 0
+      },
+      "g": {
+        "seen": 6,
+        "missing": 0
+      },
+      "h": {
+        "seen": 15,
+        "missing": 0
+      },
+      "i": {
+        "seen": 11,
+        "missing": 0
+      },
+      "k": {
+        "seen": 0,
+        "missing": 2
+      },
+      "l": {
+        "seen": 0,
+        "missing": 15
+      },
+      "m": {
+        "seen": 0,
+        "missing": 3
+      },
+      "n": {
+        "seen": 16,
+        "missing": 0
+      },
+      "o": {
+        "seen": 19,
+        "missing": 0
+      },
+      "p": {
+        "seen": 0,
+        "missing": 3
+      },
+      "r": {
+        "seen": 0,
+        "missing": 15
+      },
+      "s": {
+        "seen": 10,
+        "missing": 0
+      },
+      "t": {
+        "seen": 29,
+        "missing": 0
+      },
+      "u": {
+        "seen": 3,
+        "missing": 0
+      },
+      "v": {
+        "seen": 2,
+        "missing": 0
+      },
+      "w": {
+        "seen": 0,
+        "missing": 7
+      },
+      "y": {
+        "seen": 0,
+        "missing": 10
+      },
+      "z": {
+        "seen": 0,
+        "missing": 2
+      }
+    }
+  },
+  "note": "real row = half of each writer's held-out real lines scored against the other half"
+}

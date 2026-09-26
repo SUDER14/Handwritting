@@ -71,7 +71,9 @@ def run_protocol_cli(args) -> int:
     for name in args.backends:
         backend = None if name == "real" else _make_backend(name, cfg)
         for K in ks:
-            rows = []
+            if backend is not None:                       # fresh backend per K: per-K coverage counters (Task 2.4)
+                backend = _make_backend(name, cfg)
+            rows, skipped = [], []
             for w in writers:
                 try:
                     r = P.run_writer(scorer, backend, dataset, by_writer[w], K, pcfg, pc["seed"], w)
@@ -80,6 +82,8 @@ def run_protocol_cli(args) -> int:
                     r = None
                 if r is not None:
                     rows.append(r)
+                else:
+                    skipped.append(w)
                 logger.info("%s K=%d writer %s -> %s", name, K, w, "ok" if r else "skipped")
             if not rows:
                 print(f"{name} K={K}: no writer could be scored", file=sys.stderr)
@@ -90,7 +94,7 @@ def run_protocol_cli(args) -> int:
             out_dir.mkdir(parents=True, exist_ok=False)
             record = {"run_id": run_id, "git": git, "split": split, "subset": subset, "cpu_reduced": cpu_reduced,
                       "backend": name, "K": K, "protocol": pc, "crnn_run": crnn_dir.name,
-                      "writer_id": embedder.describe(), "aggregate": agg, "writers": rows,
+                      "writer_id": embedder.describe(), "aggregate": agg, "writers": rows, "skipped_writers": skipped,
                       "coverage": backend.coverage() if hasattr(backend, "coverage") else None,
                       "note": "real row = half of each writer's held-out real lines scored against the other half"}
             (out_dir / "metrics.json").write_text(json.dumps(record, indent=2, ensure_ascii=False, default=float) + "\n",

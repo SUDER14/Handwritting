@@ -74,3 +74,33 @@ def test_run_writer_real_row_and_backend_row_with_fake_instruments():
     assert fake["n_failed"] + fake["all"]["n_lines"] == fake["n_targets"]
     assert fake["n_failed"] == sum(t.startswith("liquor") for t in [ds.samples[i].transcription for i in range(len(ds.samples))
                                                                     if ds.samples[i].sample_id in fake["target_ids"]])
+
+
+def test_generation_exceptions_are_recorded_and_memoryerror_is_retried_once():
+    class DS:
+        samples = _samples()
+        def read_native(self, i):
+            img = np.full((64, 200), 255, np.uint8); img[20:40, 20:180] = 0
+            return img
+    class Scorer:
+        def read(self, grays): return ["x"] * len(grays)
+        def embed(self, g): return np.array([1.0, 0.0])
+        def hwd_entry(self, g, key=None): return (np.ones(4), 1)
+    class Flaky:
+        name = "flaky"
+        def __init__(self): self.calls = 0
+        def generate(self, refs, text):
+            self.calls += 1
+            if self.calls == 1:
+                raise MemoryError("transient")                        # retried -> succeeds
+            if text.startswith("liquor"):
+                raise ValueError("boom")                              # not retried -> counted failure
+            img = np.full((64, 100), 255, np.uint8); img[20:40, 10:90] = 0
+            return img
+    cfg = {"targets_per_writer": 4, "min_reference_letters": 12, "max_target_chars": 40}
+    ds, be = DS(), Flaky()
+    r = P.run_writer(Scorer(), be, ds, ds.samples, 2, cfg, 1, "007")
+    n_liquor = sum(ds.samples[i].transcription.startswith("liquor") for i in range(len(ds.samples))
+                   if ds.samples[i].sample_id in r["target_ids"])
+    assert r["n_failed"] == n_liquor
+    assert r["gen_errors"][0].startswith("MemoryError") and sum(e.startswith("ValueError") for e in r["gen_errors"]) == n_liquor
