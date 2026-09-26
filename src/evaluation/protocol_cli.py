@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import gc
 import json
 import sys
 from datetime import datetime, timezone
@@ -73,13 +74,23 @@ def run_protocol_cli(args) -> int:
         for K in ks:
             if backend is not None:                       # fresh backend per K: per-K coverage counters (Task 2.4)
                 backend = _make_backend(name, cfg)
-            rows, skipped = [], []
+            rows, skipped, writer_errors = [], [], {}
             for w in writers:
-                try:
-                    r = P.run_writer(scorer, backend, dataset, by_writer[w], K, pcfg, pc["seed"], w)
-                except Exception as e:               # noqa: BLE001 -- recorded, never silently dropped
-                    logger.warning("writer %s failed: %s", w, e)
-                    r = None
+                r = None
+                snap = ((backend.coverage_seen.copy(), backend.coverage_missing.copy())
+                        if hasattr(backend, "coverage_seen") else None)
+                for attempt in range(2):              # a host-OOM (not a code error) gets one retry for the writer
+                    if snap is not None:              # a failed attempt must not leave its counts in the coverage stat
+                        backend.coverage_seen, backend.coverage_missing = snap[0].copy(), snap[1].copy()
+                    try:
+                        r = P.run_writer(scorer, backend, dataset, by_writer[w], K, pcfg, pc["seed"], w)
+                        break
+                    except Exception as e:           # noqa: BLE001 -- recorded, never silently dropped
+                        logger.warning("writer %s failed (attempt %d): %r", w, attempt + 1, e)
+                        writer_errors.setdefault(w, []).append(f"{type(e).__name__}: {e}")
+                        if not P.is_out_of_memory(e):
+                            break
+                        gc.collect()
                 if r is not None:
                     rows.append(r)
                 else:
@@ -95,6 +106,7 @@ def run_protocol_cli(args) -> int:
             record = {"run_id": run_id, "git": git, "split": split, "subset": subset, "cpu_reduced": cpu_reduced,
                       "backend": name, "K": K, "protocol": pc, "crnn_run": crnn_dir.name,
                       "writer_id": embedder.describe(), "aggregate": agg, "writers": rows, "skipped_writers": skipped,
+                      "writer_errors": writer_errors,
                       "coverage": backend.coverage() if hasattr(backend, "coverage") else None,
                       "note": "real row = half of each writer's held-out real lines scored against the other half"}
             (out_dir / "metrics.json").write_text(json.dumps(record, indent=2, ensure_ascii=False, default=float) + "\n",

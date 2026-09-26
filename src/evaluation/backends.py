@@ -14,6 +14,8 @@ that is the Task 2.4 per-character coverage statistic.
 """
 from __future__ import annotations
 
+import copy
+import hashlib
 from collections import Counter
 
 import cv2
@@ -31,8 +33,16 @@ class _PipelineBackend:
         self.cfg = config
         self.coverage_seen: Counter = Counter()      # target letters found in the references
         self.coverage_missing: Counter = Counter()   # target letters absent from the references (generated/fallback)
+        self._cached: tuple | None = None            # (reference identity, analysis): refs are fixed per writer and K
 
     def _analysis(self, refs):
+        key = tuple((r.text, r.gray.shape, hashlib.blake2b(np.ascontiguousarray(r.gray).tobytes(), digest_size=16).digest())
+                    for r in refs)
+        if self._cached is None or self._cached[0] != key:
+            self._cached = (key, self._analyse(refs))
+        return copy.deepcopy(self._cached[1])        # generation must never see another target's mutations
+
+    def _analyse(self, refs):
         first, merged = None, {}
         for r in refs:
             bgr = cv2.cvtColor(r.gray, cv2.COLOR_GRAY2BGR) if r.gray.ndim == 2 else r.gray

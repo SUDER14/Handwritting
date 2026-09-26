@@ -103,4 +103,39 @@ def test_generation_exceptions_are_recorded_and_memoryerror_is_retried_once():
     n_liquor = sum(ds.samples[i].transcription.startswith("liquor") for i in range(len(ds.samples))
                    if ds.samples[i].sample_id in r["target_ids"])
     assert r["n_failed"] == n_liquor
-    assert r["gen_errors"][0].startswith("MemoryError") and sum(e.startswith("ValueError") for e in r["gen_errors"]) == n_liquor
+    assert r["gen_errors"][0].startswith("OutOfMemory[MemoryError]") and sum(e.startswith("ValueError") for e in r["gen_errors"]) == n_liquor
+
+
+def test_library_out_of_memory_errors_are_recognised_as_oom():
+    # the exact messages that skipped 15/20 writers in the 2026-09-27 Stage-2 rerun (torch CPU allocator, OpenCV)
+    torch_oom = RuntimeError("[enforce fail at alloc_cpu.cpp:117] data. DefaultCPUAllocator: not enough memory: "
+                             "you tried to allocate 7045120 bytes.")
+    cv_oom = Exception("OpenCV(5.0.0) alloc.cpp:73: error: (-4:Insufficient memory) Failed to allocate 6393600 bytes "
+                       "in function 'cv::OutOfMemoryError'")
+    assert P.is_out_of_memory(torch_oom) and P.is_out_of_memory(cv_oom) and P.is_out_of_memory(MemoryError())
+    assert not P.is_out_of_memory(ValueError("boom"))
+
+
+def test_oom_from_a_library_is_retried_once_not_counted_as_a_failed_generation():
+    class DS:
+        samples = _samples()
+        def read_native(self, i):
+            img = np.full((64, 200), 255, np.uint8); img[20:40, 20:180] = 0
+            return img
+    class Scorer:
+        def read(self, grays): return ["x"] * len(grays)
+        def embed(self, g): return np.array([1.0, 0.0])
+        def hwd_entry(self, g, key=None): return (np.ones(4), 1)
+    class CvFlaky:
+        name = "cvflaky"
+        def __init__(self): self.calls = 0
+        def generate(self, refs, text):
+            self.calls += 1
+            if self.calls == 1:
+                raise RuntimeError("(-4:Insufficient memory) Failed to allocate 100 bytes")
+            img = np.full((64, 100), 255, np.uint8); img[20:40, 10:90] = 0
+            return img
+    cfg = {"targets_per_writer": 4, "min_reference_letters": 12, "max_target_chars": 40}
+    ds = DS()
+    r = P.run_writer(Scorer(), CvFlaky(), ds, ds.samples, 2, cfg, 1, "007")
+    assert r["n_failed"] == 0 and len(r["gen_errors"]) == 1 and r["gen_errors"][0].startswith("OutOfMemory[RuntimeError]")

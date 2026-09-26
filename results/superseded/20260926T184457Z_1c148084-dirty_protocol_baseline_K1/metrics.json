@@ -1,0 +1,592 @@
+{
+  "run_id": "20260926T184457Z_1c148084-dirty_protocol_baseline_K1",
+  "git": {
+    "sha": "1c148084",
+    "dirty": true,
+    "branch": "master"
+  },
+  "split": "test",
+  "subset": "20 of 161 test writers (seed 1337)",
+  "cpu_reduced": true,
+  "backend": "baseline",
+  "K": 1,
+  "protocol": {
+    "split": "test",
+    "n_writers": 20,
+    "targets_per_writer": 10,
+    "ks": [
+      1,
+      5
+    ],
+    "seed": 1337
+  },
+  "crnn_run": "crnn_20260922T003942Z_d1f87b49_cpu_r1",
+  "writer_id": {
+    "name": "writer_id:writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "is_stub": false,
+    "run_id": "writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "checkpoint": "best.pt",
+    "test_top1": 0.7319291527046433,
+    "test_map": 0.5650027956358793,
+    "test_chance_top1": 0.011032823619246703,
+    "min_usable_top1": 0.6,
+    "usable": true
+  },
+  "aggregate": {
+    "n_writers": 5,
+    "all_cer": 0.7991113669176354,
+    "all_wid_dist": 0.7094470885733684,
+    "all_hwd": 3.5255905122440616,
+    "all_n_writers": 5,
+    "all_n_lines": 50,
+    "oov_cer": 0.7991113669176354,
+    "oov_wid_dist": 0.7094470885733684,
+    "oov_hwd": 3.5255905122440616,
+    "oov_n_writers": 5,
+    "oov_n_lines": 50,
+    "n_failed_generations": 0
+  },
+  "writers": [
+    {
+      "writer": "172",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "c04-165-06"
+      ],
+      "target_ids": [
+        "c04-165-08",
+        "c04-165-07",
+        "c04-165-03",
+        "c04-165-02",
+        "c04-165-01",
+        "c04-170-00",
+        "c04-170-03",
+        "c04-170-01",
+        "c04-165-04",
+        "c04-165-05"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.7676470588235295,
+        "wid_dist": 0.5754616317343542,
+        "hwd": 3.8982724851020083,
+        "n_lines": 10,
+        "hyps": [
+          "tad the crivediean erednnretn varine",
+          "leemeianilnnih firedh anit the c redn sacoces",
+          "resf an areitemean arextrediercilme",
+          "trlnhe len trhrednec iler alemnn ivesteas thrvedwi th",
+          "inet srivedyiarveticeante resf an",
+          "tthecoan th eecoamery ane acoan tencocolnivede",
+          "tha inw theiace reuf the redeein na tmveslnt",
+          "cermen lenvetn lens sat coef ved rexredics",
+          "iiln entth dcitredmacolnitmet arresdw ther",
+          "eenment inedth an f rhacoa s theecoaner ane acoan"
+        ]
+      },
+      "oov": {
+        "cer": 0.7676470588235295,
+        "wid_dist": 0.5754616317343542,
+        "hwd": 3.8982724851020083,
+        "n_lines": 10,
+        "hyps": [
+          "tad the crivediean erednnretn varine",
+          "leemeianilnnih firedh anit the c redn sacoces",
+          "resf an areitemean arextrediercilme",
+          "trlnhe len trhrednec iler alemnn ivesteas thrvedwi th",
+          "inet srivedyiarveticeante resf an",
+          "tthecoan th eecoamery ane acoan tencocolnivede",
+          "tha inw theiace reuf the redeein na tmveslnt",
+          "cermen lenvetn lens sat coef ved rexredics",
+          "iiln entth dcitredmacolnitmet arresdw ther",
+          "eenment inedth an f rhacoa s theecoaner ane acoan"
+        ]
+      },
+      "gen_examples": [
+        [
+          "to the european common market",
+          "tad the crivediean erednnretn varine"
+        ],
+        [
+          "scene ranging from pubs the eton wall",
+          "leemeianilnnih firedh anit the c redn sacoces"
+        ],
+        [
+          "of an american t v reporter eric",
+          "resf an areitemean arextrediercilme"
+        ]
+      ]
+    },
+    {
+      "writer": "173",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "c06-011-05"
+      ],
+      "target_ids": [
+        "c06-011-06",
+        "d06-063-03",
+        "d06-063-10",
+        "d06-008-00",
+        "d06-008-03",
+        "d06-008-08",
+        "c06-011-01",
+        "c06-011-03",
+        "c06-011-00",
+        "c06-011-08"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 1.0188679245283019,
+        "wid_dist": 0.8755865265683862,
+        "hwd": 3.5191034364603504,
+        "n_lines": 10,
+        "hyps": [
+          "arin the figtorn ligtit tool mavnnth fighim",
+          "to ligh ofr is to tool minn tho trn tighirn te trn ighe",
+          "in trrn of the tho tho tan tighitts trsn in tighit thein",
+          "to righ ofhol un to trin tigters frw tho trsimn",
+          "to trnwin ighit s in figtn to tighit tho lighit",
+          "ato to tigtithanto tr toob to tr trol iu an trn tighir",
+          "nonh tow ligh trn igtron olf wn ligthiol tomito",
+          "to tr torn liglrntho the i figtnto trol o r tighin of tns",
+          "ifigtewento af ligtin figts itigton al to w trn tighe",
+          "aighitt of the to tigtin figts wa t rigte trantto"
+        ]
+      },
+      "oov": {
+        "cer": 1.0188679245283019,
+        "wid_dist": 0.8755865265683862,
+        "hwd": 3.5191034364603504,
+        "n_lines": 10,
+        "hyps": [
+          "arin the figtorn ligtit tool mavnnth fighim",
+          "to ligh ofr is to tool minn tho trn tighirn te trn ighe",
+          "in trrn of the tho tho tan tighitts trsn in tighit thein",
+          "to righ ofhol un to trin tigters frw tho trsimn",
+          "to trnwin ighit s in figtn to tighit tho lighit",
+          "ato to tigtithanto tr toob to tr trol iu an trn tighir",
+          "nonh tow ligh trn igtron olf wn ligthiol tomito",
+          "to tr torn liglrntho the i figtnto trol o r tighin of tns",
+          "ifigtewento af ligtin figts itigton al to w trn tighe",
+          "aighitt of the to tigtin figts wa t rigte trantto"
+        ]
+      },
+      "gen_examples": [
+        [
+          "has rung a couple of times calls from",
+          "arin the figtorn ligtit tool mavnnth fighim"
+        ],
+        [
+          "to live a day at a time even those who",
+          "to ligh ofr is to tool minn tho trn tighirn te trn ighe"
+        ],
+        [
+          "be happening at the other end of england",
+          "in trrn of the tho tho tan tighitts trsn in tighit thein"
+        ]
+      ]
+    },
+    {
+      "writer": "179",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "d01-085-05"
+      ],
+      "target_ids": [
+        "d01-080-01",
+        "d01-085-01",
+        "d01-085-06",
+        "d01-085-04",
+        "d01-080-00",
+        "d01-085-02",
+        "d01-080-07",
+        "d01-080-03",
+        "d01-080-02",
+        "d01-080-05"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.8050847457627118,
+        "wid_dist": 0.7516310477468623,
+        "hwd": 3.7143428270119068,
+        "n_lines": 10,
+        "hyps": [
+          "uay choconay aoso ocomgoango agoty am",
+          "suy ananamen oo suy oroughweon hey",
+          "ctonrs congsten cod c vengcornd scnsgno",
+          "corumosuroo o suy eakenacnuyunccstey",
+          "suy hen weosuycorweongosmestany ws",
+          "conan cmch arn suy hcocugn megorge unassgm",
+          "suorssrtngsoo oa",
+          "roro meomay sowern cueney nasn",
+          "wen car sugycngccayomegneg ovecann so",
+          "suy aremaesm oues aa suy conan amen crsuy"
+        ]
+      },
+      "oov": {
+        "cer": 0.8050847457627118,
+        "wid_dist": 0.7516310477468623,
+        "hwd": 3.7143428270119068,
+        "n_lines": 10,
+        "hyps": [
+          "uay choconay aoso ocomgoango agoty am",
+          "suy ananamen oo suy oroughweon hey",
+          "ctonrs congsten cod c vengcornd scnsgno",
+          "corumosuroo o suy eakenacnuyunccstey",
+          "suy hen weosuycorweongosmestany ws",
+          "conan cmch arn suy hcocugn megorge unassgm",
+          "suorssrtngsoo oa",
+          "roro meomay sowern cueney nasn",
+          "wen car sugycngccayomegneg ovecann so",
+          "suy aremaesm oues aa suy conan amen crsuy"
+        ]
+      },
+      "gen_examples": [
+        [
+          "were also used dots sometimes served in",
+          "uay choconay aoso ocomgoango agoty am"
+        ],
+        [
+          "the original of the gospel would be",
+          "suy ananamen oo suy oroughweon hey"
+        ],
+        [
+          "about one third of a page of souters",
+          "ctonrs congsten cod c vengcornd scnsgno"
+        ]
+      ]
+    },
+    {
+      "writer": "190",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "d04-062-00"
+      ],
+      "target_ids": [
+        "d04-058-04",
+        "d04-058-03",
+        "d04-058-01",
+        "d04-062-04",
+        "d04-058-06",
+        "d04-062-01",
+        "d04-062-03",
+        "d04-058-02",
+        "d04-062-02",
+        "d04-058-00"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.8509485094850948,
+        "wid_dist": 0.6272536908441897,
+        "hwd": 3.2872511031157314,
+        "n_lines": 10,
+        "hyps": [
+          "iuto ip our unint s oussurwer tnite",
+          "ty ourt ourkcwyr ineron wor wanbyhng",
+          "sie mionwrty auediewerntnp ohtotntonwons",
+          "yurty tnt anctwreth inwvusnto cnctwe",
+          "oceyhtyrintnonourncwry atnivonauret",
+          "arctwounwwo ty ritnon mr auctwrrctn ty",
+          "ie ournmaniewy tnt auctwrunwosty tnt",
+          "arctwrnto ttyrwensvuvctythotnetrour orey",
+          "sur purtnrmto nantor w thes vrvehing",
+          "tyauet rrwrirminmet tyory ty anet"
+        ]
+      },
+      "oov": {
+        "cer": 0.8509485094850948,
+        "wid_dist": 0.6272536908441897,
+        "hwd": 3.2872511031157314,
+        "n_lines": 10,
+        "hyps": [
+          "iuto ip our unint s oussurwer tnite",
+          "ty ourt ourkcwyr ineron wor wanbyhng",
+          "sie mionwrty auediewerntnp ohtotntonwons",
+          "yurty tnt anctwreth inwvusnto cnctwe",
+          "oceyhtyrintnonourncwry atnivonauret",
+          "arctwounwwo ty ritnon mr auctwrrctn ty",
+          "ie ournmaniewy tnt auctwrunwosty tnt",
+          "arctwrnto ttyrwensvuvctythotnetrour orey",
+          "sur purtnrmto nantor w thes vrvehing",
+          "tyauet rrwrirminmet tyory ty anet"
+        ]
+      },
+      "gen_examples": [
+        [
+          "shut up the heavens that there is no",
+          "iuto ip our unint s oussurwer tnite"
+        ],
+        [
+          "and then the lords wrath be kindled",
+          "ty ourt ourkcwyr ineron wor wanbyhng"
+        ],
+        [
+          "two masters and you worship selfinterest",
+          "sie mionwrty auediewerntnp ohtotntonwons"
+        ]
+      ]
+    },
+    {
+      "writer": "196",
+      "K": 1,
+      "n_targets": 10,
+      "ref_ids": [
+        "d04-111-04"
+      ],
+      "target_ids": [
+        "d04-111-00",
+        "d04-111-05",
+        "d04-111-07",
+        "d04-111-11",
+        "d04-111-06",
+        "d04-111-08",
+        "d04-111-03",
+        "d04-111-09",
+        "d04-111-02",
+        "d04-111-10"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.5530085959885387,
+        "wid_dist": 0.7173025459730495,
+        "hwd": 3.2089827095303107,
+        "n_lines": 10,
+        "hyps": [
+          "eanztnt raceraevento elonet eafralwoa",
+          "io cheecenthe pelot fr eanetntothe",
+          "erainchiale nin thioineo wo rint raeeaen",
+          "the raichhneco r the ef eninthet re",
+          "witterahera ho raberaecent the opiraitunee",
+          "na eline ninechcheat eel the",
+          "thioio the alrainwocaztnt raeeraecento",
+          "fnetiohuraleinlinot wo the oletretera",
+          "merawon eelninhechnraceraeoentooewin",
+          "eninfhe oreet eantratera in nichn re hriein"
+        ]
+      },
+      "oov": {
+        "cer": 0.5530085959885387,
+        "wid_dist": 0.7173025459730495,
+        "hwd": 3.2089827095303107,
+        "n_lines": 10,
+        "hyps": [
+          "eanztnt raceraevento elonet eafralwoa",
+          "io cheecenthe pelot fr eanetntothe",
+          "erainchiale nin thioineo wo rint raeeaen",
+          "the raichhneco r the ef eninthet re",
+          "witterahera ho raberaecent the opiraitunee",
+          "na eline ninechcheat eel the",
+          "thioio the alrainwocaztnt raeeraecento",
+          "fnetiohuraleinlinot wo the oletretera",
+          "merawon eelninhechnraceraeoentooewin",
+          "eninfhe oreet eantratera in nichn re hriein"
+        ]
+      },
+      "gen_examples": [
+        [
+          "matzo represents peshat moraur",
+          "eanztnt raceraevento elonet eafralwoa"
+        ],
+        [
+          "is called the feast of matzos the",
+          "io cheecenthe pelot fr eanetntothe"
+        ],
+        [
+          "principle and this gives us a wink remez",
+          "erainchiale nin thioineo wo rint raeeaen"
+        ]
+      ]
+    }
+  ],
+  "skipped_writers": [
+    "283",
+    "286",
+    "292",
+    "315",
+    "513",
+    "514",
+    "542",
+    "547",
+    "552",
+    "553",
+    "557",
+    "561",
+    "577",
+    "594",
+    "598"
+  ],
+  "coverage": {
+    "letters_in_references": 1586,
+    "letters_absent": 212,
+    "fallback_rate": 0.11790878754171301,
+    "per_char": {
+      "a": {
+        "seen": 155,
+        "missing": 0
+      },
+      "b": {
+        "seen": 5,
+        "missing": 31
+      },
+      "c": {
+        "seen": 20,
+        "missing": 21
+      },
+      "d": {
+        "seen": 49,
+        "missing": 19
+      },
+      "e": {
+        "seen": 217,
+        "missing": 0
+      },
+      "f": {
+        "seen": 30,
+        "missing": 0
+      },
+      "g": {
+        "seen": 27,
+        "missing": 18
+      },
+      "h": {
+        "seen": 112,
+        "missing": 0
+      },
+      "i": {
+        "seen": 112,
+        "missing": 0
+      },
+      "j": {
+        "seen": 0,
+        "missing": 1
+      },
+      "k": {
+        "seen": 0,
+        "missing": 14
+      },
+      "l": {
+        "seen": 60,
+        "missing": 14
+      },
+      "m": {
+        "seen": 32,
+        "missing": 13
+      },
+      "n": {
+        "seen": 99,
+        "missing": 26
+      },
+      "o": {
+        "seen": 144,
+        "missing": 0
+      },
+      "p": {
+        "seen": 34,
+        "missing": 5
+      },
+      "r": {
+        "seen": 121,
+        "missing": 0
+      },
+      "s": {
+        "seen": 122,
+        "missing": 0
+      },
+      "t": {
+        "seen": 160,
+        "missing": 0
+      },
+      "u": {
+        "seen": 34,
+        "missing": 20
+      },
+      "v": {
+        "seen": 5,
+        "missing": 10
+      },
+      "w": {
+        "seen": 32,
+        "missing": 6
+      },
+      "y": {
+        "seen": 16,
+        "missing": 10
+      },
+      "z": {
+        "seen": 0,
+        "missing": 4
+      }
+    }
+  },
+  "note": "real row = half of each writer's held-out real lines scored against the other half"
+}

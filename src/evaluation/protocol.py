@@ -46,6 +46,15 @@ class Backend(Protocol):
         """K reference lines + target text -> uint8 gray line image, dark ink on light paper (None = failed)."""
 
 
+_OOM_MARKERS = ("insufficient memory", "not enough memory", "out of memory", "failed to allocate", "bad_alloc")
+
+
+def is_out_of_memory(e: BaseException) -> bool:
+    """Host-RAM exhaustion, whatever library raised it: Python MemoryError, torch's DefaultCPUAllocator RuntimeError,
+    OpenCV's cv2.error (-4: Insufficient memory). These are infrastructure failures, not generation failures."""
+    return isinstance(e, MemoryError) or any(m in str(e).lower() for m in _OOM_MARKERS)
+
+
 def choose_writers(dataset, n_writers: int | None, seed: int, min_lines: int) -> list[str]:
     """A deterministic subset of the split's writers that have enough lines for K refs + targets."""
     by: dict[str, int] = {}
@@ -159,11 +168,13 @@ def run_writer(scorer: Scorer, backend: Backend | None, dataset, samples, K: int
             try:
                 g = backend.generate(ref_objs, t) if t.strip() else None
                 break
-            except MemoryError as e:                             # host out of RAM: infrastructure, retry once
-                errors.append(f"MemoryError(attempt {attempt + 1}): {e}")
-                logger.warning("writer %s K=%d: MemoryError generating %r (attempt %d)", writer, K, t[:30], attempt + 1)
-                gc.collect()
             except Exception as e:                               # noqa: BLE001 -- a failed generation is counted
+                if is_out_of_memory(e):                          # host out of RAM: infrastructure, retry once
+                    errors.append(f"OutOfMemory[{type(e).__name__}](attempt {attempt + 1}): {e}")
+                    logger.warning("writer %s K=%d: out of memory generating %r (attempt %d): %r",
+                                   writer, K, t[:30], attempt + 1, e)
+                    gc.collect()
+                    continue
                 errors.append(f"{type(e).__name__}: {e}")
                 logger.warning("writer %s K=%d: generation failed for %r: %r", writer, K, t[:30], e)
                 break
