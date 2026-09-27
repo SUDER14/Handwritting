@@ -1,6 +1,6 @@
 """Stage 4 measurements (no GPU, no VATr).
 
-    python scripts/stage4_measure.py words  --allow-test   # 4.1: learn the word-gap threshold on TRAIN lines, check on
+    python scripts/stage4_measure.py words  --allow-test   # 4.1: learn the word-gap rule on TRAIN lines, check on
                                                            #      VAL, GATE 4 count check on 200 seeded TEST lines
     python scripts/stage4_measure.py deskew --allow-test   # 4.2: skew-estimator output distribution on the same 200 lines
 
@@ -23,7 +23,7 @@ import numpy as np
 from src.data.iam import load_iam_splits
 from src.evaluation.harness import git_info, letters_only
 from src.generator.vatr_backend import transcription_words
-from src.segmentation.words import column_gaps, despeckle, learn_gap_threshold, predicted_word_count
+from src.segmentation.words import despeckle, learn_gap_rule, predicted_word_count
 from src.utils.config import load_config, resolve_path
 from src.writer_id.data import LineStore
 
@@ -45,14 +45,14 @@ def words(cfg, datasets, store, seed) -> dict:
     tr = datasets["train"]
     tr_idx = sorted(rng.choice(len(tr), min(N_TRAIN_FIT, len(tr)), replace=False).tolist())
     train = [(ink, len(transcription_words(t))) for ink, t in _lines(store, tr, tr_idx)]
-    fit = learn_gap_threshold(train)
-    t = fit["threshold"]
+    fit = learn_gap_rule(train)
+    rule = fit["rule"]
 
     def score(ds, idx):
         rows = []
         for i, (ink, text) in zip(idx, _lines(store, ds, idx)):
             n_words, n_tokens = len(transcription_words(text)), len(text.split())
-            p = predicted_word_count(ink, t)
+            p = predicted_word_count(ink, rule)
             rows.append({"id": ds.samples[i].sample_id, "pred": p, "words": n_words, "tokens": n_tokens})
         w1 = float(np.mean([abs(r["pred"] - r["words"]) <= 1 for r in rows]))
         ex = float(np.mean([r["pred"] == r["words"] for r in rows]))
@@ -65,7 +65,7 @@ def words(cfg, datasets, store, seed) -> dict:
     va = datasets["val"]
     val = score(va, list(range(len(va))))
     test = score(datasets["test"], test_lines(datasets, seed))
-    return {"threshold_px_at_h64": t, "fit": {k: v for k, v in fit.items() if k != "curve"}, "fit_curve": fit["curve"],
+    return {"rule": rule, "fit": fit,
             "val": {k: v for k, v in val.items() if k != "rows"},
             "test200": {k: v for k, v in test.items() if k != "rows"}, "test200_rows": test["rows"],
             "gate4_word_count_within1_ge_0.80": test["within1"] >= 0.80}
@@ -114,7 +114,7 @@ def main() -> int:
             store.ensure(datasets[n])
         res = {**head, **words(cfg, datasets, store, seed)}
         out = resolve_path("results/stage4_word_segmentation.json")
-        summary = {k: res[k] for k in ("threshold_px_at_h64", "fit", "val", "test200", "gate4_word_count_within1_ge_0.80")}
+        summary = {k: res[k] for k in ("rule", "fit", "val", "test200", "gate4_word_count_within1_ge_0.80")}
     else:
         res = {**head, **deskew(cfg, datasets, seed)}
         out = resolve_path("results/stage4_deskew.json")
