@@ -9,7 +9,7 @@ Procedure (nothing in third_party/VATr is edited):
   2. official HWD: HWDScore(height=32)(FolderDataset(Fake_test), FolderDataset(Real_test)).
 
 Runtime shims (logged in ROADMAP_STATE.md), needed only because this host has no CUDA / no extra downloads:
-  * --device cpu and torch.load(map_location="cpu");
+  * --device cpu and torch.load(map_location="cpu") on this host (--device cuda on Colab);
   * `wandb` stubbed (generate_fakes imports train.py, which imports wandb; logging only);
   * VATr builds an FID InceptionV3 in __init__ that generation never calls; its weights are a download outside the
     ROADMAP allow-list, so it is replaced by an empty module;
@@ -34,7 +34,7 @@ HWD_REPO = ROOT / "third_party" / "HWD"
 PUBLISHED_HWD = 0.828
 
 
-def generate(out_dir: Path, batch_size: int) -> None:
+def generate(out_dir: Path, batch_size: int, device: str) -> None:
     import os
 
     import torch
@@ -55,7 +55,7 @@ def generate(out_dir: Path, batch_size: int) -> None:
     inc.InceptionV3 = _NoInception
 
     _load = torch.load
-    torch.load = lambda f, *a, **k: _load(f, *a, **{"map_location": "cpu", "weights_only": False, **k})
+    torch.load = lambda f, *a, **k: _load(f, *a, **{"map_location": device, "weights_only": False, **k})
 
     import models.model as mm
     orig = mm.VATr.save_images_for_fid_calculation
@@ -68,7 +68,7 @@ def generate(out_dir: Path, batch_size: int) -> None:
 
     mm.VATr.save_images_for_fid_calculation = test_only
     sys.argv = ["generate_fakes.py", "--checkpoint", "files/vatr.pth", "--output", str(out_dir),
-                "--device", "cpu", "--batch_size", str(batch_size)]
+                "--device", device, "--batch_size", str(batch_size)]
     runpy.run_path(str(VATR / "generate_fakes.py"), run_name="__main__")
 
 
@@ -89,12 +89,13 @@ def main() -> int:
     ap.add_argument("--out", default=str(ROOT / "data" / "processed" / "vatr_repro"))
     ap.add_argument("--batch_size", type=int, default=8)
     ap.add_argument("--stage", choices=["all", "generate", "score"], default="all")
+    ap.add_argument("--device", default="cpu", help="cpu (this host) | cuda (Colab)")
     args = ap.parse_args()
     out = Path(args.out)
     img_dir = out / "vatr"                                  # generate_fakes appends the checkpoint stem
     t0 = time.time()
     if args.stage in ("all", "generate"):
-        generate(out, args.batch_size)
+        generate(out, args.batch_size, args.device)
     if args.stage in ("all", "score"):
         from src.evaluation.harness import git_info       # noqa: E402
         res = score(img_dir)
@@ -102,7 +103,7 @@ def main() -> int:
         rec = {"task": "3.2", "utc": datetime.now(timezone.utc).isoformat(), "git": git_info(),
                "published_hwd": PUBLISHED_HWD, "published_source": "Pippi et al., BMVC 2023 (HWD), Table 2, VATr, IAM test",
                **res, "rel_diff": rel, "within_10pct": rel <= 0.10, "images": str(img_dir),
-               "device": "cpu", "shims": ["cpu map_location", "wandb stub", "FID InceptionV3 stub (unused)",
+               "device": args.device, "shims": [f"{args.device} map_location", "wandb stub", "FID InceptionV3 stub (unused)",
                                           "train-split generation skipped (RNG draw differs)"],
                "wall_s": time.time() - t0}
         dest = ROOT / "results" / "vatr_reproduction.json"

@@ -176,3 +176,7 @@ crnn:
   max_line_width: 1400              # training/eval crops wider than this are skipped for speed (few lines, CPU budget)
   num_threads: 4
   seed: 1337
+
+vatr:                               # Stage 3 backend (src/generator/vatr_backend.py); official repo, unedited
+  root: "third_party/VATr"          # aimagelab/VATr @ 183501e (gitignored clone)
+  checkpoint: "files/vatr.pth"      # released checkpoint, relative to root
