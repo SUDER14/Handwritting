@@ -43,7 +43,7 @@ def run_protocol_cli(args) -> int:
         print("Refusing to evaluate on the test split without --allow-test.", file=sys.stderr)
         return 2
     from src.recognition.crnn import latest_crnn_run, load_crnn
-    crnn_dir = Path(ev["crnn_run"]) if ev.get("crnn_run") else latest_crnn_run()
+    crnn_dir = resolve_path(ev["crnn_run"]) if ev.get("crnn_run") else latest_crnn_run()
     if crnn_dir is None:
         print("No finished CRNN run (scripts/train_crnn.py) under models/checkpoints/.", file=sys.stderr)
         return 2

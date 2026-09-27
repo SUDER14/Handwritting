@@ -227,7 +227,12 @@ class VATrBackend:
         with _cwd(self.vatr_root):                 # VATr opens files/unifont.pickle etc. relative to its root
             model = gen.VATr(args)
             ck = torch.load(self.checkpoint, map_location=args.device, weights_only=False)
-            gen.load_checkpoint(model, ck)
+            state = ck["model"] if isinstance(ck, dict) and "model" in ck else ck
+            # the released checkpoint also carries the 564 FID-InceptionV3 tensors; the (stubbed, unused) inception
+            # has none. Everything else must match BY NAME, exactly (strict) -- stricter than VATr's own
+            # load_checkpoint, which pairs tensors by position.
+            state = {k: v for k, v in state.items() if not k.startswith("inception.")}
+            model.load_state_dict(state, strict=True)
         model.eval()
         self.model = model
         self.alphabet = set(args.alphabet)

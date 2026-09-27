@@ -105,8 +105,8 @@ evaluation:
   results_dir: "results"            # each run -> results/<utc-timestamp>_<git-sha>/metrics.json, plus results/index.csv
   writer_embedder: "trained"        # "trained" = the writer-ID ResNet (scripts/train_writer_id.py); "stub" = rule-based
                                     # PLACEHOLDER for smoke tests only. "trained" never falls back to the stub silently.
-  writer_id_run: null               # run dir under models/checkpoints/; null -> the newest writer-ID run
-  crnn_run: null                    # frozen CRNN legibility instrument (models/checkpoints/crnn_*); null -> newest finished run
+  writer_id_run: "models/checkpoints/writerid_20260921T180911Z_ed897d02_cpu_r1"   # PINNED (GATE 1 instrument); change only with a logged re-score of all rows
+  crnn_run: "models/checkpoints/crnn_20260922T003942Z_d1f87b49_cpu_r1"            # PINNED (GATE 1 instrument); null would mean newest-by-name wins
   protocol:                         # ROADMAP 1.4 protocol (scripts/evaluate.py --mode protocol), see src/evaluation/protocol.py
     split: "test"                   # evaluated on TEST writers only (needs --allow-test)
     n_writers: 20                   # fixed seeded subset of test writers (CPU budget; labelled "subset" in results)
