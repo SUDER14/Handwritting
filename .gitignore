@@ -30,3 +30,8 @@ logs/
 third_party/
 data/processed/hwd_cache/
 .stage_patches/
+
+# local scratch / IAM ascii metadata copies (licensed, never commit)
+a.py
+words_new.txt
+words.txt
