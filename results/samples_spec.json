@@ -1,0 +1,139 @@
+{
+  "task": "3.6",
+  "created_utc": "2026-09-27T20:00:20.644336+00:00",
+  "created_git": "51338a91",
+  "rule": "first 3 (sorted) writers of the protocol's seeded 20-writer test subset; K=1 protocol reference line; sample i = writer[i % 3] writes texts[i]; real backend: writer[i % 3]'s (i // 3)-th held-out line",
+  "protocol_seed": 1337,
+  "K": 1,
+  "writers": [
+    "172",
+    "173",
+    "179"
+  ],
+  "per_writer": {
+    "172": {
+      "ref_ids": [
+        "c04-165-06"
+      ],
+      "ref_texts": [
+        "The film covered a wide aspect of the British"
+      ],
+      "heldout_ids": [
+        "c04-165-08",
+        "c04-165-07",
+        "c04-165-03",
+        "c04-165-02",
+        "c04-165-01",
+        "c04-170-00",
+        "c04-170-03",
+        "c04-170-01",
+        "c04-165-04",
+        "c04-165-05"
+      ]
+    },
+    "173": {
+      "ref_ids": [
+        "c06-011-05"
+      ],
+      "ref_texts": [
+        "to fight off the frustration . The telephone"
+      ],
+      "heldout_ids": [
+        "c06-011-06",
+        "d06-063-03",
+        "d06-063-10",
+        "d06-008-00",
+        "d06-008-03",
+        "d06-008-08",
+        "c06-011-01",
+        "c06-011-03",
+        "c06-011-00",
+        "c06-011-08"
+      ]
+    },
+    "179": {
+      "ref_ids": [
+        "d01-085-05"
+      ],
+      "ref_texts": [
+        "manuscripts . A common size of column would hold"
+      ],
+      "heldout_ids": [
+        "d01-080-01",
+        "d01-085-01",
+        "d01-085-06",
+        "d01-085-04",
+        "d01-080-00",
+        "d01-085-02",
+        "d01-080-07",
+        "d01-080-03",
+        "d01-080-02",
+        "d01-080-05"
+      ]
+    }
+  },
+  "texts": [
+    "the quick brown fox jumps over the dog",
+    "pack my box with five dozen liquor jugs",
+    "a lazy zebra quietly vexed the judge",
+    "just keep walking toward the six hills",
+    "we quickly amazed the jovial boxers",
+    "sphinx of black quartz judge my vow",
+    "the wizard quickly jinxed the gnomes",
+    "a jury of six kept vexing the queen",
+    "five boxing wizards jump quickly now",
+    "my crazy uncle bought quite a few jets"
+  ],
+  "items": [
+    {
+      "i": 0,
+      "writer": "172",
+      "text": "the quick brown fox jumps over the dog"
+    },
+    {
+      "i": 1,
+      "writer": "173",
+      "text": "pack my box with five dozen liquor jugs"
+    },
+    {
+      "i": 2,
+      "writer": "179",
+      "text": "a lazy zebra quietly vexed the judge"
+    },
+    {
+      "i": 3,
+      "writer": "172",
+      "text": "just keep walking toward the six hills"
+    },
+    {
+      "i": 4,
+      "writer": "173",
+      "text": "we quickly amazed the jovial boxers"
+    },
+    {
+      "i": 5,
+      "writer": "179",
+      "text": "sphinx of black quartz judge my vow"
+    },
+    {
+      "i": 6,
+      "writer": "172",
+      "text": "the wizard quickly jinxed the gnomes"
+    },
+    {
+      "i": 7,
+      "writer": "173",
+      "text": "a jury of six kept vexing the queen"
+    },
+    {
+      "i": 8,
+      "writer": "179",
+      "text": "five boxing wizards jump quickly now"
+    },
+    {
+      "i": 9,
+      "writer": "172",
+      "text": "my crazy uncle bought quite a few jets"
+    }
+  ]
+}

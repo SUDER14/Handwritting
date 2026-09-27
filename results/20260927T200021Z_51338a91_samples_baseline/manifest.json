@@ -1,0 +1,110 @@
+{
+  "run_id": "20260927T200021Z_51338a91_samples_baseline",
+  "backend": "baseline",
+  "git": {
+    "sha": "51338a91",
+    "dirty": false,
+    "branch": "master"
+  },
+  "spec": "results/samples_spec.json",
+  "writers": [
+    "172",
+    "173",
+    "179"
+  ],
+  "K": 1,
+  "seed": 1337,
+  "items": [
+    {
+      "file": "00_172.png",
+      "writer": "172",
+      "text": "the quick brown fox jumps over the dog",
+      "ref_ids": [
+        "c04-165-06"
+      ],
+      "ok": true
+    },
+    {
+      "file": "01_173.png",
+      "writer": "173",
+      "text": "pack my box with five dozen liquor jugs",
+      "ref_ids": [
+        "c06-011-05"
+      ],
+      "ok": true
+    },
+    {
+      "file": "02_179.png",
+      "writer": "179",
+      "text": "a lazy zebra quietly vexed the judge",
+      "ref_ids": [
+        "d01-085-05"
+      ],
+      "ok": true
+    },
+    {
+      "file": "03_172.png",
+      "writer": "172",
+      "text": "just keep walking toward the six hills",
+      "ref_ids": [
+        "c04-165-06"
+      ],
+      "ok": true
+    },
+    {
+      "file": "04_173.png",
+      "writer": "173",
+      "text": "we quickly amazed the jovial boxers",
+      "ref_ids": [
+        "c06-011-05"
+      ],
+      "ok": true
+    },
+    {
+      "file": "05_179.png",
+      "writer": "179",
+      "text": "sphinx of black quartz judge my vow",
+      "ref_ids": [
+        "d01-085-05"
+      ],
+      "ok": true
+    },
+    {
+      "file": "06_172.png",
+      "writer": "172",
+      "text": "the wizard quickly jinxed the gnomes",
+      "ref_ids": [
+        "c04-165-06"
+      ],
+      "ok": true
+    },
+    {
+      "file": "07_173.png",
+      "writer": "173",
+      "text": "a jury of six kept vexing the queen",
+      "ref_ids": [
+        "c06-011-05"
+      ],
+      "ok": true
+    },
+    {
+      "file": "08_179.png",
+      "writer": "179",
+      "text": "five boxing wizards jump quickly now",
+      "ref_ids": [
+        "d01-085-05"
+      ],
+      "ok": true
+    },
+    {
+      "file": "09_172.png",
+      "writer": "172",
+      "text": "my crazy uncle bought quite a few jets",
+      "ref_ids": [
+        "c04-165-06"
+      ],
+      "ok": true
+    }
+  ],
+  "n_ok": 10
+}
