@@ -24,7 +24,6 @@ import json
 import runpy
 import sys
 import time
-import types
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -38,21 +37,10 @@ def generate(out_dir: Path, batch_size: int, device: str) -> None:
     import os
 
     import torch
-    import torch.nn as nn
 
-    sys.modules.setdefault("wandb", types.ModuleType("wandb"))
-    sys.path.insert(0, str(VATR))
+    from src.generator.vatr_backend import apply_runtime_shims   # wandb/FID/resnet18-init/Unifont-device shims
+    apply_runtime_shims(VATR, device)
     os.chdir(VATR)
-
-    import models.inception as inc
-
-    class _NoInception(nn.Module):
-        BLOCK_INDEX_BY_DIM = inc.InceptionV3.BLOCK_INDEX_BY_DIM
-
-        def __init__(self, *a, **k):
-            super().__init__()
-
-    inc.InceptionV3 = _NoInception
 
     _load = torch.load
     torch.load = lambda f, *a, **k: _load(f, *a, **{"map_location": device, "weights_only": False, **k})
@@ -104,6 +92,7 @@ def main() -> int:
                "published_hwd": PUBLISHED_HWD, "published_source": "Pippi et al., BMVC 2023 (HWD), Table 2, VATr, IAM test",
                **res, "rel_diff": rel, "within_10pct": rel <= 0.10, "images": str(img_dir),
                "device": args.device, "shims": [f"{args.device} map_location", "wandb stub", "FID InceptionV3 stub (unused)",
+                                          "Feat_Encoder resnet18 weights=None (overwritten by checkpoint)", "UnifontModule device default",
                                           "train-split generation skipped (RNG draw differs)"],
                "wall_s": time.time() - t0}
         dest = ROOT / "results" / "vatr_reproduction.json"

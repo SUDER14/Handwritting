@@ -148,25 +148,59 @@ def _cwd(path: Path):
         os.chdir(old)
 
 
-def _import_vatr(vatr_root: Path):
-    """Import VATr's generator module with the logged runtime shims; returns the module."""
-    import torch
+def apply_runtime_shims(vatr_root: Path, device: str) -> None:
+    """Runtime-only patches (nothing in third_party/VATr is edited), all logged in ROADMAP_STATE.md:
+      * `wandb` stubbed (imported by train.py; logging only);
+      * the FID InceptionV3 built in VATr.__init__ is replaced by an empty module (never used for generation; its
+        weights would be a download outside the ROADMAP allow-list);
+      * Feat_Encoder = torchvision resnet18(weights=ResNet18_Weights.DEFAULT) is built with weights=None: the released
+        checkpoint overwrites all its tensors (load_checkpoint asserts 241 keys), so the ImageNet init only costs an
+        un-allow-listed download;
+      * UnifontModule's hardcoded device='cuda' default follows `device` (CPU hosts; a no-op on CUDA).
+    """
     import torch.nn as nn
     sys.modules.setdefault("wandb", types.ModuleType("wandb"))
     if str(vatr_root) not in sys.path:
         sys.path.insert(0, str(vatr_root))
     with _cwd(vatr_root):
         import models.inception as inc
-
-        class _NoInception(nn.Module):            # FID network: built in VATr.__init__, never used for generation
-            BLOCK_INDEX_BY_DIM = inc.InceptionV3.BLOCK_INDEX_BY_DIM
-
-            def __init__(self, *a, **k):
-                super().__init__()
-
-        inc.InceptionV3 = _NoInception
         import models.model as mm
-        mm.InceptionV3 = _NoInception
+        import models.unifont_module as um
+
+        if not getattr(mm, "_shimmed", False):
+            class _NoInception(nn.Module):        # FID network: never used for generation
+                BLOCK_INDEX_BY_DIM = inc.InceptionV3.BLOCK_INDEX_BY_DIM
+
+                def __init__(self, *a, **k):
+                    super().__init__()
+
+            inc.InceptionV3 = _NoInception
+            mm.InceptionV3 = _NoInception
+            _resnet18 = mm.models.resnet18
+
+            class _Models:                        # model.py's `models` = torchvision.models; only resnet18 is overridden
+                def __getattr__(self, name):
+                    return getattr(mm.models_orig, name)
+
+                @staticmethod
+                def resnet18(*a, **k):
+                    k.pop("weights", None)
+                    k.pop("pretrained", None)
+                    return _resnet18(*a, weights=None, **k)
+
+            mm.models_orig = mm.models
+            mm.models = _Models()
+            mm._shimmed = True
+        d = list(um.UnifontModule.__init__.__defaults__)
+        d[0] = device                              # (device, input_type, linear)
+        um.UnifontModule.__init__.__defaults__ = tuple(d)
+
+
+def _import_vatr(vatr_root: Path, device: str):
+    """Import VATr's generator module with the runtime shims; returns (module, torch)."""
+    import torch
+    apply_runtime_shims(vatr_root, device)
+    with _cwd(vatr_root):
         import generator as gen
     return gen, torch
 
@@ -181,10 +215,12 @@ class VATrBackend:
         self.checkpoint = Path(checkpoint or (self.vatr_root / vc.get("checkpoint", "files/vatr.pth")))
         if not self.checkpoint.exists():
             raise FileNotFoundError(f"VATr checkpoint not found: {self.checkpoint} (see notebooks/colab_train.ipynb)")
-        gen, torch = _import_vatr(self.vatr_root)
+        import torch
+        device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        gen, torch = _import_vatr(self.vatr_root, device)
         self._torch = torch
         args = gen.FakeArgs()
-        args.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        args.device = device
         args.add_noise = False
         self.device = args.device
         torch.manual_seed(seed)
