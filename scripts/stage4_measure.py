@@ -72,8 +72,8 @@ def words(cfg, datasets, store, seed) -> dict:
 
 
 def deskew(cfg, datasets, seed) -> dict:
-    from src.preprocessing.pipeline import PreprocessingPipeline
-    pp = PreprocessingPipeline(cfg)
+    from src.preprocessing.pipeline import Preprocessor
+    pp = Preprocessor(cfg)
     ds = datasets["test"]
     rows = []
     for i in test_lines(datasets, seed):
