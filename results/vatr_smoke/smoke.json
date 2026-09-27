@@ -1,0 +1,27 @@
+{
+  "task": "3.3 smoke",
+  "utc": "2026-09-27T16:19:39.979021+00:00",
+  "git": {
+    "sha": "2edcb4bd",
+    "dirty": false,
+    "branch": "master"
+  },
+  "device": "cpu",
+  "checkpoint": "C:\\Users\\0561r\\OneDrive\\Desktop\\handwriting matching\\third_party\\VATr\\files\\vatr.pth",
+  "writer": "168",
+  "K": 1,
+  "reference_line": "c04-110-01",
+  "reference_text": "assuredness \" Bella Bella Marie \" ( Parlophone ) , a lively song that changes tempo mid-way .",
+  "n_transcription_words": 12,
+  "n_word_crops": 12,
+  "target_line": "c04-110-02",
+  "target_text": "I don't think he will storm the charts with this one , but it 's a good start .",
+  "generated_shape": [
+    32,
+    1264
+  ],
+  "has_ink_and_paper": true,
+  "load_s": 33.9,
+  "generate_s": 35.13,
+  "dropped_chars_not_in_vatr_alphabet": {}
+}
