@@ -25,6 +25,7 @@ def _l2(x: np.ndarray) -> np.ndarray:
 def embed_line(encoder, line: np.ndarray, eval_cfg: dict) -> np.ndarray:
     """One canonical line (uint8, ink high, H x W) -> unit-length embedding."""
     encoder.eval()
+    dev = next(encoder.parameters()).device
     line = np.asarray(line)
     h, w = line.shape
     if eval_cfg["mode"] == "full_line":
@@ -32,8 +33,8 @@ def embed_line(encoder, line: np.ndarray, eval_cfg: dict) -> np.ndarray:
         if w > cap:
             x0 = (w - cap) // 2
             line = line[:, x0:x0 + cap]
-        x = torch.from_numpy(line.astype(np.float32) / 255.0)[None, None]
-        return _l2(encoder(x).numpy()[0])
+        x = torch.from_numpy(line.astype(np.float32) / 255.0)[None, None].to(dev)
+        return _l2(encoder(x).cpu().numpy()[0])
 
     width, stride = eval_cfg["window_width"], eval_cfg["window_stride"]
     if w <= width:
@@ -48,8 +49,8 @@ def embed_line(encoder, line: np.ndarray, eval_cfg: dict) -> np.ndarray:
     wins = np.stack([line[:, s:s + width] for s in starts])
     ink = (wins > 127).mean(axis=(1, 2))
     keep = ink >= 0.004 if (ink >= 0.004).any() else np.ones(len(wins), bool)   # skip blank margins unless all blank
-    x = torch.from_numpy(wins[keep].astype(np.float32) / 255.0)[:, None]
-    return _l2(_l2(encoder(x).numpy()).mean(axis=0))
+    x = torch.from_numpy(wins[keep].astype(np.float32) / 255.0)[:, None].to(dev)
+    return _l2(_l2(encoder(x).cpu().numpy()).mean(axis=0))
 
 
 def embed_samples(encoder, store: LineStore, samples: list, eval_cfg: dict) -> np.ndarray:

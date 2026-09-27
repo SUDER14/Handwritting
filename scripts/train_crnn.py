@@ -55,7 +55,9 @@ def main() -> int:
     ap.add_argument("--run-name", default=None)
     ap.add_argument("--epochs", type=int, default=None)
     ap.add_argument("--checkpoint-root", default=None)
+    ap.add_argument("--device", default="auto", help="auto (cuda if available, else cpu) | cpu | cuda")
     args = ap.parse_args()
+    device = torch.device(("cuda" if torch.cuda.is_available() else "cpu") if args.device == "auto" else args.device)
 
     cfg = load_config()
     c = copy.deepcopy(cfg["crnn"])
@@ -83,8 +85,9 @@ def main() -> int:
     root = Path(args.checkpoint_root) if args.checkpoint_root else None
     run_id, run_dir = new_run_dir(git["sha"], git["dirty"], args.run_name, root, prefix="crnn")
     write_once(run_dir / "config.json", json.dumps({"kind": "crnn", "run_id": run_id, "git": git, "crnn": c,
-                                                    "charset": charset, "cuda": torch.cuda.is_available()}, indent=2) + "\n")
-    model = CRNN(len(charset), c["hidden"])
+                                                    "charset": charset, "cuda": torch.cuda.is_available(),
+                                                    "device": str(device)}, indent=2) + "\n")
+    model = CRNN(len(charset), c["hidden"]).to(device)
     logger.info("run %s | params %.2fM", run_id, sum(p.numel() for p in model.parameters()) / 1e6)
     steps = math.ceil(len(tr_x) / c["batch_size"])
     opt = torch.optim.AdamW(model.parameters(), lr=c["lr"], weight_decay=c["weight_decay"])
@@ -115,8 +118,9 @@ def main() -> int:
                 crops.append(cv2.resize(cr, (max(8, int(cr.shape[1] * f)), cr.shape[0]), interpolation=cv2.INTER_AREA))
             x, in_len = pad_batch(crops)
             tgt = [encode(tr_t[i], char_to_id) for i in idx]
-            logp = model(x)
-            loss = ctc(logp, torch.tensor([k for t in tgt for k in t]), in_len, torch.tensor([len(t) for t in tgt]))
+            logp = model(x.to(device))
+            loss = ctc(logp, torch.tensor([k for t in tgt for k in t], device=device), in_len.to(device),
+                       torch.tensor([len(t) for t in tgt], device=device))
             opt.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
@@ -141,14 +145,15 @@ def main() -> int:
     log_f.close()
 
     te_x, te_t = load_crops(store, datasets["test"], c["max_line_width"])
-    best = torch.load(run_dir / "best.pt", map_location="cpu", weights_only=False)
+    best = torch.load(run_dir / "best.pt", map_location=device, weights_only=False)
     model.load_state_dict(best["model_state_dict"])
     test = evaluate(model, charset, te_x, te_t)
     test.update({"split": "test", "checkpoint": "best.pt", "best_epoch": best_epoch,
                  "skipped_wider_than": c["max_line_width"], "n_test_lines_total": len(datasets["test"])})
     write_once(run_dir / "test_metrics.json", json.dumps(test, indent=2, ensure_ascii=False) + "\n")
     write_once(run_dir / "run.json", json.dumps({"run_id": run_id, "best_epoch": best_epoch, "best_val_cer": best_cer,
-                                                 "epochs_cap": c["epochs"], "epochs_run": epochs_run, "test": test},
+                                                 "epochs_cap": c["epochs"], "epochs_run": epochs_run, "device": str(device),
+                                                 "test": test},
                                                 indent=2, ensure_ascii=False) + "\n")
     print(f"TEST (real lines, unseen writers): CER {test['cer']:.4f} WER {test['wer']:.4f} on {test['n_lines']} lines")
     print(f"run directory: {run_dir}")

@@ -98,10 +98,11 @@ class Recognizer:
     def transcribe(self, crops: list[np.ndarray], batch_size: int = 16) -> list[str]:
         order = sorted(range(len(crops)), key=lambda i: crops[i].shape[1])
         out = [""] * len(crops)
+        dev = next(self.model.parameters()).device
         for s in range(0, len(order), batch_size):
             idx = order[s: s + batch_size]
             x, lengths = pad_batch([crops[i] for i in idx])
-            for i, text in zip(idx, greedy_decode(self.model(x), lengths, self.charset)):
+            for i, text in zip(idx, greedy_decode(self.model(x.to(dev)), lengths, self.charset)):
                 out[i] = text
         return out
 

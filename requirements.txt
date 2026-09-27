@@ -19,6 +19,11 @@ tqdm>=4.66
 
 # Evaluation
 scikit-learn>=1.8
+# official HWD (third_party/HWD, cloned separately) imports these
+torchmetrics>=1.4
+transformers>=4.40
+gudhi>=3.9
+msgpack>=1.0
 
 # Testing
 pytest>=8.0

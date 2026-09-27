@@ -74,7 +74,9 @@ def main() -> int:
     ap.add_argument("--splits-dir", default=None)
     ap.add_argument("--checkpoint-root", default=None, help="default: models/checkpoints")
     ap.add_argument("--skip-test", action="store_true", help="do not evaluate the test writers at the end")
+    ap.add_argument("--device", default="auto", help="auto (cuda if available, else cpu) | cpu | cuda")
     args = ap.parse_args()
+    device = torch.device(("cuda" if torch.cuda.is_available() else "cpu") if args.device == "auto" else args.device)
 
     cfg = load_config()
     wid = copy.deepcopy(cfg["writer_id"])
@@ -112,12 +114,13 @@ def main() -> int:
     write_once(run_dir / "config.json", json.dumps({
         "kind": "writer_id", "run_id": run_id, "git": git, "writer_id": wid, "split_seed": cfg["data"]["iam"]["split_seed"],
         "split_writer_fingerprints": fingerprint, "num_train_writers": len(train_writers),
+        "device": str(device), "cuda_device_name": torch.cuda.get_device_name(device) if device.type == "cuda" else None,
         "note": "no pretrained weights; ImageNet initialisation was NOT compared",
     }, indent=2) + "\n")
     logger.info("run %s -> %s", run_id, run_dir)
 
     m = wid["model"]
-    net = WriterIDNet(len(train_writers), m["widths"], m["blocks"], m["stem_stride"])
+    net = WriterIDNet(len(train_writers), m["widths"], m["blocks"], m["stem_stride"]).to(device)
     logger.info("model parameters: %.2fM", sum(p.numel() for p in net.parameters()) / 1e6)
     sampler = WriterBatchSampler(store, train_by_writer, writer_to_idx, tr["writers_per_batch"],
                                  tr["crops_per_writer"], wid["augment"], tr["seed"], forbidden_writers=test_ids)
@@ -144,8 +147,8 @@ def main() -> int:
         for _ in range(steps):
             width = int(rng.integers(lo // 8, hi // 8 + 1)) * 8
             x, y = sampler.sample(width)
-            x = torch.from_numpy(x.astype(np.float32) / 255.0)[:, None]
-            y = torch.from_numpy(y)
+            x = torch.from_numpy(x.astype(np.float32) / 255.0)[:, None].to(device)
+            y = torch.from_numpy(y).to(device)
             emb, logits = net(x)
             ce = F.cross_entropy(logits, y)
             nt = nt_xent_multi_positive(emb, y, temp)
@@ -180,13 +183,14 @@ def main() -> int:
     if not args.skip_test:
         store.ensure(datasets["test"])
         encoder, _ = load_encoder(run_dir)
+        encoder.to(device)
         test_metrics = evaluate_split(encoder, store, datasets["test"], wid)
         test_metrics.update({"split": "test", "checkpoint": best_checkpoint(run_dir).name, "eval_mode": wid["eval"]["mode"]})
         write_once(run_dir / "test_metrics.json", json.dumps(test_metrics, indent=2) + "\n")
     write_once(run_dir / "run.json", json.dumps({
         "run_id": run_id, "best_epoch": best_epoch, "best_val": {"top1": best[0], "map": best[1]},
         "epochs_cap": tr["epochs"], "epochs_run": epochs_run, "steps_per_epoch": steps, "batch_size": batch,
-        "num_train_lines": len(datasets["train"]), "test": test_metrics,
+        "num_train_lines": len(datasets["train"]), "device": str(device), "test": test_metrics,
     }, indent=2) + "\n")
 
     if test_metrics is not None:
