@@ -101,6 +101,11 @@ class Scorer:
     def embed(self, gray: np.ndarray) -> np.ndarray:
         return self.embedder.embed(self.crop(gray)).astype(np.float64)
 
+    def scorable(self, gray: np.ndarray) -> bool:
+        """Ink survives canonicalisation (Otsu + resize to `height`): what embed() requires. A generation with a few
+        faint/thin marks can pass the raw-pixel check yet vanish here; it is then a failed generation, not a lost writer."""
+        return bool(np.any(self.crop(gray) > 127))
+
     def hwd_entry(self, gray: np.ndarray, key: str | None = None):
         if key is not None and key in self.hwd_cache:
             return self.hwd_cache[key]
@@ -179,7 +184,8 @@ def run_writer(scorer: Scorer, backend: Backend | None, dataset, samples, K: int
                 logger.warning("writer %s K=%d: generation failed for %r: %r", writer, K, t[:30], e)
                 break
         gens.append(g)
-        ok.append(g is not None and np.any(np.asarray(g) < 128))
+        ok.append(g is not None and bool(np.any(np.asarray(g) < 128))
+                  and getattr(scorer, "scorable", lambda _g: True)(g))
     out["n_failed"] = int(len(ok) - sum(ok))
     out["gen_errors"] = errors
     keep = [i for i, o in enumerate(ok) if o]

@@ -139,3 +139,40 @@ def test_oom_from_a_library_is_retried_once_not_counted_as_a_failed_generation()
     ds = DS()
     r = P.run_writer(Scorer(), CvFlaky(), ds, ds.samples, 2, cfg, 1, "007")
     assert r["n_failed"] == 0 and len(r["gen_errors"]) == 1 and r["gen_errors"][0].startswith("OutOfMemory[RuntimeError]")
+
+
+def test_generation_whose_ink_vanishes_on_canonicalisation_is_a_failed_line_not_a_lost_writer():
+    # 2026-09-27 glyph_vae K=5 writer 547: one sparse generation passed the raw ink check, its 64-px canonical crop was
+    # blank, embed() raised and the whole writer was skipped. Real Scorer.crop + the real embed() blank-check are used.
+    class DS:
+        samples = _samples()
+        def read_native(self, i):
+            img = np.full((64, 200), 255, np.uint8); img[20:40, 20:180] = 0
+            return img
+    class Emb:
+        def embed(self, line):
+            if not np.any(np.asarray(line) > 127):
+                raise ValueError("blank image; cannot embed")
+            return np.array([1.0, 0.0])
+    class Rec:
+        def transcribe(self, crops): return ["x"] * len(crops)
+    class Feats:
+        def line(self, g): return (np.ones(4), 1)
+    class Sparse:
+        name = "sparse"
+        def generate(self, refs, text):
+            img = np.full((260, 1600), 255, np.uint8)
+            if text.startswith("liquor"):
+                img[100, 800] = 0                                    # one dark pixel: raw check passes, crop is blank
+            else:
+                img[80:180, 100:1500] = 0
+            return img
+    scorer = P.Scorer(Rec(), Emb(), Feats(), 64)
+    faint = np.full((260, 1600), 255, np.uint8); faint[100, 800] = 0
+    assert np.any(faint < 128) and not scorer.scorable(faint)
+    cfg = {"targets_per_writer": 4, "min_reference_letters": 12, "max_target_chars": 40}
+    ds = DS()
+    r = P.run_writer(scorer, Sparse(), ds, ds.samples, 2, cfg, 1, "007")
+    n_liquor = sum(ds.samples[i].transcription.startswith("liquor") for i in range(len(ds.samples))
+                   if ds.samples[i].sample_id in r["target_ids"])
+    assert n_liquor == 1 and r is not None and r["n_failed"] == 1 and r["all"]["n_lines"] == r["n_targets"] - 1

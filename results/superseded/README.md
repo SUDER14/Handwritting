@@ -14,3 +14,12 @@ the protocol process is flat at ~2.2-2.4 GB private (no per-call growth, K=5 pro
 Also: the MemoryError retry never fired because torch/OpenCV OOMs are not Python MemoryError. Fixed in the next
 commit (OOM classification + per-target and per-writer retry, coverage restored on retry, reference analysis cached
 per writer -- bit-identical metrics, ~3x faster) and rerun with nothing else heavy running. Log: protocol_stage2_r2.log.
+
+Superseded glyph_vae K=5 run 20260927T141745Z (code 5457f3b0, clean). NOT quoted anywhere. 19 of 20 writers: writer 547
+skipped with writer_errors ['ValueError: blank image; cannot embed']. Cause: run_writer counted a generation as OK if the
+RAW image had any pixel < 128, but the instruments score the canonical crop (Otsu + resize to 64 px); one sparse glyph_vae
+line (the VAE samples unseeded, so it does not reproduce: all 10 of 547's K=5 lines had ink in their crops when regenerated)
+lost all ink in that crop, the writer-ID embed() raised, and the exception discarded all of writer 547's lines. Fix:
+Scorer.scorable() = ink survives canonicalisation; such a line is now a counted failed generation (n_failed_generations)
+instead of a lost writer. Existing rows are unaffected (none raised, so every kept line already had ink in its crop).
+The K=1 run of the same invocation (20/20 writers, no errors) is kept. K=5 rerun on the fixed code.
