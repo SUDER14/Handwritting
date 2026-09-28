@@ -1,0 +1,1249 @@
+{
+  "task": "4.1",
+  "utc": "2026-09-28T02:20:31.962044+00:00",
+  "git": {
+    "sha": "4077940c",
+    "dirty": false,
+    "branch": "master"
+  },
+  "seed": 1337,
+  "rule": {
+    "floor": 12.0,
+    "rel_max": 0.4
+  },
+  "fit": {
+    "rule": {
+      "floor": 12.0,
+      "rel_max": 0.4
+    },
+    "within1_acc": 0.884,
+    "exact_acc": 0.5753333333333334,
+    "n_lines": 3000,
+    "col_tol": 2,
+    "deslant_range_deg": [
+      -45.0,
+      45.0
+    ]
+  },
+  "val": {
+    "n_lines": 950,
+    "within1": 0.8547368421052631,
+    "exact": 0.5094736842105263,
+    "within1_vs_raw_tokens": 0.6578947368421053,
+    "mean_signed_error": 0.11789473684210526,
+    "frac_over": 0.08421052631578947,
+    "frac_under": 0.061052631578947365
+  },
+  "test200": {
+    "n_lines": 200,
+    "within1": 0.865,
+    "exact": 0.48,
+    "within1_vs_raw_tokens": 0.68,
+    "mean_signed_error": 0.055,
+    "frac_over": 0.07,
+    "frac_under": 0.065
+  },
+  "test200_rows": [
+    {
+      "id": "c04-116-02",
+      "pred": 20,
+      "words": 19,
+      "tokens": 22
+    },
+    {
+      "id": "c04-139-02",
+      "pred": 11,
+      "words": 11,
+      "tokens": 12
+    },
+    {
+      "id": "d06-008-00",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "d06-008-02",
+      "pred": 8,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "d06-008-04",
+      "pred": 7,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "d06-020-08",
+      "pred": 10,
+      "words": 9,
+      "tokens": 10
+    },
+    {
+      "id": "d01-019-03",
+      "pred": 15,
+      "words": 14,
+      "tokens": 16
+    },
+    {
+      "id": "d01-080-07",
+      "pred": 2,
+      "words": 3,
+      "tokens": 4
+    },
+    {
+      "id": "d01-104-07",
+      "pred": 8,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "d01-118-02",
+      "pred": 9,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "e01-055-03",
+      "pred": 8,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "e01-055-04",
+      "pred": 7,
+      "words": 8,
+      "tokens": 9
+    },
+    {
+      "id": "d04-012-02",
+      "pred": 6,
+      "words": 6,
+      "tokens": 8
+    },
+    {
+      "id": "d04-021-04",
+      "pred": 9,
+      "words": 8,
+      "tokens": 11
+    },
+    {
+      "id": "d04-028-05",
+      "pred": 9,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "d04-032-05",
+      "pred": 9,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "d04-032-07",
+      "pred": 7,
+      "words": 7,
+      "tokens": 10
+    },
+    {
+      "id": "d04-047-08",
+      "pred": 6,
+      "words": 1,
+      "tokens": 3
+    },
+    {
+      "id": "d04-096-07",
+      "pred": 1,
+      "words": 1,
+      "tokens": 2
+    },
+    {
+      "id": "d04-111-11",
+      "pred": 9,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "d04-125-00",
+      "pred": 11,
+      "words": 12,
+      "tokens": 15
+    },
+    {
+      "id": "d04-131-06",
+      "pred": 6,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "d05-008-00",
+      "pred": 8,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "d05-025-07",
+      "pred": 9,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "d05-013-00",
+      "pred": 10,
+      "words": 10,
+      "tokens": 12
+    },
+    {
+      "id": "d05-040-00",
+      "pred": 9,
+      "words": 9,
+      "tokens": 10
+    },
+    {
+      "id": "d05-040-02",
+      "pred": 11,
+      "words": 11,
+      "tokens": 12
+    },
+    {
+      "id": "d06-003-00",
+      "pred": 13,
+      "words": 13,
+      "tokens": 14
+    },
+    {
+      "id": "d06-076-00",
+      "pred": 13,
+      "words": 13,
+      "tokens": 15
+    },
+    {
+      "id": "e06-046-01",
+      "pred": 11,
+      "words": 11,
+      "tokens": 12
+    },
+    {
+      "id": "d06-107-05",
+      "pred": 7,
+      "words": 6,
+      "tokens": 7
+    },
+    {
+      "id": "e06-003-01",
+      "pred": 4,
+      "words": 3,
+      "tokens": 4
+    },
+    {
+      "id": "e06-003-07",
+      "pred": 6,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "d06-025-05",
+      "pred": 7,
+      "words": 6,
+      "tokens": 7
+    },
+    {
+      "id": "d06-104-01",
+      "pred": 8,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "d06-104-03",
+      "pred": 5,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "d06-104-07",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "e06-049-02",
+      "pred": 8,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "e06-049-04",
+      "pred": 5,
+      "words": 6,
+      "tokens": 6
+    },
+    {
+      "id": "e06-000-01",
+      "pred": 6,
+      "words": 6,
+      "tokens": 6
+    },
+    {
+      "id": "e06-021-07",
+      "pred": 5,
+      "words": 5,
+      "tokens": 6
+    },
+    {
+      "id": "d06-072-05",
+      "pred": 3,
+      "words": 6,
+      "tokens": 8
+    },
+    {
+      "id": "e06-070-01",
+      "pred": 8,
+      "words": 10,
+      "tokens": 10
+    },
+    {
+      "id": "e06-070-04",
+      "pred": 4,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "d06-041-00",
+      "pred": 8,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "d06-060-05",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "d06-086-06",
+      "pred": 6,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "d06-086-07",
+      "pred": 9,
+      "words": 9,
+      "tokens": 10
+    },
+    {
+      "id": "d06-086-08",
+      "pred": 9,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "d07-096-01",
+      "pred": 7,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "d07-096-03",
+      "pred": 11,
+      "words": 10,
+      "tokens": 12
+    },
+    {
+      "id": "d07-100-02",
+      "pred": 9,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "d07-102-01",
+      "pred": 10,
+      "words": 6,
+      "tokens": 10
+    },
+    {
+      "id": "f04-039-03",
+      "pred": 8,
+      "words": 9,
+      "tokens": 10
+    },
+    {
+      "id": "f04-057-01",
+      "pred": 9,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "f04-061-00",
+      "pred": 8,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "f04-064-01",
+      "pred": 8,
+      "words": 9,
+      "tokens": 10
+    },
+    {
+      "id": "f04-068-03",
+      "pred": 5,
+      "words": 5,
+      "tokens": 6
+    },
+    {
+      "id": "f04-074-00",
+      "pred": 10,
+      "words": 10,
+      "tokens": 11
+    },
+    {
+      "id": "f04-079-01",
+      "pred": 8,
+      "words": 10,
+      "tokens": 10
+    },
+    {
+      "id": "f04-079-08",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "f04-087-04",
+      "pred": 11,
+      "words": 11,
+      "tokens": 12
+    },
+    {
+      "id": "f07-000-07",
+      "pred": 6,
+      "words": 6,
+      "tokens": 7
+    },
+    {
+      "id": "f07-042a-04",
+      "pred": 9,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "g07-079a-10",
+      "pred": 8,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "f07-000b-01",
+      "pred": 8,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "f07-000b-02",
+      "pred": 9,
+      "words": 8,
+      "tokens": 9
+    },
+    {
+      "id": "f07-000b-05",
+      "pred": 7,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "f07-002-03",
+      "pred": 6,
+      "words": 6,
+      "tokens": 7
+    },
+    {
+      "id": "f07-009-00",
+      "pred": 9,
+      "words": 9,
+      "tokens": 10
+    },
+    {
+      "id": "f07-009-02",
+      "pred": 11,
+      "words": 10,
+      "tokens": 11
+    },
+    {
+      "id": "f07-021b-03",
+      "pred": 8,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "f07-021b-09",
+      "pred": 5,
+      "words": 5,
+      "tokens": 6
+    },
+    {
+      "id": "f07-021a-02",
+      "pred": 10,
+      "words": 10,
+      "tokens": 11
+    },
+    {
+      "id": "f07-073-09",
+      "pred": 10,
+      "words": 9,
+      "tokens": 10
+    },
+    {
+      "id": "f07-084b-04",
+      "pred": 8,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "f07-084b-08",
+      "pred": 12,
+      "words": 7,
+      "tokens": 12
+    },
+    {
+      "id": "f07-084a-05",
+      "pred": 4,
+      "words": 4,
+      "tokens": 4
+    },
+    {
+      "id": "f07-088a-03",
+      "pred": 7,
+      "words": 6,
+      "tokens": 9
+    },
+    {
+      "id": "f07-092a-08",
+      "pred": 6,
+      "words": 6,
+      "tokens": 7
+    },
+    {
+      "id": "f07-092b-06",
+      "pred": 2,
+      "words": 2,
+      "tokens": 3
+    },
+    {
+      "id": "g07-000b-08",
+      "pred": 8,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "g01-008-01",
+      "pred": 10,
+      "words": 10,
+      "tokens": 10
+    },
+    {
+      "id": "g01-025-05",
+      "pred": 6,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "g01-037-01",
+      "pred": 8,
+      "words": 8,
+      "tokens": 10
+    },
+    {
+      "id": "g01-037-03",
+      "pred": 6,
+      "words": 6,
+      "tokens": 7
+    },
+    {
+      "id": "g01-037-05",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "g01-037-06",
+      "pred": 4,
+      "words": 5,
+      "tokens": 8
+    },
+    {
+      "id": "g01-039-01",
+      "pred": 8,
+      "words": 8,
+      "tokens": 9
+    },
+    {
+      "id": "g01-043-03",
+      "pred": 4,
+      "words": 5,
+      "tokens": 7
+    },
+    {
+      "id": "g01-045-03",
+      "pred": 9,
+      "words": 9,
+      "tokens": 10
+    },
+    {
+      "id": "g01-045-04",
+      "pred": 9,
+      "words": 8,
+      "tokens": 10
+    },
+    {
+      "id": "g01-067-08",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "g01-074-07",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "g02-062-02",
+      "pred": 9,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "g02-062-07",
+      "pred": 7,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "g03-043-01",
+      "pred": 6,
+      "words": 5,
+      "tokens": 6
+    },
+    {
+      "id": "g03-049-06",
+      "pred": 7,
+      "words": 6,
+      "tokens": 6
+    },
+    {
+      "id": "n02-104-05",
+      "pred": 8,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "n02-109-00",
+      "pred": 7,
+      "words": 8,
+      "tokens": 11
+    },
+    {
+      "id": "n02-114-09",
+      "pred": 2,
+      "words": 1,
+      "tokens": 2
+    },
+    {
+      "id": "r03-053-03",
+      "pred": 8,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "r03-053-04",
+      "pred": 8,
+      "words": 6,
+      "tokens": 8
+    },
+    {
+      "id": "g03-052-03",
+      "pred": 7,
+      "words": 6,
+      "tokens": 8
+    },
+    {
+      "id": "g03-052-10",
+      "pred": 9,
+      "words": 8,
+      "tokens": 9
+    },
+    {
+      "id": "g04-072-07",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "m01-049-07",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "m01-060-02",
+      "pred": 9,
+      "words": 8,
+      "tokens": 11
+    },
+    {
+      "id": "m01-095-03",
+      "pred": 7,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "m01-131-00",
+      "pred": 8,
+      "words": 10,
+      "tokens": 11
+    },
+    {
+      "id": "m01-131-05",
+      "pred": 10,
+      "words": 10,
+      "tokens": 10
+    },
+    {
+      "id": "m01-136-08",
+      "pred": 8,
+      "words": 5,
+      "tokens": 6
+    },
+    {
+      "id": "m02-048-10",
+      "pred": 5,
+      "words": 7,
+      "tokens": 10
+    },
+    {
+      "id": "m02-072-06",
+      "pred": 11,
+      "words": 11,
+      "tokens": 12
+    },
+    {
+      "id": "m02-095-02",
+      "pred": 8,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "m03-006-01",
+      "pred": 6,
+      "words": 7,
+      "tokens": 9
+    },
+    {
+      "id": "m03-013-01",
+      "pred": 8,
+      "words": 10,
+      "tokens": 13
+    },
+    {
+      "id": "m03-013-05",
+      "pred": 9,
+      "words": 9,
+      "tokens": 12
+    },
+    {
+      "id": "m03-110-05",
+      "pred": 4,
+      "words": 5,
+      "tokens": 6
+    },
+    {
+      "id": "m03-118-02",
+      "pred": 10,
+      "words": 10,
+      "tokens": 11
+    },
+    {
+      "id": "m04-038-04",
+      "pred": 10,
+      "words": 11,
+      "tokens": 11
+    },
+    {
+      "id": "m04-038-05",
+      "pred": 2,
+      "words": 2,
+      "tokens": 3
+    },
+    {
+      "id": "m04-072-07",
+      "pred": 8,
+      "words": 8,
+      "tokens": 9
+    },
+    {
+      "id": "m04-081-02",
+      "pred": 7,
+      "words": 6,
+      "tokens": 8
+    },
+    {
+      "id": "m04-107-00",
+      "pred": 7,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "m04-107-05",
+      "pred": 8,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "m04-107-08",
+      "pred": 7,
+      "words": 6,
+      "tokens": 7
+    },
+    {
+      "id": "m04-113-08",
+      "pred": 7,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "m04-231-06",
+      "pred": 4,
+      "words": 3,
+      "tokens": 4
+    },
+    {
+      "id": "m04-246-02",
+      "pred": 12,
+      "words": 9,
+      "tokens": 14
+    },
+    {
+      "id": "m06-031-02",
+      "pred": 9,
+      "words": 9,
+      "tokens": 13
+    },
+    {
+      "id": "m06-048-03",
+      "pred": 11,
+      "words": 11,
+      "tokens": 14
+    },
+    {
+      "id": "m06-056-02",
+      "pred": 12,
+      "words": 11,
+      "tokens": 13
+    },
+    {
+      "id": "m06-056-05",
+      "pred": 8,
+      "words": 8,
+      "tokens": 11
+    },
+    {
+      "id": "m06-067-03",
+      "pred": 11,
+      "words": 11,
+      "tokens": 13
+    },
+    {
+      "id": "m06-076-02",
+      "pred": 8,
+      "words": 7,
+      "tokens": 9
+    },
+    {
+      "id": "m06-083-00",
+      "pred": 10,
+      "words": 11,
+      "tokens": 13
+    },
+    {
+      "id": "m06-083-04",
+      "pred": 8,
+      "words": 8,
+      "tokens": 11
+    },
+    {
+      "id": "m06-083-06",
+      "pred": 10,
+      "words": 11,
+      "tokens": 11
+    },
+    {
+      "id": "m06-106-09",
+      "pred": 4,
+      "words": 4,
+      "tokens": 5
+    },
+    {
+      "id": "n01-000-04",
+      "pred": 11,
+      "words": 11,
+      "tokens": 13
+    },
+    {
+      "id": "n01-020-06",
+      "pred": 7,
+      "words": 8,
+      "tokens": 9
+    },
+    {
+      "id": "n01-045-07",
+      "pred": 7,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "n01-045-08",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "n01-036-03",
+      "pred": 9,
+      "words": 9,
+      "tokens": 10
+    },
+    {
+      "id": "n01-052-12",
+      "pred": 8,
+      "words": 6,
+      "tokens": 7
+    },
+    {
+      "id": "n02-004-05",
+      "pred": 11,
+      "words": 11,
+      "tokens": 12
+    },
+    {
+      "id": "n02-028-08",
+      "pred": 6,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "n02-028-09",
+      "pred": 4,
+      "words": 4,
+      "tokens": 5
+    },
+    {
+      "id": "n02-049-03",
+      "pred": 5,
+      "words": 11,
+      "tokens": 12
+    },
+    {
+      "id": "n02-033-06",
+      "pred": 6,
+      "words": 5,
+      "tokens": 6
+    },
+    {
+      "id": "n02-037-00",
+      "pred": 7,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "n02-040-01",
+      "pred": 11,
+      "words": 9,
+      "tokens": 11
+    },
+    {
+      "id": "n02-040-05",
+      "pred": 7,
+      "words": 6,
+      "tokens": 8
+    },
+    {
+      "id": "n02-054-05",
+      "pred": 5,
+      "words": 5,
+      "tokens": 8
+    },
+    {
+      "id": "n02-154-03",
+      "pred": 6,
+      "words": 7,
+      "tokens": 9
+    },
+    {
+      "id": "n03-064-04",
+      "pred": 9,
+      "words": 9,
+      "tokens": 9
+    },
+    {
+      "id": "n03-066-02",
+      "pred": 10,
+      "words": 10,
+      "tokens": 10
+    },
+    {
+      "id": "n03-066-04",
+      "pred": 8,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "n03-106-02",
+      "pred": 8,
+      "words": 8,
+      "tokens": 9
+    },
+    {
+      "id": "n03-126-01",
+      "pred": 8,
+      "words": 8,
+      "tokens": 10
+    },
+    {
+      "id": "n03-126-04",
+      "pred": 7,
+      "words": 5,
+      "tokens": 7
+    },
+    {
+      "id": "n04-048-01",
+      "pred": 6,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "n04-048-07",
+      "pred": 8,
+      "words": 7,
+      "tokens": 11
+    },
+    {
+      "id": "n04-107-08",
+      "pred": 2,
+      "words": 2,
+      "tokens": 3
+    },
+    {
+      "id": "n04-114-02",
+      "pred": 8,
+      "words": 6,
+      "tokens": 13
+    },
+    {
+      "id": "n04-149-01",
+      "pred": 10,
+      "words": 10,
+      "tokens": 12
+    },
+    {
+      "id": "n04-209-05",
+      "pred": 7,
+      "words": 6,
+      "tokens": 6
+    },
+    {
+      "id": "n04-213-03",
+      "pred": 11,
+      "words": 10,
+      "tokens": 11
+    },
+    {
+      "id": "n04-213-07",
+      "pred": 2,
+      "words": 2,
+      "tokens": 3
+    },
+    {
+      "id": "n04-218-02",
+      "pred": 8,
+      "words": 9,
+      "tokens": 10
+    },
+    {
+      "id": "n04-218-04",
+      "pred": 8,
+      "words": 8,
+      "tokens": 9
+    },
+    {
+      "id": "n06-111-01",
+      "pred": 8,
+      "words": 7,
+      "tokens": 11
+    },
+    {
+      "id": "n06-111-03",
+      "pred": 9,
+      "words": 7,
+      "tokens": 10
+    },
+    {
+      "id": "n06-123-09",
+      "pred": 7,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "n06-128-03",
+      "pred": 7,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "p01-155-09",
+      "pred": 5,
+      "words": 4,
+      "tokens": 5
+    },
+    {
+      "id": "p01-174-01",
+      "pred": 7,
+      "words": 6,
+      "tokens": 7
+    },
+    {
+      "id": "p02-069-00",
+      "pred": 8,
+      "words": 6,
+      "tokens": 8
+    },
+    {
+      "id": "p02-076-08",
+      "pred": 8,
+      "words": 8,
+      "tokens": 8
+    },
+    {
+      "id": "p02-081-05",
+      "pred": 6,
+      "words": 8,
+      "tokens": 9
+    },
+    {
+      "id": "p02-081-07",
+      "pred": 6,
+      "words": 6,
+      "tokens": 7
+    },
+    {
+      "id": "p02-135-00",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "p02-135-05",
+      "pred": 6,
+      "words": 6,
+      "tokens": 7
+    },
+    {
+      "id": "p02-144-10",
+      "pred": 7,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "p03-012-01",
+      "pred": 6,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "p03-023-00",
+      "pred": 10,
+      "words": 10,
+      "tokens": 12
+    },
+    {
+      "id": "p03-023-03",
+      "pred": 11,
+      "words": 11,
+      "tokens": 12
+    },
+    {
+      "id": "p03-029-04",
+      "pred": 8,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "p03-040-06",
+      "pred": 7,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "p03-163-02",
+      "pred": 8,
+      "words": 8,
+      "tokens": 10
+    },
+    {
+      "id": "p03-181-01",
+      "pred": 9,
+      "words": 9,
+      "tokens": 12
+    },
+    {
+      "id": "p06-030-02",
+      "pred": 7,
+      "words": 6,
+      "tokens": 8
+    },
+    {
+      "id": "p06-047-01",
+      "pred": 1,
+      "words": 5,
+      "tokens": 6
+    },
+    {
+      "id": "p06-052-03",
+      "pred": 5,
+      "words": 7,
+      "tokens": 7
+    },
+    {
+      "id": "p06-088-07",
+      "pred": 8,
+      "words": 6,
+      "tokens": 6
+    },
+    {
+      "id": "p06-088-08",
+      "pred": 5,
+      "words": 6,
+      "tokens": 8
+    },
+    {
+      "id": "p06-096-03",
+      "pred": 7,
+      "words": 8,
+      "tokens": 9
+    },
+    {
+      "id": "p06-104-06",
+      "pred": 7,
+      "words": 7,
+      "tokens": 8
+    },
+    {
+      "id": "p06-104-09",
+      "pred": 3,
+      "words": 4,
+      "tokens": 7
+    }
+  ],
+  "gate4_word_count_within1_ge_0.80": true
+}
