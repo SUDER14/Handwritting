@@ -290,8 +290,10 @@ def test_usable_flag_follows_the_threshold(trained_run, tmp_path):
 def test_trained_embedder_never_falls_back_to_the_stub(tmp_path, monkeypatch):
     import src.writer_id.runs as runs
     monkeypatch.setattr(runs, "CHECKPOINT_ROOT", str(tmp_path / "none"))
+    cfg = copy.deepcopy(CFG)
+    cfg["evaluation"]["writer_id_run"] = None       # no pin and no run on disk (config.yaml now pins the GATE-1 run)
     with pytest.raises(FileNotFoundError, match="scripts/train_writer_id.py"):
-        get_writer_embedder("trained", CFG)
+        get_writer_embedder("trained", cfg)
 
 
 # -- calibration ------------------------------------------------------------------------------------------------------
