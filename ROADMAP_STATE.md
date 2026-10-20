@@ -72,3 +72,6 @@ GATE 4 | PASSED (2026-09-28) |
 ## RESUME HERE (updated 2026-09-28)
 1. GATE 3 is OPEN, waiting on the user's Colab run of notebooks/colab_train.ipynb: cell 10 (3.2 reproduction, HWD within 10% of 0.828), 10b (3.5 VATr K=1/K=5 rows on the pinned instruments; needs the two best.pt uploaded to Drive), 10c (3.6 VATr samples on results/samples_spec.json). On arrival: copy results dirs, append VATr rows from Colab's protocol_table.csv, log 3.2/3.5/3.6, evaluate GATE 3 (+ leakage assertion).
 2. Stage 5 needs the VATr rows (5.1 vary K for VATr and baseline, 5.2 VATr per-writer, 5.3 metric agreement across backends); 5.4 is [HUMAN]. Do not start before GATE 3 unless the user asks.
+
+## 2026-10-20 session: STEP 0 not possible yet
+STEP0 | WAITING (input missing) | | colab_out/ not found. Searched: G:\My Drive (all top-level folders; handwriting/ recursively), ~\Downloads, ~\Desktop, ~\OneDrive, repo (no vatr_reproduction.json, no *_gpu_colab_r1 dirs). G:\My Drive\handwriting contains only instruments/ (modified 2026-10-01): writerid_..._cpu_r1/best.pt (11,524,043 bytes) present; crnn_..._cpu_r1/ is EMPTY (no best.pt) -> Colab cell 10b cannot score VATr on the pinned instruments without it. Latest Colab notebook touched: Untitled6.ipynb (2026-10-20 22:37), not a known output. No numbers recorded; GATE 3 stays OPEN; Stages 5/6 not started (need VATr rows).
