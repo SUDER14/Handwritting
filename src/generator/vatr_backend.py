@@ -196,6 +196,16 @@ def apply_runtime_shims(vatr_root: Path, device: str) -> None:
         um.UnifontModule.__init__.__defaults__ = tuple(d)
 
 
+def load_checkpoint_by_name(model, state):
+    """Load a released VATr checkpoint dict into `model` BY NAME, strictly. The checkpoint also carries the 564
+    FID-InceptionV3 tensors; the (stubbed, unused) inception has none, so they are dropped first. Stricter than VATr's
+    own generate_fakes.load_checkpoint, which pairs tensors by position and asserts equal lengths. Single source of truth
+    for scripts/vatr_smoke.py (via VATrBackend) and scripts/vatr_reproduce.py (replaces generate_fakes.load_checkpoint)."""
+    state = {k: v for k, v in state.items() if not k.startswith("inception.")}
+    model.load_state_dict(state, strict=True)
+    return model
+
+
 def _import_vatr(vatr_root: Path, device: str):
     """Import VATr's generator module with the runtime shims; returns (module, torch)."""
     import torch
@@ -228,11 +238,7 @@ class VATrBackend:
             model = gen.VATr(args)
             ck = torch.load(self.checkpoint, map_location=args.device, weights_only=False)
             state = ck["model"] if isinstance(ck, dict) and "model" in ck else ck
-            # the released checkpoint also carries the 564 FID-InceptionV3 tensors; the (stubbed, unused) inception
-            # has none. Everything else must match BY NAME, exactly (strict) -- stricter than VATr's own
-            # load_checkpoint, which pairs tensors by position.
-            state = {k: v for k, v in state.items() if not k.startswith("inception.")}
-            model.load_state_dict(state, strict=True)
+            load_checkpoint_by_name(model, state)
         model.eval()
         self.model = model
         self.alphabet = set(args.alphabet)

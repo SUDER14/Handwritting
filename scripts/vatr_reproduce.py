@@ -10,6 +10,7 @@ Procedure (nothing in third_party/VATr is edited):
 
 Runtime shims (logged in ROADMAP_STATE.md), needed only because this host has no CUDA / no extra downloads:
   * --device cpu and torch.load(map_location="cpu") on this host (--device cuda on Colab);
+  * generate_fakes.load_checkpoint replaced by vatr_backend.load_checkpoint_by_name (checkpoint has 564 extra FID tensors);
   * `wandb` stubbed (generate_fakes imports train.py, which imports wandb; logging only);
   * VATr builds an FID InceptionV3 in __init__ that generation never calls; its weights are a download outside the
     ROADMAP allow-list, so it is replaced by an empty module;
@@ -20,8 +21,8 @@ Runtime shims (logged in ROADMAP_STATE.md), needed only because this host has no
 from __future__ import annotations
 
 import argparse
+import ast
 import json
-import runpy
 import sys
 import time
 from datetime import datetime, timezone
@@ -57,7 +58,19 @@ def generate(out_dir: Path, batch_size: int, device: str) -> None:
     mm.VATr.save_images_for_fid_calculation = test_only
     sys.argv = ["generate_fakes.py", "--checkpoint", "files/vatr.pth", "--output", str(out_dir),
                 "--device", device, "--batch_size", str(batch_size)]
-    runpy.run_path(str(VATR / "generate_fakes.py"), run_name="__main__")
+    _run_generate_fakes()
+
+
+def _run_generate_fakes() -> None:
+    """Run generate_fakes.py as __main__ with its load_checkpoint swapped for the shared by-name loader. runpy would
+    re-execute the script's own `def load_checkpoint` over any monkeypatch, so the def is dropped from the parsed tree
+    and ours is injected into the namespace instead (the file on disk is untouched)."""
+    from src.generator.vatr_backend import load_checkpoint_by_name
+    path = VATR / "generate_fakes.py"
+    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+    tree.body = [n for n in tree.body if not (isinstance(n, ast.FunctionDef) and n.name == "load_checkpoint")]
+    ns = {"__name__": "__main__", "__file__": str(path), "load_checkpoint": load_checkpoint_by_name}
+    exec(compile(tree, str(path), "exec"), ns)
 
 
 def score(img_dir: Path) -> dict:
@@ -91,7 +104,7 @@ def main() -> int:
         rec = {"task": "3.2", "utc": datetime.now(timezone.utc).isoformat(), "git": git_info(),
                "published_hwd": PUBLISHED_HWD, "published_source": "Pippi et al., BMVC 2023 (HWD), Table 2, VATr, IAM test",
                **res, "rel_diff": rel, "within_10pct": rel <= 0.10, "images": str(img_dir),
-               "device": args.device, "shims": [f"{args.device} map_location", "wandb stub", "FID InceptionV3 stub (unused)",
+               "device": args.device, "shims": [f"{args.device} map_location", "wandb stub", "load_checkpoint by name, FID tensors dropped", "FID InceptionV3 stub (unused)",
                                           "Feat_Encoder resnet18 weights=None (overwritten by checkpoint)", "UnifontModule device default",
                                           "train-split generation skipped (RNG draw differs)"],
                "wall_s": time.time() - t0}
