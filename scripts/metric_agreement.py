@@ -107,15 +107,23 @@ def main() -> int:
     backends = {"baseline": B.BaselineBackend(cfg),
                 "glyph_vae": B.NeuralBackend(cfg, str(resolve_path(cfg["training"]["checkpoint_path"])))}
     OUT.mkdir(parents=True, exist_ok=True)
-    rows = []
+    rows, done_writers = [], set()
+    if (OUT / "samples.csv").exists():                  # resume: keep the finished writers of an interrupted run
+        rows = list(csv.DictReader((OUT / "samples.csv").open(newline="", encoding="utf-8")))
+        done_writers = {r["writer"] for r in rows}
+        logger.info("resuming: %d rows, writers done %s", len(rows), sorted(done_writers))
 
     def metrics_vs_set(g, real_emb_mean, real_h_mean):
+        if not scorer.scorable(g):               # an intervention (erosion) can erase a thin line: no value, not a crash
+            return float("nan"), float("nan")
         e = scorer.embed(g)
         e = e / np.linalg.norm(e)
         wid = float(1.0 - np.dot(e, real_emb_mean) / np.linalg.norm(real_emb_mean))
         return wid, hwd(set_mean([scorer.hwd_entry(g)]), real_h_mean)
 
     for wi, w in enumerate(writers):
+        if w in done_writers:
+            continue
         sp = P.split_lines(by[w], K, pcfg["targets_per_writer"], pcfg["min_reference_letters"], pc["seed"], w)
         refs, targets = sp
         real = [ds.read_native(index[t.sample_id]) for t in targets]
