@@ -58,7 +58,9 @@ def run_protocol_cli(args) -> int:
     for s in dataset.samples:
         by_writer.setdefault(s.writer_id, []).append(s)
     ks = args.ks or pc["ks"]
-    writers = P.choose_writers(dataset, pc["n_writers"], pc["seed"], max(ks) + pc["targets_per_writer"] // 2 + 1)
+    # the writer subset depends ONLY on the configured ks, never on --ks: a K-sweep (Task 5.1) must score the same
+    # seed-1337 writers as the main table. Writers without enough lines at a large K are reported, not replaced.
+    writers = P.choose_writers(dataset, pc["n_writers"], pc["seed"], max(pc["ks"]) + pc["targets_per_writer"] // 2 + 1)
     subset = f"{len(writers)} of {len(dataset.writer_ids)} {split} writers (seed {pc['seed']})"
     pcfg = {"targets_per_writer": pc["targets_per_writer"], "min_reference_letters": ev["min_reference_letters"],
             "max_target_chars": ev["max_target_chars"]}
@@ -100,13 +102,18 @@ def run_protocol_cli(args) -> int:
                 print(f"{name} K={K}: no writer could be scored", file=sys.stderr)
                 continue
             agg = P.aggregate(rows)
+            target_coverage = {"writers_requested": len(writers), "writers_scored": len(rows),
+                               "writers_not_scored": skipped,
+                               "targets_requested": len(writers) * pc["targets_per_writer"],
+                               "targets_scored": int(sum(r["n_targets"] for r in rows))}
+            logger.info("%s K=%d target coverage: %s", name, K, target_coverage)
             run_id = f"{utc:%Y%m%dT%H%M%SZ}_{git['sha']}{'-dirty' if git['dirty'] else ''}_protocol_{name}_K{K}"
             out_dir = results_dir / run_id
             out_dir.mkdir(parents=True, exist_ok=False)
             record = {"run_id": run_id, "git": git, "split": split, "subset": subset, "cpu_reduced": cpu_reduced,
                       "backend": name, "K": K, "protocol": pc, "crnn_run": crnn_dir.name,
                       "writer_id": embedder.describe(), "aggregate": agg, "writers": rows, "skipped_writers": skipped,
-                      "writer_errors": writer_errors,
+                      "writer_errors": writer_errors, "target_coverage": target_coverage,
                       "coverage": backend.coverage() if hasattr(backend, "coverage") else None,
                       "note": "real row = half of each writer's held-out real lines scored against the other half"}
             (out_dir / "metrics.json").write_text(json.dumps(record, indent=2, ensure_ascii=False, default=float) + "\n",
@@ -125,5 +132,7 @@ def run_protocol_cli(args) -> int:
                             "writer_id_run": embedder.run_id, "metrics_path": str(out_dir / "metrics.json")})
             print(f"{name:10s} K={K}: CER {agg['all_cer']:.3f} | writer-ID dist {agg['all_wid_dist']:.4f} | "
                   f"HWD {agg['all_hwd']:.3f} | OOV n={agg['oov_n_writers']} CER {agg['oov_cer']} "
-                  f"({agg['n_writers']} writers, {subset}, CPU-reduced)")
+                  f"({agg['n_writers']} writers, {subset}, CPU-reduced) | coverage: {target_coverage['writers_scored']}"
+                  f"/{target_coverage['writers_requested']} writers, {target_coverage['targets_scored']}"
+                  f"/{target_coverage['targets_requested']} targets")
     return 0
