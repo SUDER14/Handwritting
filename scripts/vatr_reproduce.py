@@ -61,16 +61,21 @@ def generate(out_dir: Path, batch_size: int, device: str) -> None:
     _run_generate_fakes()
 
 
-def _run_generate_fakes() -> None:
-    """Run generate_fakes.py as __main__ with its load_checkpoint swapped for the shared by-name loader. runpy would
-    re-execute the script's own `def load_checkpoint` over any monkeypatch, so the def is dropped from the parsed tree
-    and ours is injected into the namespace instead (the file on disk is untouched)."""
+def patched_generate_fakes_code():
+    """generate_fakes.py compiled with its own `def load_checkpoint` removed. Returns (code, namespace) where the namespace
+    already holds the shared by-name loader as `load_checkpoint`. runpy would re-execute the script's def over any
+    monkeypatch, so the def is dropped from the parsed tree instead (the file on disk is untouched)."""
     from src.generator.vatr_backend import load_checkpoint_by_name
     path = VATR / "generate_fakes.py"
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     tree.body = [n for n in tree.body if not (isinstance(n, ast.FunctionDef) and n.name == "load_checkpoint")]
     ns = {"__name__": "__main__", "__file__": str(path), "load_checkpoint": load_checkpoint_by_name}
-    exec(compile(tree, str(path), "exec"), ns)
+    return compile(tree, str(path), "exec"), ns
+
+
+def _run_generate_fakes() -> None:
+    code, ns = patched_generate_fakes_code()
+    exec(code, ns)
 
 
 def score(img_dir: Path) -> dict:
