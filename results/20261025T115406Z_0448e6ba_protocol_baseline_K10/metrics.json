@@ -1,0 +1,1469 @@
+{
+  "run_id": "20261025T115406Z_0448e6ba_protocol_baseline_K10",
+  "git": {
+    "sha": "0448e6ba",
+    "dirty": false,
+    "branch": "master"
+  },
+  "split": "test",
+  "subset": "20 of 161 test writers (seed 1337)",
+  "cpu_reduced": true,
+  "backend": "baseline",
+  "K": 10,
+  "protocol": {
+    "split": "test",
+    "n_writers": 20,
+    "targets_per_writer": 10,
+    "ks": [
+      1,
+      5
+    ],
+    "seed": 1337
+  },
+  "crnn_run": "crnn_20260922T003942Z_d1f87b49_cpu_r1",
+  "writer_id": {
+    "name": "writer_id:writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "is_stub": false,
+    "run_id": "writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "checkpoint": "best.pt",
+    "test_top1": 0.7319291527046433,
+    "test_map": 0.5650027956358793,
+    "test_chance_top1": 0.011032823619246703,
+    "min_usable_top1": 0.6,
+    "usable": true
+  },
+  "aggregate": {
+    "n_writers": 18,
+    "all_cer": 0.8035017991417267,
+    "all_wid_dist": 0.7030099804509999,
+    "all_hwd": 3.5631917886966153,
+    "all_n_writers": 18,
+    "all_n_lines": 131,
+    "oov_cer": 0.935153763664471,
+    "oov_wid_dist": 0.7280765239895701,
+    "oov_hwd": 3.493617887299425,
+    "oov_n_writers": 8,
+    "oov_n_lines": 18,
+    "n_failed_generations": 0
+  },
+  "writers": [
+    {
+      "writer": "172",
+      "K": 10,
+      "n_targets": 3,
+      "ref_ids": [
+        "c04-170-02",
+        "c04-165-08",
+        "c04-165-01",
+        "c04-165-05",
+        "c04-170-00",
+        "c04-165-02",
+        "c04-165-04",
+        "c04-165-06",
+        "c04-170-01",
+        "c04-170-03"
+      ],
+      "target_ids": [
+        "c04-165-00",
+        "c04-165-03",
+        "c04-165-07"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.5370370370370371,
+        "wid_dist": 0.5450454239386819,
+        "hwd": 3.4798633764940177,
+        "n_lines": 3,
+        "hyps": [
+          "the eilemnecoleated shat stmileree aedre",
+          "ofaeamenitaat aneboontenenit",
+          "sttecenaestes f nom looist theetoeralele"
+        ]
+      },
+      "oov": null,
+      "gen_examples": [
+        [
+          "the film replaced what s my line and be",
+          "the eilemnecoleated shat stmileree aedre"
+        ],
+        [
+          "of an american t v reporter eric",
+          "ofaeamenitaat aneboontenenit"
+        ],
+        [
+          "scene ranging from pubs the eton wall",
+          "sttecenaestes f nom looist theetoeralele"
+        ]
+      ]
+    },
+    {
+      "writer": "173",
+      "K": 10,
+      "n_targets": 10,
+      "ref_ids": [
+        "c06-011-07",
+        "d06-008-03",
+        "d06-046-03",
+        "d06-008-07",
+        "d06-008-01",
+        "d06-063-08",
+        "d06-020-05",
+        "d06-008-02",
+        "d06-046-01",
+        "d06-063-10"
+      ],
+      "target_ids": [
+        "c06-011-01",
+        "d06-008-04",
+        "c06-011-04",
+        "d06-008-08",
+        "d06-020-01",
+        "d06-046-04",
+        "d06-020-03",
+        "d06-008-09",
+        "d06-008-06",
+        "d06-046-00"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.9752747252747253,
+        "wid_dist": 0.8740444486706563,
+        "hwd": 3.5245992231607812,
+        "n_lines": 10,
+        "hyps": [
+          "marren athe chctueritiguer cresrwses te nuctherarthewar",
+          "crn chrumemr ather chrinch the te wr e cron",
+          "on chrothe w aother eoanittinguorte wattes",
+          "ahesurchurm ithgar chuvctrnmociern chiother",
+          "uciatueriting merc rmothcrthe chrthe iucitrng u uichiathenr c itingu",
+          "arenachroithgn chre athar chvesern chiure",
+          "mrachvorganathercann wen as terwr an",
+          "itngoourucmente ar eresee wanse",
+          "smere o uatr ch menrwiting as",
+          "uwo thertherser curthente ucrs te stweritriegus othenrs eerwr stheou"
+        ]
+      },
+      "oov": {
+        "cer": 1.6285714285714286,
+        "wid_dist": 0.8861225220599379,
+        "hwd": 3.3942196011987327,
+        "n_lines": 1,
+        "hyps": [
+          "uciatueriting merc rmothcrthe chrthe iucitrng u uichiathenr c itingue"
+        ]
+      },
+      "gen_examples": [
+        [
+          "arrived two hours earlier by appointment",
+          "marren athe chctueritiguer cresrwses te nuctherarthewar"
+        ],
+        [
+          "the harvest of which may still be being",
+          "crn chrumemr ather chrinch the te wr e cron"
+        ],
+        [
+          "and who is now being pluckily convivial",
+          "on chrothe w aother eoanittinguorte wattes"
+        ]
+      ]
+    },
+    {
+      "writer": "179",
+      "K": 10,
+      "n_targets": 4,
+      "ref_ids": [
+        "d01-080-06",
+        "d01-085-02",
+        "d01-080-00",
+        "d01-085-04",
+        "d01-080-05",
+        "d01-080-07",
+        "d01-080-02",
+        "d01-085-06",
+        "d01-080-01",
+        "d01-085-03"
+      ],
+      "target_ids": [
+        "d01-085-05",
+        "d01-080-03",
+        "d01-085-01",
+        "d01-080-04"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.7801418439716312,
+        "wid_dist": 0.7832894417736145,
+        "hwd": 3.781580520951594,
+        "n_lines": 4,
+        "hyps": [
+          "swicac wacger iinnarars",
+          "irn inl smerl wavesnonwe",
+          "ncoriniwer mrecshanscalan",
+          "sernenueiswerlin snaanoinea"
+        ]
+      },
+      "oov": {
+        "cer": 0.7971014492753623,
+        "wid_dist": 0.7868156330965197,
+        "hwd": 3.7513385925276874,
+        "n_lines": 2,
+        "hyps": [
+          "swicac wacger iinnarars",
+          "irn inl smerl wanesnenwe"
+        ]
+      },
+      "gen_examples": [
+        [
+          "manuscripts a common size of column",
+          "swicac wacger iinnarars"
+        ],
+        [
+          "it is now used to mark a paragraph",
+          "irn inl smerl wavesnonwe"
+        ],
+        [
+          "the original of the gospel would be",
+          "ncoriniwer mrecshanscalan"
+        ]
+      ]
+    },
+    {
+      "writer": "190",
+      "K": 10,
+      "n_targets": 2,
+      "ref_ids": [
+        "d04-058-01",
+        "d04-058-06",
+        "d04-058-05",
+        "d04-062-02",
+        "d04-058-00",
+        "d04-058-04",
+        "d04-062-03",
+        "d04-058-03",
+        "d04-058-02",
+        "d04-062-01"
+      ],
+      "target_ids": [
+        "d04-062-04",
+        "d04-062-00"
+      ],
+      "oov_flags": [
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.5394736842105263,
+        "wid_dist": 0.6668520524462733,
+        "hwd": 3.511635671627839,
+        "n_lines": 2,
+        "hyps": [
+          "udd s wand can yonersonerisevrnseang yonor",
+          "rowalsonst tsereseranto serretseriond"
+        ]
+      },
+      "oov": null,
+      "gen_examples": [
+        [
+          "adds and in your soul searching your",
+          "udd s wand can yonersonerisevrnseang yonor"
+        ],
+        [
+          "for without the vision to serve the lord",
+          "rowalsonst tsereseranto serretseriond"
+        ]
+      ]
+    },
+    {
+      "writer": "283",
+      "K": 10,
+      "n_targets": 6,
+      "ref_ids": [
+        "f04-087-04",
+        "f04-083-00",
+        "f04-087-00",
+        "f04-083-06",
+        "f04-083-08",
+        "f04-087-02",
+        "f04-083-01",
+        "f04-083-04",
+        "f04-087-01",
+        "f04-087-03"
+      ],
+      "target_ids": [
+        "f04-083-07",
+        "f04-083-09",
+        "f04-083-05",
+        "f04-083-03",
+        "f04-087-05",
+        "f04-083-02"
+      ],
+      "oov_flags": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.7348066298342542,
+        "wid_dist": 0.7832239926670196,
+        "hwd": 3.821924515926513,
+        "n_lines": 6,
+        "hyps": [
+          "obr an m uarartion aun brisn al",
+          "ionuns arcn an adoowretwodssnsr",
+          "inulortis rauue rubar wards wousis",
+          "rn lorcals buvis ansucriiloron op bons",
+          "hins",
+          "rsmanusn a wiesmiloar wbrib babarbus"
+        ]
+      },
+      "oov": {
+        "cer": 0.6216216216216216,
+        "wid_dist": 0.801171756638311,
+        "hwd": 4.081647195236998,
+        "n_lines": 1,
+        "hyps": [
+          "obr an m uarartion aun brisn al"
+        ]
+      },
+      "gen_examples": [
+        [
+          "jolly had been unmarried and lived at",
+          "obr an m uarartion aun brisn al"
+        ],
+        [
+          "whom she worked as a bookkeeper",
+          "ionuns arcn an adoowretwodssnsr"
+        ],
+        [
+          "identify her as his sister mary money",
+          "inulortis rauue rubar wards wousis"
+        ]
+      ]
+    },
+    {
+      "writer": "286",
+      "K": 10,
+      "n_targets": 10,
+      "ref_ids": [
+        "f07-009-02",
+        "f07-009-01",
+        "f07-002-00",
+        "f07-009-08",
+        "f07-002-01",
+        "f07-000b-05",
+        "f07-009-03",
+        "f07-009-00",
+        "f07-006-06",
+        "f07-009-04"
+      ],
+      "target_ids": [
+        "f07-002-07",
+        "f07-009-09",
+        "f07-002-05",
+        "f07-002-06",
+        "f07-006-01",
+        "f07-000b-04",
+        "f07-002-04",
+        "f07-006-00",
+        "f07-002-03",
+        "f07-000b-01"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.8360655737704918,
+        "wid_dist": 0.7948261481307494,
+        "hwd": 3.548736065746939,
+        "n_lines": 10,
+        "hyps": [
+          "hanten ar wm opfen riurncra inison",
+          "mnma soencn drprennon nienwoen mn anens tnmanan",
+          "wran romhencunsn mipoen nins inmon",
+          "wrr tnmrep mron anmsen nouscdimon",
+          "inman sims cuentenmorreuen epinon",
+          "noxrcdh ine shrdl tenmonr nousdtona cion gitn",
+          "mr cloupthnorsumah rp mpon druvan a wrae",
+          "wer mr roupthnoreumastnon s mnisen",
+          "minan wrmwihiten raps inmon nenmiutnind",
+          "inis omteutten tumenan cum pitnwop aa"
+        ]
+      },
+      "oov": null,
+      "gen_examples": [
+        [
+          "meat or fish burnt and roasted in the",
+          "hanten ar wm opfen riurncra inison"
+        ],
+        [
+          "than mere converse has always been there",
+          "mnma soencn drprennon nienwoen mn anens tnmanan"
+        ],
+        [
+          "hide did our forebears home from the",
+          "wran romhencunsn mipoen nins inmon"
+        ]
+      ]
+    },
+    {
+      "writer": "292",
+      "K": 10,
+      "n_targets": 10,
+      "ref_ids": [
+        "f07-076a-02",
+        "f07-088a-06",
+        "f07-076a-04",
+        "f07-092a-05",
+        "f07-081a-06",
+        "f07-081a-08",
+        "f07-088a-00",
+        "f07-092a-01",
+        "f07-076a-05",
+        "f07-092a-07"
+      ],
+      "target_ids": [
+        "f07-092a-03",
+        "f07-088a-01",
+        "f07-092a-04",
+        "f07-081a-04",
+        "f07-084a-04",
+        "f07-088a-08",
+        "f07-084a-06",
+        "f07-081a-02",
+        "f07-076a-09",
+        "f07-076a-07"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.7964071856287425,
+        "wid_dist": 0.639864464305784,
+        "hwd": 4.110238494052235,
+        "n_lines": 10,
+        "hyps": [
+          "wakl drrcniinarlannnt",
+          "wraiwa rlmtht larng tingics",
+          "i iranik ihinnit gxsihavit hor",
+          "wram ilnola tringhhit nc irias",
+          "iccnrsi iarnihalasns tircar",
+          "moinit tirb anearten t angt ax",
+          "saninh an git ishg inecincienarnine",
+          "traittia andrnlrsrncu",
+          "imihgrnt tirihado in untan",
+          "tilmit aner ars traitn angtaicits"
+        ]
+      },
+      "oov": null,
+      "gen_examples": [
+        [
+          "to have been much more interested",
+          "wakl drrcniinarlannnt"
+        ],
+        [
+          "the dietary welcomed by men of genius",
+          "wraiwa rlmtht larng tingics"
+        ],
+        [
+          "in the dish in which it was served he",
+          "i iranik ihinnit gxsihavit hor"
+        ]
+      ]
+    },
+    {
+      "writer": "315",
+      "K": 10,
+      "n_targets": 10,
+      "ref_ids": [
+        "r03-053-03",
+        "r03-053-02",
+        "n02-120-04",
+        "n02-114-04",
+        "n02-109-01",
+        "n02-114-06",
+        "n02-104-06",
+        "n02-104-03",
+        "n02-127-07",
+        "n02-120-05"
+      ],
+      "target_ids": [
+        "n02-120-06",
+        "n02-109-07",
+        "n02-114-09",
+        "r03-053-01",
+        "g03-049-00",
+        "g03-049-03",
+        "r03-053-07",
+        "n02-127-00",
+        "n02-109-03",
+        "n02-127-03"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.8006042296072508,
+        "wid_dist": 0.5726641212069437,
+        "hwd": 3.347014341769903,
+        "n_lines": 10,
+        "hyps": [
+          "laruintrinsitt helmuhinc hrig",
+          "wintentuge sotrins",
+          "irams",
+          "siapent moninhieag cnssulitshin thint",
+          "armnjringrincrunancisrtinfinra",
+          "iregeregett te ahcughiltlnonn",
+          "harsphernnn tieout cncilnunt",
+          "hingarnal ina lrnnisona",
+          "cintion tirn a secnritedd ictrcnt",
+          "xnktufrmtea brn he muris"
+        ]
+      },
+      "oov": null,
+      "gen_examples": [
+        [
+          "but forrest might at least have tried he",
+          "laruintrinsitt helmuhinc hrig"
+        ],
+        [
+          "dares to stand up to him",
+          "wintentuge sotrins"
+        ],
+        [
+          "courage",
+          "irams"
+        ]
+      ]
+    },
+    {
+      "writer": "513",
+      "K": 10,
+      "n_targets": 7,
+      "ref_ids": [
+        "m01-121-07",
+        "m01-121-02",
+        "m01-104-03",
+        "m01-104-02",
+        "m01-121-01",
+        "m01-104-01",
+        "m01-121-03",
+        "m01-104-05",
+        "m01-121-08",
+        "m01-121-00"
+      ],
+      "target_ids": [
+        "m01-104-04",
+        "m01-121-05",
+        "m01-121-06",
+        "m01-121-04",
+        "m01-104-00",
+        "m01-104-07",
+        "m01-104-06"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.7701612903225806,
+        "wid_dist": 0.8603187441317264,
+        "hwd": 3.472263193130653,
+        "n_lines": 7,
+        "hyps": [
+          "tngur ahr uins ien turn orope sean",
+          "wpumh onrt suewerar oumnan",
+          "wrmeeanaurpihy mnountrn",
+          "mewrte somnsursuemireon en",
+          "in sametnnervenepartsurrhy tore",
+          "anrusp mna myrperspermarp",
+          "moar soresusuren thr ropurnn"
+        ]
+      },
+      "oov": null,
+      "gen_examples": [
+        [
+          "them out just what these orders will be",
+          "tngur ahr uins ien turn orope sean"
+        ],
+        [
+          "working out it occurred to steve that",
+          "wpumh onrt suewerar oumnan"
+        ],
+        [
+          "not have been entirely an objective",
+          "wrmeeanaurpihy mnountrn"
+        ]
+      ]
+    },
+    {
+      "writer": "514",
+      "K": 10,
+      "n_targets": 8,
+      "ref_ids": [
+        "m01-110-03",
+        "m01-110-01",
+        "m01-131-01",
+        "m01-131-00",
+        "m01-110-00",
+        "m01-110-05",
+        "m01-131-03",
+        "m01-131-06",
+        "m01-131-02",
+        "m01-110-04"
+      ],
+      "target_ids": [
+        "m01-131-04",
+        "m01-110-09",
+        "m01-110-02",
+        "m01-110-11",
+        "m01-110-08",
+        "m01-110-10",
+        "m01-131-05",
+        "m01-110-06"
+      ],
+      "oov_flags": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.875968992248062,
+        "wid_dist": 0.5740498342532014,
+        "hwd": 3.0133987008904337,
+        "n_lines": 8,
+        "hyps": [
+          "misnahnkinoonenthioenioot corustnitn",
+          "mmnksemnohoou onehntusen",
+          "misnhanlmthertengrncomionnae",
+          "iunemnmnthionnnoor",
+          "nhunennootooriorten tnincontenntinconcs",
+          "inrnatuescnnkrmnin wrn",
+          "misnanionnsoo rthuenenooconehuntekoorooinn",
+          "renrrramurionor"
+        ]
+      },
+      "oov": {
+        "cer": 0.8648648648648649,
+        "wid_dist": 0.5857806187699801,
+        "hwd": 2.900039478681125,
+        "n_lines": 1,
+        "hyps": [
+          "misnahnkinoonenthioenioot corustnitn"
+        ]
+      },
+      "gen_examples": [
+        [
+          "of their presence they just stared at",
+          "misnahnkinoonenthioenioot corustnitn"
+        ],
+        [
+          "are beyond personal security",
+          "mmnksemnohoou onehntusen"
+        ],
+        [
+          "they will promptly give us their",
+          "misnhanlmthertengrncomionnae"
+        ]
+      ]
+    },
+    {
+      "writer": "542",
+      "K": 10,
+      "n_targets": 10,
+      "ref_ids": [
+        "m03-114-01",
+        "m03-110-01",
+        "m03-110-05",
+        "m03-114-00",
+        "m03-110-04",
+        "m03-110-06",
+        "m03-114-03",
+        "m03-114-09",
+        "m03-110-09",
+        "m03-114-08"
+      ],
+      "target_ids": [
+        "m03-110-00",
+        "m03-114-06",
+        "m03-110-08",
+        "m03-114-07",
+        "m03-110-07",
+        "m03-110-03",
+        "m03-110-02",
+        "m03-114-05",
+        "m03-114-02",
+        "m03-114-04"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.7795698924731183,
+        "wid_dist": 0.5839634822756343,
+        "hwd": 3.2226933849176596,
+        "n_lines": 10,
+        "hyps": [
+          "mmnd drad acif rnstarf aas",
+          "irnnernercand f comscon hand",
+          "uhrmaniharf tr antsmon",
+          "meahen mrvidnaendnan",
+          "aram pomitfer craas",
+          "urmanin atr n inamanarsanaan",
+          "mnarefe win arsmianadnind",
+          "waincormsinnmeminas",
+          "malf umuandarationin",
+          "nwoiendsen drmansien"
+        ]
+      },
+      "oov": {
+        "cer": 0.7866666666666666,
+        "wid_dist": 0.5893313940684475,
+        "hwd": 3.358412712359517,
+        "n_lines": 2,
+        "hyps": [
+          "waincormsinnmemoinad",
+          "nwoiendsen drmannien"
+        ]
+      },
+      "gen_examples": [
+        [
+          "sally and of course mrs septimus for",
+          "mmnd drad acif rnstarf aas"
+        ],
+        [
+          "so mr gilberto told us that the wild and",
+          "irnnernercand f comscon hand"
+        ],
+        [
+          "to watch mr septimus more closely mrs",
+          "uhrmaniharf tr antsmon"
+        ]
+      ]
+    },
+    {
+      "writer": "547",
+      "K": 10,
+      "n_targets": 10,
+      "ref_ids": [
+        "m04-123-00",
+        "m04-107-05",
+        "m04-113-02",
+        "m04-123-08",
+        "m04-123-07",
+        "m04-138-07",
+        "m04-113-01",
+        "m04-131-00",
+        "m04-123-01",
+        "m04-113-06"
+      ],
+      "target_ids": [
+        "m04-138-05",
+        "m04-107-00",
+        "m04-113-08",
+        "m04-113-03",
+        "m04-107-02",
+        "m04-123-02",
+        "m04-131-08",
+        "m04-113-04",
+        "m04-131-06",
+        "m04-107-04"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.8703703703703703,
+        "wid_dist": 0.7516625842941501,
+        "hwd": 3.6747649934404505,
+        "n_lines": 10,
+        "hyps": [
+          "mean manen asan",
+          "mranromenmances cnnsar snr aentin asen wur",
+          "mue mrannen ssranenmannsan mr",
+          "ianermaner vaneanennonsen surrmnenee mrramas",
+          "mnainmannenmorcrranenmoen",
+          "msessasens nr aman aes tenanas imn un",
+          "wmmeneanenten enromeninene",
+          "mil umetenanar tin merenne",
+          "wintien aneenswernivhs anesen",
+          "asen tn anser incuner mseransen"
+        ]
+      },
+      "oov": {
+        "cer": 0.8840579710144928,
+        "wid_dist": 0.7544919230252013,
+        "hwd": 3.726371291513661,
+        "n_lines": 4,
+        "hyps": [
+          "mue mrannen ssranenmannsan mr",
+          "ianermaner vaneanennonsen surrmnenee mrramas",
+          "mil umetenanar tin merenne",
+          "wintien aneenswernivhs anesen"
+        ]
+      },
+      "gen_examples": [
+        [
+          "from their lethargy something was",
+          "mean manen asan"
+        ],
+        [
+          "but eth and me wanted to be",
+          "mranromenmances cnnsar snr aentin asen wur"
+        ],
+        [
+          "therefore mr roberts must have been",
+          "mue mrannen ssranenmannsan mr"
+        ]
+      ]
+    },
+    {
+      "writer": "552",
+      "K": 10,
+      "n_targets": 10,
+      "ref_ids": [
+        "m06-076-01",
+        "m06-031-04",
+        "m06-083-01",
+        "m06-083-04",
+        "m06-056-00",
+        "m06-042-02",
+        "m06-083-06",
+        "m06-048-01",
+        "m06-031-06",
+        "m06-048-02"
+      ],
+      "target_ids": [
+        "m06-106-03",
+        "m06-067-05",
+        "m06-098-01",
+        "m06-042-03",
+        "m06-067-03",
+        "m06-031-02",
+        "m06-083-02",
+        "m06-091-04",
+        "m06-042-00",
+        "m06-106-01"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.609375,
+        "wid_dist": 0.7129860579482119,
+        "hwd": 3.470061412553053,
+        "n_lines": 10,
+        "hyps": [
+          "ungd neurio uheereverenungd erergmo vheree",
+          "vesovevurg unergr uneio urtle or unee mirse",
+          "mmor uneere ong n grenc pourg re vemego",
+          "onemngge s burgrgon srgor rhenn hee ou do nenrso",
+          "inoese rad devoured nolen good ohempe",
+          "vesrgoy nionerepenmed unee vheree mupuire",
+          "veurevupureo ve nemechee uine no unos",
+          "nosed henneodecoorungd sioso or",
+          "theerg j vone heere rheerg orvone no unee",
+          "cor uheoverngegoigrloe ererguo unenn oeened"
+        ]
+      },
+      "oov": null,
+      "gen_examples": [
+        [
+          "and haris there were many events chief",
+          "ungd neurio uheereverenungd erergmo vheree"
+        ],
+        [
+          "well we can think this tribe of the true",
+          "vesovevurg unergr uneio urtle or unee mirse"
+        ],
+        [
+          "back there on a great plan we have go",
+          "mmor uneere ong n grenc pourg re vemego"
+        ]
+      ]
+    },
+    {
+      "writer": "553",
+      "K": 10,
+      "n_targets": 4,
+      "ref_ids": [
+        "n01-009-04",
+        "n01-009-02",
+        "n01-009-07",
+        "n01-009-06",
+        "n01-000-03",
+        "n01-009-05",
+        "n01-000-01",
+        "n01-000-00",
+        "n01-009-03",
+        "n01-000-06"
+      ],
+      "target_ids": [
+        "n01-000-04",
+        "n01-009-08",
+        "n01-000-02",
+        "n01-000-05"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.832,
+        "wid_dist": 0.6677899967741598,
+        "hwd": 3.2954783784078625,
+        "n_lines": 4,
+        "hyps": [
+          "mmos an aomupprman mors",
+          "mors",
+          "men urrormprmaen eonouerema",
+          "mu mpsarse umprrsaremumps"
+        ]
+      },
+      "oov": null,
+      "gen_examples": [
+        [
+          "his own life but geoffreys as well to a",
+          "mmos an aomupprman mors"
+        ],
+        [
+          "efficient",
+          "mors"
+        ],
+        [
+          "which must necessarily be subordinated",
+          "men urrormprmaen eonouerema"
+        ]
+      ]
+    },
+    {
+      "writer": "557",
+      "K": 10,
+      "n_targets": 3,
+      "ref_ids": [
+        "n01-052-01",
+        "n01-052-12",
+        "n01-052-07",
+        "n01-052-09",
+        "n01-052-06",
+        "n01-052-10",
+        "n01-052-02",
+        "n01-052-11",
+        "n01-052-03",
+        "n01-052-05"
+      ],
+      "target_ids": [
+        "n01-052-08",
+        "n01-052-00",
+        "n01-052-04"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.7653061224489796,
+        "wid_dist": 0.8522039015707286,
+        "hwd": 4.300885280044981,
+        "n_lines": 3,
+        "hyps": [
+          "wo tn rortentin hr mrin inisn",
+          "usin wrse uesin soun unussn",
+          "w rirorn iin ire suerisnn"
+        ]
+      },
+      "oov": null,
+      "gen_examples": [
+        [
+          "by special helicopter from the horse",
+          "wo tn rortentin hr mrin inisn"
+        ],
+        [
+          "they were nearing modena geoffrey",
+          "usin wrse uesin soun unussn"
+        ],
+        [
+          "along which he had motored so",
+          "w rirorn iin ire suerisnn"
+        ]
+      ]
+    },
+    {
+      "writer": "561",
+      "K": 10,
+      "n_targets": 6,
+      "ref_ids": [
+        "n02-028-06",
+        "n02-028-00",
+        "n02-049-01",
+        "n02-028-08",
+        "n02-028-07",
+        "n02-049-00",
+        "n02-028-03",
+        "n02-049-03",
+        "n02-028-05",
+        "n02-049-04"
+      ],
+      "target_ids": [
+        "n02-028-01",
+        "n02-028-09",
+        "n02-049-02",
+        "n02-028-02",
+        "n02-049-05",
+        "n02-028-04"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.8418079096045198,
+        "wid_dist": 0.5698072552416561,
+        "hwd": 4.020143858763009,
+        "n_lines": 6,
+        "hyps": [
+          "wh nmnnthr",
+          "mhrnliwhar",
+          "nnanan annantanwhr",
+          "mrminnhrinan tuts",
+          "mrnh a",
+          "wnr tht icrhinaith"
+        ]
+      },
+      "oov": null,
+      "gen_examples": [
+        [
+          "express their disgust at sir johns",
+          "wh nmnnthr"
+        ],
+        [
+          "north of the island",
+          "mhrnliwhar"
+        ],
+        [
+          "at balicou doesnt interest you in the",
+          "nnanan annantanwhr"
+        ]
+      ]
+    },
+    {
+      "writer": "577",
+      "K": 10,
+      "n_targets": 9,
+      "ref_ids": [
+        "n03-103-02",
+        "n03-103-01",
+        "n03-103-04",
+        "n03-103-06",
+        "n03-097-02",
+        "n03-103-00",
+        "n03-103-03",
+        "n03-103-08",
+        "n03-097-03",
+        "n03-103-09"
+      ],
+      "target_ids": [
+        "n03-097-04",
+        "n03-097-01",
+        "n03-103-05",
+        "n03-097-08",
+        "n03-097-06",
+        "n03-097-05",
+        "n03-097-07",
+        "n03-097-00",
+        "n03-103-07"
+      ],
+      "oov_flags": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 1.1564625850340136,
+        "wid_dist": 0.833999485802887,
+        "hwd": 2.9728333486864287,
+        "n_lines": 9,
+        "hyps": [
+          "bdcmer mantrnanrs surmerenis cnrtyr manemasnme scrsmon cn",
+          "iscosmernisaarme wxrty wxme earrmaens an dorscis me asmaman",
+          "seenanr crrends meccrcisnanermans senrad suarmanmannt",
+          "warred macmmimans",
+          "mnoonis namamen omeme aame somsemense mamaneneoran axmanan",
+          "srmnn suornat mer serdamaer an arat cxmaman sorcnar",
+          "saharlys meanaer cusarmermanr srodd cormasrn cxnarman",
+          "ur cosne csrmeamndernrionde mrnans mnat axmaman ounts",
+          "mmemans me sarmermaes aman srlp nensamins an"
+        ]
+      },
+      "oov": {
+        "cer": 0.972972972972973,
+        "wid_dist": 0.8282173580642946,
+        "hwd": 3.1600224816808846,
+        "n_lines": 1,
+        "hyps": [
+          "srmnn suornat mer serdamaer an arat cxmaman sercnar"
+        ]
+      },
+      "gen_examples": [
+        [
+          "black eyes showing any emotion with a",
+          "bdcmer mantrnanrs surmerenis cnrtyr manemasnme scrsmon cn"
+        ],
+        [
+          "is going to try to make a landing on the",
+          "iscosmernisaarme wxrty wxme earrmaens an dorscis me asmaman"
+        ],
+        [
+          "same time dropping the small sheet",
+          "seenanr crrends meccrcisnanermans senrad suarmanmannt"
+        ]
+      ]
+    },
+    {
+      "writer": "598",
+      "K": 10,
+      "n_targets": 9,
+      "ref_ids": [
+        "p02-090-01",
+        "p02-069-04",
+        "p02-090-07",
+        "p02-090-02",
+        "p02-069-01",
+        "p02-090-00",
+        "p02-069-06",
+        "p02-090-04",
+        "p02-090-08",
+        "p02-069-02"
+      ],
+      "target_ids": [
+        "p02-090-06",
+        "p02-069-00",
+        "p02-090-03",
+        "p02-069-09",
+        "p02-069-08",
+        "p02-069-03",
+        "p02-090-05",
+        "p02-069-05",
+        "p02-069-07"
+      ],
+      "oov_flags": [
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "n_failed": 0,
+      "gen_errors": [],
+      "all": {
+        "cer": 0.9621993127147767,
+        "wid_dist": 0.5875882126859204,
+        "hwd": 3.5693374359747194,
+        "n_lines": 9,
+        "hyps": [
+          "sover aschais andermem erprecade chewe ao chainnare",
+          "chawwas a as anereenechaieer andnchaw",
+          "savame nrcand a chaince favmeas",
+          "astachais as as tupne anad",
+          "achew fas mee cschais e fay ar ar",
+          "mee cschais o fas aschais try ande chew arcand",
+          "and ar chewricharnecand fay as chais cucwans as fas an",
+          "imcacs anden fay and cseechais eaas upre",
+          "ase chain faycouchai ea aocand e as eectais"
+        ]
+      },
+      "oov": {
+        "cer": 0.9253731343283582,
+        "wid_dist": 0.5926809861938687,
+        "hwd": 3.576891745196795,
+        "n_lines": 6,
+        "hyps": [
+          "sover aschais andermem erprecade chewe ao chainnare",
+          "chawwas a as anereenechaieer andnchaw",
+          "savame nrcand a chaince favmeas",
+          "achew fas mee cschais e fay ar ar",
+          "mee cschais o fas aschais try ande chew arcand",
+          "imcacs anden fay and cseechais eaas upre"
+        ]
+      },
+      "gen_examples": [
+        [
+          "view and remembering the advice",
+          "sover aschais andermem erprecade chewe ao chainnare"
+        ],
+        [
+          "gay a little puzzled went through",
+          "chawwas a as anereenechaieer andnchaw"
+        ],
+        [
+          "simone on to the floor it doesnt mean",
+          "savame nrcand a chaince favmeas"
+        ]
+      ]
+    }
+  ],
+  "skipped_writers": [
+    "196",
+    "594"
+  ],
+  "writer_errors": {},
+  "target_coverage": {
+    "writers_requested": 20,
+    "writers_scored": 18,
+    "writers_not_scored": [
+      "196",
+      "594"
+    ],
+    "targets_requested": 200,
+    "targets_scored": 131
+  },
+  "coverage": {
+    "letters_in_references": 3729,
+    "letters_absent": 22,
+    "fallback_rate": 0.005865102639296188,
+    "per_char": {
+      "a": {
+        "seen": 285,
+        "missing": 0
+      },
+      "b": {
+        "seen": 68,
+        "missing": 0
+      },
+      "c": {
+        "seen": 104,
+        "missing": 2
+      },
+      "d": {
+        "seen": 145,
+        "missing": 0
+      },
+      "e": {
+        "seen": 494,
+        "missing": 0
+      },
+      "f": {
+        "seen": 74,
+        "missing": 0
+      },
+      "g": {
+        "seen": 71,
+        "missing": 0
+      },
+      "h": {
+        "seen": 232,
+        "missing": 0
+      },
+      "i": {
+        "seen": 248,
+        "missing": 0
+      },
+      "j": {
+        "seen": 9,
+        "missing": 4
+      },
+      "k": {
+        "seen": 24,
+        "missing": 3
+      },
+      "l": {
+        "seen": 142,
+        "missing": 0
+      },
+      "m": {
+        "seen": 109,
+        "missing": 7
+      },
+      "n": {
+        "seen": 221,
+        "missing": 0
+      },
+      "o": {
+        "seen": 277,
+        "missing": 0
+      },
+      "p": {
+        "seen": 66,
+        "missing": 0
+      },
+      "q": {
+        "seen": 1,
+        "missing": 2
+      },
+      "r": {
+        "seen": 244,
+        "missing": 0
+      },
+      "s": {
+        "seen": 242,
+        "missing": 0
+      },
+      "t": {
+        "seen": 338,
+        "missing": 0
+      },
+      "u": {
+        "seen": 111,
+        "missing": 0
+      },
+      "v": {
+        "seen": 45,
+        "missing": 0
+      },
+      "w": {
+        "seen": 92,
+        "missing": 0
+      },
+      "x": {
+        "seen": 1,
+        "missing": 1
+      },
+      "y": {
+        "seen": 86,
+        "missing": 0
+      },
+      "z": {
+        "seen": 0,
+        "missing": 3
+      }
+    }
+  },
+  "note": "real row = half of each writer's held-out real lines scored against the other half"
+}
