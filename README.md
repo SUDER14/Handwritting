@@ -1,288 +1,139 @@
-# Personalized Handwriting Generator
+# Handwriting style synthesis: line-level generation, scored on unseen IAM writers
 
-AI system that learns a person's handwriting style from a small
-handwritten sample (even a single word) and generates the rest of the
-alphabet in that style, then renders arbitrary text using the result.
+Given a line of someone's handwriting, generate arbitrary text in that handwriting, and measure two things on real writers
+the system never trained on: **legibility** (can a frozen recognizer read it?) and **style fidelity** (does it look like
+that writer?). Three generators are compared under one protocol: a non-learned font-glyph **baseline**, an EMNIST **glyph
+VAE** (ablation) and **VATr** (Pippi et al.), the line-level few-shot model, run with its released checkpoint.
 
-## Problem statement
+> **Status (read this first).** Everything below the line "Results" was produced on a CPU-only 4-core host, so every
+> trained component is **CPU-reduced** (training caps divided by 4) and every table row is a **20-writer subset** of the 161
+> test writers. **GATE 3 is OPEN**: the VATr reproduction gave HWD **0.6069 against the published 0.828** (outside the
+> 10% band 0.745-0.911), and the VATr protocol rows are **PENDING COLAB**. No VATr number is in this README that did not
+> come from a file. See `docs/gate3_audit.md` and `FINAL_REPORT.md`.
 
-Given a photo of a short handwritten sample (e.g. the word "quick"),
-generate the characters the person did *not* write (`a, b, d, e, f, ...`)
-so that they look like they belong to the same handwriting — then use
-the resulting personalized alphabet to render any text the user types.
+## Data provenance
 
-## Motivation
+* **IAM Handwriting Database** (Marti & Bunke, *The IAM-database: an English sentence database for offline handwriting
+  recognition*, IJDAR 5(1), 2002). Licensed; **never committed** (`data/iam/*` is gitignored).
+* **Lines and text**: Hugging Face `Teklia/IAM-line` (image + text, no writer id) and `xReniar/IAM-Dataset` (line id + text
+  per form). `scripts/join_teklia.py` joins them to writers through IAM's official `forms.txt` (form -> writer): a Teklia
+  row is kept only when its text matches exactly one line id inside the writer group its split allows. Match rate 0.9024
+  (9360 of 10373 rows), 1013 rows excluded and logged, zero forms with conflicting writers.
+* **`forms.txt`** is IAM's own file (supplied by hand; licensed). It was **committed by mistake in commit `5150ef8`** and is
+  therefore in the **public git history** of this repository (it is untracked and gitignored since `5457f3b`, but the
+  history was deliberately not rewritten). Treat that file as published.
+* **Canonical split**: the IAM writer split of HWT/VATr (283 train / 56 val / 161 test writers; `data/splits/vatr/*.json`,
+  made by `scripts/make_vatr_split.py`). Test writers are never seen by any trained component (asserted in the data loader).
+* **HWD** (Handwriting Distance): Pippi et al., BMVC 2023, official repo `aimagelab/HWD` at `eabb5b5` (pretrained VGG16
+  backbone, downloaded by the official code, not stored here).
+* **VATr**: Pippi et al., *Handwritten Text Generation from Visual Archetypes*, CVPR 2023, official repo `aimagelab/VATr`
+  at `183501e` with the released checkpoint. Both repos are cloned into `third_party/` (gitignored) and are **not edited**;
+  all adaptations are runtime shims (`src/generator/vatr_backend.py`).
 
-Personalized handwriting synthesis has applications in accessibility
-(assistive writing tools), personalization (digital cards, notes),
-education, and as a research testbed for few-shot style transfer more
-broadly. The interesting constraint is the "few-shot" part: real users
-will not hand-write all 26 letters, so the system must generalize a
-writer's *style* from a handful of *characters*.
-
-## Existing research vs. this implementation
-
-Handwriting synthesis and style transfer are established research areas
-(e.g. GAN- and diffusion-based handwriting generation, RNN stroke models
-like Graves 2013's seminal work). This project does not claim the
-overall concept is novel. Where this implementation focuses novelty (per
-its scope, honestly stated) is:
-- a genuinely **few-shot** setting (a handful of characters, not a full
-  labeled writer corpus) — see docs/methodology.md,
-- **partial-alphabet inference** with an explicit hybrid policy (real
-  observed glyphs preserved, only unobserved ones generated),
-- a directly comparable **non-learned baseline** vs. a **learned
-  conditional VAE**, evaluated with the same quantitative metrics
-  (docs/experiments.md), and
-- an architecture designed to run entirely on a modest CPU-only machine.
-
-## Architecture
-
-See `docs/architecture.md` for the full diagram and rationale. In short:
-
-```
-photo -> preprocess -> segment -> recognize -> extract style features
-      -> generate missing letters (baseline CV transform, or a trained
-         conditional VAE) -> personalized alphabet -> render any text
-```
-
-## Technologies
-
-Python 3.12, OpenCV, scikit-image, NumPy/SciPy, PyTorch (CPU),
-torchvision, Hugging Face `datasets` (EMNIST source), Streamlit, pytest.
-
-## Installation
+## Setup
 
 ```powershell
 python -m venv venv
 venv\Scripts\pip install -r requirements.txt
+venv\Scripts\python -m pytest tests -q          # full suite
 ```
 
-(This repo's venv was created and populated during development; re-run
-the above only if setting up fresh.)
+IAM goes under `data/iam/` (layout in `docs/iam_setup.md`); put the licensed `forms.txt` at the repo root. Use
+`venv\Scripts\python` for everything (system Python lacks OpenCV). No GPU is needed for the baseline/glyph_vae/measurement
+stages; VATr generation needs CUDA (`notebooks/colab_train.ipynb`).
 
-## Usage
+## Commands per stage
 
-### 1. Run the Streamlit app (recommended)
-
-```powershell
-venv\Scripts\streamlit run app/app.py
-```
-
-Then: upload a handwriting image (PNG/JPG/JPEG), type the word you wrote,
-review detected characters + style analysis, generate the alphabet,
-preview it, type any text, and generate/download the rendered result.
-
-A trained CNN recognizer (`src/recognition/cnn_recognizer.py`, see
-Training below) adds a "Recognition check" panel showing, per character,
-whether the model's own pixel-level reading agrees with what you typed and
-how confident it is — a mismatch usually flags a segmentation problem
-(commonly a touching cursive join) rather than a bad classification. You
-can also tick "Auto-detect the word with the trained CNN instead"
-(experimental) to have the CNN read the word directly, with no typed label
-required.
-
-### 2. Command-line
-
-```powershell
-# Generate a personalized alphabet from a sample image.
-venv\Scripts\python scripts\generate_alphabet.py --image data\samples\quick_sample.png --label quick --backend baseline --session-id demo
-
-# Render arbitrary text using that alphabet.
-venv\Scripts\python scripts\generate_text.py --session-id demo --text "the quick fox" --out outputs\generated_text\demo.png
-```
-
-`--backend neural` uses the trained conditional VAE instead (requires a
-checkpoint — see Training below).
-
-### 3. Create your own test sample
-
-No scanner needed for a quick smoke test — a synthetic (font-rendered,
-noise-added) sample generator is included:
-
-```powershell
-venv\Scripts\python scripts\make_synthetic_sample.py
-```
-
-## Glyph geometry
-
-Every glyph carries a `GlyphMetrics` (`advance_width`, `x_height`, `baseline_offset`, `bbox`; conventions in
-`src/generator/glyph.py`). The renderer scales each glyph to a common x-height and places it by baseline, so real
-crops (~100 px), VAE output (28 px) and font-derived glyphs mix correctly and g j p q y drop below the line.
-Observed glyphs get their metrics measured from the sample; the VAE's 28x28 glyphs get them from typographic
-priors (`glyph_metrics:` in `config/config.yaml`) because EMNIST-style output carries no absolute size.
-
-## Real data: IAM (writer-disjoint splits)
-
-The IAM Handwriting Database is licensed and is **not** in this repo. Put it
-under `data/iam/` in the standard layout (`ascii/{forms,lines,words}.txt`,
-`lines/a01/a01-000u/*.png`, `words/...`); `src/data/iam.py` reads it, groups
-samples by writer via `forms.txt`, and exposes a writer-disjoint train/val/test
-split. The **canonical** split (`data.iam.split_source: vatr`) is the IAM writer split of HWT/VATr
-(`data/splits/vatr/{train,val,test}.json`, 283/56/161 writers; built by `scripts/make_vatr_split.py`).
-The old self-made split (a pure function of `data.iam.split_seed`, `data/splits/seeded/`) is **fallback only**
-(`split_source: seeded`). Fixed files are checked for writer overlap and unknown writers on every load; the seeded
-files are re-verified against the seed.
-
-```powershell
-venv\Scripts\python scripts\check_split.py      # asserts zero writer overlap, prints per-split counts
-```
-
-```python
-from src.data.iam import load_iam
-val = load_iam("val", unit="lines")
-image, transcription, writer_id = val[0]   # uint8 gray, fixed height, variable width
-```
-
-`data/samples/{quick,hello}_sample.png` are font-rendered and exist **only as a
-smoke test**; never report metrics computed on them as results.
-
-## Training the neural style encoder
-
-```powershell
-venv\Scripts\python scripts\preprocess_dataset.py   # optional sanity check
-venv\Scripts\python scripts\train_style_encoder.py
-```
-
-Downloads EMNIST-letters (via Hugging Face Hub — see
-`src/utils/emnist_source.py` for why not torchvision's built-in
-downloader) and trains the conditional VAE (`src/style_encoder/model.py`).
-Checkpoints are written to `models/checkpoints/style_vae.pt`
-(config: `training.checkpoint_path`). Default config trains on a 40k-image
-subset for 8 epochs (~20-25 min on a 4-core CPU, no GPU) — adjust
-`training.max_train_samples` / `training.epochs` in `config/config.yaml`
-for a longer, higher-quality run.
-
-## Training the CNN character recognizer
-
-```powershell
-venv\Scripts\python scripts\train_cnn_recognizer.py
-```
-
-Trains `src/recognition/cnn_model.py::CharCNN` (a small discriminative
-classifier, separate from the generative style VAE above) on EMNIST-letters
-with random-affine + morphological (erosion/dilation) + noise augmentation,
-so it tolerates slant and variable stroke width rather than only upright
-EMNIST-style printing — this is what lets `recognition.backend: "cnn"`
-(`src/recognition/cnn_recognizer.py`) actually detect a character from its
-pixels, instead of trusting a typed label. Checkpoint:
-`models/checkpoints/char_cnn.pt` (config: `recognition_training.
-checkpoint_path`); default config trains on a 20k-image subset for 10
-epochs (~40 min on a 4-core CPU, no GPU) — adjust
-`recognition_training.max_train_samples` / `.epochs` in `config/config.yaml`
-for a longer run.
-
-## Evaluation harness
-
-```powershell
-venv\Scripts\python scripts\evaluate.py --split val                 # baseline generator, validation writers
-venv\Scripts\python scripts\evaluate.py --split val --backend neural
-venv\Scripts\python scripts\evaluate.py --smoke                     # synthetic samples: smoke test, NOT a result
-```
-
-Two headline metrics, always reported together: **legibility** = CER of the CNN
-recognizer reading the generated text back, and **style fidelity** = cosine
-distance between writer-ID embeddings of the generated and the reference image.
-The writer-ID model is not trained yet; `src/evaluation/writer_id.py` provides
-the interface plus a rule-based **stub**, and every run records `is_stub`.
-Each run writes `results/<utc-timestamp>_<git-sha>/metrics.json` (git SHA, full
-resolved config, checkpoint paths + SHA-256, split, per-sample and aggregate
-metrics) and appends a row to `results/index.csv`. The test split needs
-`--allow-test`. Leave-one-out SSIM rebuilds the style profile from the remaining
-characters only (`src/evaluation/loo.py`).
-
-## Evaluation
-
-```powershell
-venv\Scripts\python -m pytest tests/ -v
-```
-
-37+ unit tests across preprocessing, segmentation, feature extraction,
-generation, rendering, recognition, and the VAE architecture, plus an
-end-to-end test (`tests/test_end_to_end.py`) covering the full
-image-to-rendered-text pipeline. Quantitative generation-quality metrics
-(SSIM, recognition accuracy, writer-style similarity) are in
-`src/evaluation/metrics.py` — see `docs/experiments.md` for the
-evaluation protocols built on top of them.
+| Stage | Command |
+|---|---|
+| 0 data | `python scripts/join_teklia.py` then `python scripts/make_vatr_split.py`, `python scripts/materialize_iam.py`, `python scripts/check_split.py` |
+| 1.1 writer-ID net | `python scripts/train_writer_id.py` (config cap 10 epochs = 40/4) |
+| 1.2 HWD sanity | `python scripts/hwd_sanity.py` -> `results/hwd_sanity.json` |
+| 1.3 recognizer | `python scripts/train_crnn.py` (config cap 15 epochs = 60/4) |
+| 1.4 / 2 / 3.5 protocol | `python scripts/evaluate.py --mode protocol --backends real baseline glyph_vae --allow-test` (add `vatr` on Colab) |
+| 3.2 VATr reproduction | Colab: `python scripts/vatr_reproduce.py --device cuda --batch_size 32` (`--skip-generation` reuses images) |
+| 3.2 audit | Colab: `python scripts/vatr_hwd_audit.py --device cuda` (see `docs/gate3_audit.md`) |
+| 3.6 samples | `python scripts/make_samples.py --backends real baseline glyph_vae --allow-test` |
+| 4 user sample -> references | `python scripts/stage4_measure.py words --allow-test`, `... deskew --allow-test` |
+| 5.1 K-sweep | `python scripts/evaluate.py --mode protocol --backends baseline --ks 3 10 15 --allow-test`, then `python scripts/plot_k_sweep.py` |
+| 5.2 per-writer | `python scripts/analyze_per_writer.py` |
+| 5.3 metric agreement | `python scripts/metric_agreement.py` then `python scripts/analyze_metric_agreement.py` |
+| 5.4 human check | `python scripts/make_human_check.py` (you rate `results/human_check/human_check.csv`) |
+| merge Colab VATr rows | `python scripts/merge_vatr_rows.py --colab-table <protocol_table.csv> --colab-results <dir> [--allow-sweep]` |
+| 6.1 app | `venv\Scripts\streamlit run app/app.py` |
 
 ## Results
 
-Full test suite: **40/40 passing** (`pytest tests/`), including two
-end-to-end scenarios covering the whole image-to-rendered-text pipeline.
+All rows: IAM **test** split, the seeded **20-writer subset** (seed 1337, 20 of 161 writers), 10 target lines per writer,
+instruments pinned to the GATE-1 runs (`writerid_20260921T180911Z_ed897d02_cpu_r1`, `crnn_20260922T003942Z_d1f87b49_cpu_r1`),
+all instruments **CPU-reduced** (writer-ID 10 epochs, CRNN 15 epochs, i.e. the ROADMAP caps /4). Lower is better for all
+three columns. Source: `results/protocol_table.csv` (each row has its `metrics.json` under `results/<run_id>/`).
 
-Conditional VAE trained on EMNIST-letters (6 epochs, 6,000-image subset —
-reduced from the intended 40,000/8 by this dev machine's available RAM,
-see docs/development_log.md): validation loss decreased monotonically
-every epoch, 208.3 -> 137.5, no overfitting observed.
+| backend | K | CER (legibility) | writer-ID dist | HWD | how produced |
+|---|---|---|---|---|---|
+| real (upper bound) | 1 | 0.1038 | 0.0158 | 0.771 | half of the held-out real lines vs the other half; 20-writer subset, CPU-reduced instruments |
+| real (upper bound) | 5 | 0.0934 | 0.0215 | 0.898 | same |
+| baseline (font glyphs) | 1 | 0.8001 | 0.6861 | 3.443 | non-learned; 20-writer subset, CPU-reduced instruments |
+| baseline (font glyphs) | 5 | 0.8352 | 0.6765 | 3.463 | same |
+| glyph_vae (EMNIST VAE, ablation) | 1 | 0.7954 | 0.4528 | 4.354 | VAE trained on 6000 EMNIST images x 6 epochs (CPU-reduced); 20-writer subset |
+| glyph_vae (EMNIST VAE, ablation) | 5 | 0.8086 | 0.4994 | 4.244 | same |
+| **VATr** | 1 | **PENDING COLAB** | **PENDING COLAB** | **PENDING COLAB** | Colab GPU, 20-writer subset, pinned (CPU-reduced) instruments |
+| **VATr** | 5 | **PENDING COLAB** | **PENDING COLAB** | **PENDING COLAB** | same |
 
-Baseline vs. neural comparison on a synthetic "quick" sample
-(`scripts/evaluate.py`):
+Notes that matter when reading the table:
 
-| Metric | Baseline (CV transform) | Neural (conditional VAE) |
-|---|---|---|
-| Recognition accuracy (OCR proxy) | 30.8% | 11.5% |
-| Writer-style similarity (cosine) | 0.786 | 0.791 |
-| Leave-one-out SSIM (mean) | 0.203 | 0.219 |
+* The two synthetic backends are close to illegible to the frozen recognizer (CER about 0.8); the real row is the floor
+  of what these instruments can measure (CER about 0.10).
+* **glyph_vae beats baseline on writer-ID distance but loses on HWD.** The two style metrics disagree; the analysis of why
+  is in `docs/metric_agreement.md`.
+* K=1 and K=5 real rows differ because the seeded reference/target draw depends on K.
 
-The neural model's style-capture metrics (similarity, SSIM) are
-competitive with the baseline, but its generated *alphabet* is visibly
-undertrained (many unobserved letters collapse toward similar shapes) —
-a direct, documented consequence of the memory-constrained training run,
-not an architectural issue. See `docs/development_log.md` for the full
-diagnosis and `docs/future_work.md` for the fix (retrain with the
-original config once more RAM is available).
+### VATr reproduction (GATE 3, open)
 
-CNN character recognizer (`models/checkpoints/char_cnn.pt`, trained on
-EMNIST-letters with slant/stroke-width/noise augmentation — see "Training
-the CNN character recognizer" above): reached **88.8% validation
-accuracy** after 2 of the configured 10 epochs before this session hit the
-same memory-constrained-machine kill documented for the VAE above (see
-`docs/development_log.md`'s 2026-09-15 entry); re-running for the full 10
-epochs once more RAM is available is a pure re-run, no code changes
-needed. On the two real end-to-end samples in `data/samples/`, its
-independent reading of each segmented glyph agreed with the typed label
-on 4/5 characters for both `quick_sample.png` and `hello_sample.png`
-(`recognize_with_cnn` cross-check), with both disagreements landing at
-visibly lower confidence (0.66, 0.82) than the agreements (0.92-0.99) —
-the low-confidence signal correctly flags the uncertain reads.
+| | value |
+|---|---|
+| published HWD, VATr on IAM test (Pippi et al. 2023, Table 2) | 0.828 |
+| reproduced here (Colab, 25766 image pairs, 161 writers, pinned HWD, `--batch_size 32`) | **0.6069** (reported by the user from `results/vatr_reproduction.json`; the file is not on the CPU host) |
+| relative difference | 0.267 (gate: within 10%, i.e. 0.745-0.911) -> **NOT PASSED** |
 
-## Limitations
+The result is *better* than published, which points at a protocol difference rather than a generation bug. The leading,
+untested hypothesis is the white padding VATr writes into both image folders (batch-dependent). `docs/gate3_audit.md`
+lists the paper-vs-ours protocol diff and the exact Colab cells that test it. The gate and its thresholds are unchanged.
 
-See `docs/limitations.md` for a stage-by-stage list — most importantly:
-segmentation now splits common touching/cursive-joined letters via a
-projection-profile heuristic, but it is still a heuristic (not a learned
-model) and heavily overlapping cursive can still be misattributed; the
-default recognition backend (`labeled`) still trusts a user-supplied
-label rather than solving open-vocabulary recognition (the `cnn` backend
-does attempt real open-vocabulary detection, at EMNIST-limited accuracy —
-see below); and the neural generator is trained on EMNIST (which has no
-writer-ID metadata), not a writer-labeled corpus.
+### K-sweep, per-writer analysis, metric agreement
 
-## Future work
+* K-sweep (baseline; VATr pending): `results/figures/k_sweep.png`, `results/figures/k_sweep_baseline.csv`.
+* Per-writer correlations with slant / stroke width / cursiveness: `results/figures/per_writer_correlations.csv`,
+  `results/figures/per_writer_{baseline,glyph_vae}.png`.
+* Writer-ID vs HWD agreement and the explanation tests: `docs/metric_agreement.md`, `results/metric_agreement/`,
+  `results/figures/metric_{scatter,disagreement}.png`.
 
-See `docs/future_work.md`. Done since the original MVP: the CNN character
-recognizer and cursive-aware (projection-profile) segmentation splitting.
-Remaining: segmentation-free CRNN+CTC HTR for true cursive words,
-writer-labeled-dataset training with a writer-identity loss,
-uppercase/digit charsets, cursive *joining* in the renderer (output side),
-stroke-trajectory (vector, not raster) generation, SVG/font export, and
-more.
+## App
 
-## Project structure
+`venv\Scripts\streamlit run app/app.py`: choose an IAM demo writer or upload a line (plus its text), pick
+real / baseline / glyph_vae, type text, and see the output with its CER, writer-ID distance and HWD. VATr is a switch that
+stays disabled, with the reason shown, unless the released checkpoint and a CUDA GPU are present. The first score loads
+the frozen instruments (including the 500 MB HWD backbone) and takes a while on CPU. The earlier alphabet-building UI is in
+`app/legacy_app.py`.
+
+## Deviations and limits (full list in `FINAL_REPORT.md`)
+
+* No CUDA on the development host: all training caps /4, all trained results CPU-reduced, evaluation on a 20-writer subset.
+* The writer-ID net is a ResNet-18 block layout with widths 32/64/128/256 (2.87M parameters), not the standard 64-512.
+* Setting up the first VATr smoke test downloaded torchvision's ImageNet `resnet18` (45 MB, not on the allow-list) through
+  VATr's constructor; its weights are overwritten by the checkpoint, no result depends on it, and a shim now prevents it.
+* `forms.txt` is in public git history (above).
+* Deferred: real-photo test of the user-sample pipeline (4.3, needs `data/user_photos/`), human ratings (5.4), VATr rows (Colab).
+
+## Repository map
 
 ```
-handwriting-ai/
-  README.md
-  requirements.txt
-  config/config.yaml
-  data/{raw,processed,samples}/
-  models/checkpoints/
-  src/
-    preprocessing/   segmentation/   recognition/   features/
-    style_encoder/   generator/      renderer/       evaluation/   utils/
-  app/app.py                     # Streamlit UI
-  tests/                         # pytest unit + end-to-end tests
-  scripts/                       # CLI entry points (train, generate, preprocess)
-  outputs/{alphabets,generated_text}/
-  docs/                          # architecture, methodology, experiments, limitations, future_work, development_log
+app/            Streamlit app (app.py) + the old alphabet UI (legacy_app.py)
+config/         config.yaml (pinned instruments, protocol, paths)
+src/            data/ evaluation/ generator/ recognition/ segmentation/ preprocessing/ writer_id/ analysis/ ...
+scripts/        one script per stage (table above)
+results/        protocol_table.csv, per-run metrics.json, figures/, metric_agreement/, human_check/
+docs/           architecture, methodology, iam_setup, gate3_audit, metric_agreement, ...
+notebooks/      colab_train.ipynb (GPU runs: training, VATr reproduction, VATr protocol rows)
+ROADMAP.md / ROADMAP_STATE.md / PROJECT_STATUS.md / FINAL_REPORT.md
 ```
