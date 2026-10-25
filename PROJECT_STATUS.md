@@ -26,8 +26,8 @@ caps /4 ("CPU-reduced") and every protocol row is a **20-writer subset** (seed 1
 | 2 baseline | PASSED | real/baseline/glyph_vae x K=1,5 rows present; shear test passes |
 | **3 VATr** | **OPEN** | 3.2 reproduction 0.6069 vs 0.828 NOT PASSED; 3.5/3.6 VATr rows + samples pending Colab; 3.3 wrapper done; 3.4 fine-tuning skipped (no GPU) |
 | 4 user sample | PASSED | word count within +-1 on 0.865 of 200 test lines (>=0.80); deskew synthetic test passes; 4.3 real photos DEFERRED [HUMAN] |
-| 5 experiments | see FINAL_REPORT.md | 5.1/5.2/5.3 done for the backends that exist without VATr; 5.4 human ratings DEFERRED [HUMAN] |
-| 6 product | see FINAL_REPORT.md | app + README + this file |
+| 5 experiments | files present; VATr parts PENDING | 5.1 K-sweep (baseline), 5.2 per-writer, 5.3 metric agreement (rho 0.5767 overall, 0.2009 baseline, 0.1110 glyph_vae) done; 5.4 human ratings DEFERRED [HUMAN] |
+| 6 product | done | app headless smoke tests pass, README + this file rewritten; full suite 185 passed, 1 skipped |
 
 ## Results table (results/protocol_table.csv)
 
@@ -54,7 +54,7 @@ caps /4 ("CPU-reduced") and every protocol row is a **20-writer subset** (seed 1
 | `src/analysis/writer_features.py`, `scripts/analyze_per_writer.py`, `plot_k_sweep.py`, `metric_agreement.py`, `analyze_metric_agreement.py`, `make_human_check.py`, `merge_vatr_rows.py` | Stage 5 |
 | `src/app_logic.py`, `app/app.py` | Stage 6 Streamlit app (`app/legacy_app.py` = the old alphabet UI) |
 | `scripts/vatr_reproduce.py`, `vatr_hwd_audit.py`, `vatr_smoke.py`, `notebooks/colab_train.ipynb` | VATr on Colab / the GATE 3 audit |
-| `tests/` | full suite (count in FINAL_REPORT.md) |
+| `tests/` | full suite: 185 passed, 1 skipped (accelerate not installed) |
 
 ## Known issues and open items
 
