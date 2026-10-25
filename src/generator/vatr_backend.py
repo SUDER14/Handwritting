@@ -20,6 +20,8 @@ edited; runtime shims (wandb stub, unused FID InceptionV3 stub, map_location) ar
 from __future__ import annotations
 
 import contextlib
+import importlib.machinery
+import importlib.util
 import os
 import re
 import sys
@@ -148,6 +150,24 @@ def _cwd(path: Path):
         os.chdir(old)
 
 
+def install_wandb_stub() -> None:
+    """Stub `wandb` (train.py imports it for logging only). The stub needs a real __spec__: with __spec__ None,
+    importlib.util.find_spec("wandb") -- called by accelerate/transformers -- raises ValueError. With a spec but no
+    dist metadata, accelerate treats wandb as unavailable, which is what we want."""
+    if "wandb" in sys.modules:
+        return
+    stub = types.ModuleType("wandb")
+    stub.__spec__ = importlib.machinery.ModuleSpec("wandb", loader=None)
+    stub._is_vatr_stub = True
+    sys.modules["wandb"] = stub
+
+
+def remove_wandb_stub() -> None:
+    """Drop the stub (only ours, never a real wandb) so later imports (HWD -> transformers) see wandb as absent."""
+    if getattr(sys.modules.get("wandb"), "_is_vatr_stub", False):
+        del sys.modules["wandb"]
+
+
 def apply_runtime_shims(vatr_root: Path, device: str) -> None:
     """Runtime-only patches (nothing in third_party/VATr is edited), all logged in ROADMAP_STATE.md:
       * `wandb` stubbed (imported by train.py; logging only);
@@ -159,7 +179,7 @@ def apply_runtime_shims(vatr_root: Path, device: str) -> None:
       * UnifontModule's hardcoded device='cuda' default follows `device` (CPU hosts; a no-op on CUDA).
     """
     import torch.nn as nn
-    sys.modules.setdefault("wandb", types.ModuleType("wandb"))
+    install_wandb_stub()
     if str(vatr_root) not in sys.path:
         sys.path.insert(0, str(vatr_root))
     with _cwd(vatr_root):

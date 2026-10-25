@@ -58,7 +58,11 @@ def generate(out_dir: Path, batch_size: int, device: str) -> None:
     mm.VATr.save_images_for_fid_calculation = test_only
     sys.argv = ["generate_fakes.py", "--checkpoint", "files/vatr.pth", "--output", str(out_dir),
                 "--device", device, "--batch_size", str(batch_size)]
-    _run_generate_fakes()
+    try:
+        _run_generate_fakes()
+    finally:
+        from src.generator.vatr_backend import remove_wandb_stub
+        remove_wandb_stub()                                 # HWD -> transformers -> accelerate must not see the stub
 
 
 def patched_generate_fakes_code():
@@ -76,6 +80,33 @@ def patched_generate_fakes_code():
 def _run_generate_fakes() -> None:
     code, ns = patched_generate_fakes_code()
     exec(code, ns)
+
+
+def expected_test_count() -> int:
+    """Number of Fake_test images generate_fakes.py produces: one per entry of the test FidDataset it iterates
+    (save_images_for_fid_calculation writes real+fake per dataset index). Built with VATr's own FidDataset and the
+    script's own dataset path, so no number is hardcoded."""
+    import os
+    sys.path.insert(0, str(VATR))
+    cwd = os.getcwd()
+    os.chdir(VATR)
+    try:
+        from data.dataset import FidDataset
+        return len(FidDataset(base_path="files/IAM-32.pickle", num_examples=15, collator_resolution=16, mode="test"))
+    finally:
+        os.chdir(cwd)
+
+
+def check_complete(img_dir: Path, expected: int) -> None:
+    """Refuse to score a partial generation: Fake_test and Real_test must each hold exactly `expected` PNGs."""
+    counts = {d: sum(1 for _ in (img_dir / d).rglob("*.png")) if (img_dir / d).is_dir() else 0
+              for d in ("Fake_test", "Real_test")}
+    print(f"[vatr_reproduce] --skip-generation: expected {expected} images; found "
+          + ", ".join(f"{d}={n}" for d, n in counts.items()), flush=True)
+    bad = {d: n for d, n in counts.items() if n != expected}
+    if bad:
+        raise SystemExit(f"refusing to score a partial/mismatched generation (expected {expected}, found {bad}); "
+                         "rerun without --skip-generation")
 
 
 def score(img_dir: Path) -> dict:
@@ -96,13 +127,17 @@ def main() -> int:
     ap.add_argument("--batch_size", type=int, default=8)
     ap.add_argument("--stage", choices=["all", "generate", "score"], default="all")
     ap.add_argument("--device", default="cpu", help="cpu (this host) | cuda (Colab)")
+    ap.add_argument("--skip-generation", action="store_true",
+                    help="reuse existing Fake_test/Real_test images; refuses unless the counts equal the test-set size")
     args = ap.parse_args()
     out = Path(args.out)
     img_dir = out / "vatr"                                  # generate_fakes appends the checkpoint stem
     t0 = time.time()
-    if args.stage in ("all", "generate"):
+    if args.skip_generation:
+        check_complete(img_dir, expected_test_count())
+    elif args.stage in ("all", "generate"):
         generate(out, args.batch_size, args.device)
-    if args.stage in ("all", "score"):
+    if args.stage in ("all", "score") or args.skip_generation:
         from src.evaluation.harness import git_info       # noqa: E402
         res = score(img_dir)
         rel = abs(res["hwd"] - PUBLISHED_HWD) / PUBLISHED_HWD
