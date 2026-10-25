@@ -1,0 +1,39 @@
+{
+  "writers": [
+    "172",
+    "173",
+    "179",
+    "190",
+    "196",
+    "283",
+    "286",
+    "292",
+    "315",
+    "513",
+    "514",
+    "542",
+    "547",
+    "552",
+    "553",
+    "557",
+    "561",
+    "577",
+    "594",
+    "598"
+  ],
+  "K": 1,
+  "n_rows": 600,
+  "wall_s": 182.01653385162354,
+  "writer_id": {
+    "name": "writer_id:writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "is_stub": false,
+    "run_id": "writerid_20260921T180911Z_ed897d02_cpu_r1",
+    "checkpoint": "best.pt",
+    "test_top1": 0.7319291527046433,
+    "test_map": 0.5650027956358793,
+    "test_chance_top1": 0.011032823619246703,
+    "min_usable_top1": 0.6,
+    "usable": true
+  },
+  "note": "per-sample metrics; real rows are leave-one-out"
+}

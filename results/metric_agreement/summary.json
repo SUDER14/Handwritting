@@ -1,0 +1,430 @@
+{
+  "n_samples": {
+    "real": 200,
+    "baseline": 200,
+    "glyph_vae": 200
+  },
+  "spearman_wid_vs_hwd": {
+    "overall": {
+      "rho": 0.5767,
+      "p": 1.771585260586784e-54,
+      "n": 600
+    },
+    "real": {
+      "rho": 0.4706,
+      "p": 2.041772306739851e-12,
+      "n": 200,
+      "mean_within_writer_rho": 0.3442,
+      "n_writers_within": 20
+    },
+    "baseline": {
+      "rho": 0.2009,
+      "p": 0.004336959907198501,
+      "n": 200,
+      "mean_within_writer_rho": -0.0558,
+      "n_writers_within": 20
+    },
+    "glyph_vae": {
+      "rho": 0.111,
+      "p": 0.11764594318619828,
+      "n": 200,
+      "mean_within_writer_rho": 0.1273,
+      "n_writers_within": 20
+    }
+  },
+  "means": {
+    "real": {
+      "wid_dist": 0.05195780525835835,
+      "hwd": 1.3938673997315771,
+      "stroke_px": 5.179767899513244,
+      "lean_deg": 10.199386237171455,
+      "ink_density": 0.09525841420124709,
+      "cc_per_word": 4.291210317460317
+    },
+    "baseline": {
+      "wid_dist": 0.6887163929897079,
+      "hwd": 3.5423851131333377,
+      "stroke_px": 2.8419999861717224,
+      "lean_deg": 2.196538101550525,
+      "ink_density": 0.023095137697074986,
+      "cc_per_word": 7.676218253968255
+    },
+    "glyph_vae": {
+      "wid_dist": 0.4591639515788832,
+      "hwd": 4.481477044710058,
+      "stroke_px": 16.500264444351195,
+      "lean_deg": 2.967339540588921,
+      "ink_density": 0.07682234229128498,
+      "cc_per_word": 6.968628968253969
+    }
+  },
+  "mean_gap": {
+    "real": {
+      "gap_stroke": 0.08569988397692327,
+      "gap_density": 0.09562503306952501,
+      "gap_lean": 2.1771250351936966,
+      "gap_cc": 0.2155151524822388
+    },
+    "baseline": {
+      "gap_stroke": 0.40252001968074447,
+      "gap_density": 0.7473189730772453,
+      "gap_lean": 8.994183997007495,
+      "gap_cc": 1.0222316983004258
+    },
+    "glyph_vae": {
+      "gap_stroke": 2.329314878645015,
+      "gap_density": 0.3097201822656366,
+      "gap_lean": 13.972829960154613,
+      "gap_cc": 0.7413834657174979
+    }
+  },
+  "gap_correlations_generated": {
+    "gap_stroke": {
+      "wid_dist": {
+        "rho": -0.3718,
+        "p": 1.4692012567707533e-14,
+        "n": 400
+      },
+      "hwd": {
+        "rho": 0.6338,
+        "p": 2.528301370572144e-46,
+        "n": 400
+      }
+    },
+    "gap_density": {
+      "wid_dist": {
+        "rho": 0.6517,
+        "p": 1.024919720463541e-49,
+        "n": 400
+      },
+      "hwd": {
+        "rho": -0.4484,
+        "p": 3.540476091173287e-21,
+        "n": 400
+      }
+    },
+    "gap_lean": {
+      "wid_dist": {
+        "rho": -0.1726,
+        "p": 0.0005239587925896486,
+        "n": 400
+      },
+      "hwd": {
+        "rho": 0.223,
+        "p": 6.674253309789766e-06,
+        "n": 400
+      }
+    },
+    "gap_cc": {
+      "wid_dist": {
+        "rho": 0.2715,
+        "p": 3.446555234036006e-08,
+        "n": 400
+      },
+      "hwd": {
+        "rho": 0.0018,
+        "p": 0.9715671328578798,
+        "n": 400
+      }
+    }
+  },
+  "gap_correlations_baseline": {
+    "gap_stroke": {
+      "wid_dist": {
+        "rho": 0.6609,
+        "p": 1.748792212516385e-26,
+        "n": 200
+      },
+      "hwd": {
+        "rho": 0.436,
+        "p": 1.0990853724304852e-10,
+        "n": 200
+      }
+    },
+    "gap_density": {
+      "wid_dist": {
+        "rho": 0.4753,
+        "p": 1.150272321602324e-12,
+        "n": 200
+      },
+      "hwd": {
+        "rho": 0.5591,
+        "p": 7.619575817838394e-18,
+        "n": 200
+      }
+    },
+    "gap_lean": {
+      "wid_dist": {
+        "rho": 0.0093,
+        "p": 0.8955595183632882,
+        "n": 200
+      },
+      "hwd": {
+        "rho": 0.1485,
+        "p": 0.035861314928472256,
+        "n": 200
+      }
+    },
+    "gap_cc": {
+      "wid_dist": {
+        "rho": 0.2945,
+        "p": 2.303606184165323e-05,
+        "n": 200
+      },
+      "hwd": {
+        "rho": 0.1512,
+        "p": 0.03255586060969863,
+        "n": 200
+      }
+    }
+  },
+  "gap_correlations_glyph_vae": {
+    "gap_stroke": {
+      "wid_dist": {
+        "rho": -0.0837,
+        "p": 0.2384425393465679,
+        "n": 200
+      },
+      "hwd": {
+        "rho": 0.3921,
+        "p": 9.37131511237321e-09,
+        "n": 200
+      }
+    },
+    "gap_density": {
+      "wid_dist": {
+        "rho": 0.0372,
+        "p": 0.6009266079887788,
+        "n": 200
+      },
+      "hwd": {
+        "rho": -0.145,
+        "p": 0.040449820873303115,
+        "n": 200
+      }
+    },
+    "gap_lean": {
+      "wid_dist": {
+        "rho": -0.1823,
+        "p": 0.009774371432491078,
+        "n": 200
+      },
+      "hwd": {
+        "rho": 0.2221,
+        "p": 0.0015748443308583786,
+        "n": 200
+      }
+    },
+    "gap_cc": {
+      "wid_dist": {
+        "rho": 0.3267,
+        "p": 2.3406057726445707e-06,
+        "n": 200
+      },
+      "hwd": {
+        "rho": -0.1133,
+        "p": 0.11026286817894865,
+        "n": 200
+      }
+    }
+  },
+  "interventions": {
+    "baseline": {
+      "stroke": {
+        "mean_delta_wid": -0.21349201747961072,
+        "mean_delta_hwd": 0.023407381650244263,
+        "rel_delta_wid": -0.3099853868046395,
+        "rel_delta_hwd": 0.006607802625259958,
+        "frac_wid_improved": 0.755,
+        "frac_hwd_improved": 0.3,
+        "n": 200
+      },
+      "slant": {
+        "mean_delta_wid": 0.0008288102271929699,
+        "mean_delta_hwd": -0.03733580280647255,
+        "rel_delta_wid": 0.0012034129514401663,
+        "rel_delta_hwd": -0.01053973569052406,
+        "frac_wid_improved": 0.51,
+        "frac_hwd_improved": 0.47,
+        "n": 200
+      },
+      "both": {
+        "mean_delta_wid": -0.22378041002316426,
+        "mean_delta_hwd": -0.07913006860867884,
+        "rel_delta_wid": -0.3249238907349609,
+        "rel_delta_hwd": -0.02233807620614296,
+        "frac_wid_improved": 0.835,
+        "frac_hwd_improved": 0.535,
+        "n": 200
+      },
+      "achieved": {
+        "mean_abs_stroke_gap_before": 2.2664499139785765,
+        "mean_abs_stroke_gap_after": 0.2153489863872528,
+        "mean_abs_lean_gap_before": 8.994183997007495,
+        "mean_abs_lean_gap_after": 2.716119235733059
+      }
+    },
+    "glyph_vae": {
+      "stroke": {
+        "mean_delta_wid": 0.10176951420403255,
+        "mean_delta_hwd": 0.049780983845977095,
+        "rel_delta_wid": 0.22164090594239258,
+        "rel_delta_hwd": 0.01110816441751914,
+        "frac_wid_improved": 0.22,
+        "frac_hwd_improved": 0.4,
+        "n": 199
+      },
+      "slant": {
+        "mean_delta_wid": -0.07180943510034965,
+        "mean_delta_hwd": -0.35391561948933303,
+        "rel_delta_wid": -0.1563917090037783,
+        "rel_delta_hwd": -0.07897298501329948,
+        "frac_wid_improved": 0.735,
+        "frac_hwd_improved": 0.705,
+        "n": 200
+      },
+      "both": {
+        "mean_delta_wid": 0.07000674806810121,
+        "mean_delta_hwd": -0.20227265402079164,
+        "rel_delta_wid": 0.15246568862249682,
+        "rel_delta_hwd": -0.04513526500365646,
+        "frac_wid_improved": 0.31,
+        "frac_hwd_improved": 0.605,
+        "n": 199
+      },
+      "achieved": {
+        "mean_abs_stroke_gap_before": 11.391814544200898,
+        "mean_abs_stroke_gap_after": 7.7675466883182525,
+        "mean_abs_lean_gap_before": 13.972829960154613,
+        "mean_abs_lean_gap_after": 1.1282440795171162
+      }
+    }
+  },
+  "disagreement_examples": [
+    {
+      "backend": "baseline",
+      "writer": "513",
+      "idx": 6,
+      "text": "people who are probably falling all over",
+      "wid_dist": 0.8655165088473138,
+      "hwd": 3.0271521368928442,
+      "wid_pct": 0.958,
+      "hwd_pct": 0.385,
+      "disagreement": 0.573,
+      "reading": "writer-ID: far / HWD: near"
+    },
+    {
+      "backend": "baseline",
+      "writer": "513",
+      "idx": 3,
+      "text": "know now because of prior hypnosis we",
+      "wid_dist": 0.8593384415449422,
+      "hwd": 3.1085690184058357,
+      "wid_pct": 0.953,
+      "hwd_pct": 0.405,
+      "disagreement": 0.548,
+      "reading": "writer-ID: far / HWD: near"
+    },
+    {
+      "backend": "baseline",
+      "writer": "513",
+      "idx": 7,
+      "text": "selves in their zeal to get their orders",
+      "wid_dist": 0.8645977291834523,
+      "hwd": 3.1911065253599733,
+      "wid_pct": 0.955,
+      "hwd_pct": 0.425,
+      "disagreement": 0.53,
+      "reading": "writer-ID: far / HWD: near"
+    },
+    {
+      "backend": "baseline",
+      "writer": "513",
+      "idx": 5,
+      "text": "ting how the thetan machinations had",
+      "wid_dist": 0.8759731325972744,
+      "hwd": 3.2944262568812706,
+      "wid_pct": 0.985,
+      "hwd_pct": 0.46,
+      "disagreement": 0.525,
+      "reading": "writer-ID: far / HWD: near"
+    },
+    {
+      "backend": "baseline",
+      "writer": "513",
+      "idx": 1,
+      "text": "them out just what these orders will be",
+      "wid_dist": 0.8754022607420429,
+      "hwd": 3.2996297509436077,
+      "wid_pct": 0.982,
+      "hwd_pct": 0.462,
+      "disagreement": 0.52,
+      "reading": "writer-ID: far / HWD: near"
+    },
+    {
+      "backend": "glyph_vae",
+      "writer": "173",
+      "idx": 9,
+      "text": "offering to drop by for a chat",
+      "wid_dist": 0.17417342864159058,
+      "hwd": 5.6511155720250414,
+      "wid_pct": 0.35,
+      "hwd_pct": 0.985,
+      "disagreement": -0.635,
+      "reading": "writer-ID: near / HWD: far"
+    },
+    {
+      "backend": "glyph_vae",
+      "writer": "173",
+      "idx": 0,
+      "text": "has rung a couple of times calls from",
+      "wid_dist": 0.2003026568590306,
+      "hwd": 5.622105572601697,
+      "wid_pct": 0.355,
+      "hwd_pct": 0.98,
+      "disagreement": -0.625,
+      "reading": "writer-ID: near / HWD: far"
+    },
+    {
+      "backend": "glyph_vae",
+      "writer": "557",
+      "idx": 1,
+      "text": "of the journey back to the place where",
+      "wid_dist": 0.36282513292715324,
+      "hwd": 5.616975003891408,
+      "wid_pct": 0.408,
+      "hwd_pct": 0.978,
+      "disagreement": -0.57,
+      "reading": "writer-ID: near / HWD: far"
+    },
+    {
+      "backend": "glyph_vae",
+      "writer": "547",
+      "idx": 1,
+      "text": "weep",
+      "wid_dist": 0.36817035435206447,
+      "hwd": 5.64812001388257,
+      "wid_pct": 0.413,
+      "hwd_pct": 0.983,
+      "disagreement": -0.57,
+      "reading": "writer-ID: near / HWD: far"
+    },
+    {
+      "backend": "glyph_vae",
+      "writer": "557",
+      "idx": 6,
+      "text": "parade to boscombe down slept for six",
+      "wid_dist": 0.4092497839000887,
+      "hwd": 6.032678099925313,
+      "wid_pct": 0.44,
+      "hwd_pct": 0.997,
+      "disagreement": -0.557,
+      "reading": "writer-ID: near / HWD: far"
+    }
+  ],
+  "spearman_of_percentiles_check": {
+    "rho": 0.5767,
+    "p": 1.771585260586784e-54,
+    "n": 600
+  }
+}

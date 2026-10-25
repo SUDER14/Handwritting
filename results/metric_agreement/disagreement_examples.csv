@@ -1,0 +1,11 @@
+backend,writer,idx,text,wid_dist,hwd,wid_pct,hwd_pct,disagreement,reading
+baseline,513,6,people who are probably falling all over,0.8655165088473138,3.0271521368928442,0.958,0.385,0.573,writer-ID: far / HWD: near
+baseline,513,3,know now because of prior hypnosis we,0.8593384415449422,3.1085690184058357,0.953,0.405,0.548,writer-ID: far / HWD: near
+baseline,513,7,selves in their zeal to get their orders,0.8645977291834523,3.1911065253599733,0.955,0.425,0.53,writer-ID: far / HWD: near
+baseline,513,5,ting how the thetan machinations had,0.8759731325972744,3.2944262568812706,0.985,0.46,0.525,writer-ID: far / HWD: near
+baseline,513,1,them out just what these orders will be,0.8754022607420429,3.2996297509436077,0.982,0.462,0.52,writer-ID: far / HWD: near
+glyph_vae,173,9,offering to drop by for a chat,0.17417342864159058,5.6511155720250414,0.35,0.985,-0.635,writer-ID: near / HWD: far
+glyph_vae,173,0,has rung a couple of times calls from,0.2003026568590306,5.622105572601697,0.355,0.98,-0.625,writer-ID: near / HWD: far
+glyph_vae,557,1,of the journey back to the place where,0.36282513292715324,5.616975003891408,0.408,0.978,-0.57,writer-ID: near / HWD: far
+glyph_vae,547,1,weep,0.36817035435206447,5.64812001388257,0.413,0.983,-0.57,writer-ID: near / HWD: far
+glyph_vae,557,6,parade to boscombe down slept for six,0.4092497839000887,6.032678099925313,0.44,0.997,-0.557,writer-ID: near / HWD: far
