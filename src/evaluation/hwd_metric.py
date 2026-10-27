@@ -46,10 +46,10 @@ class HWDFeatures:
     @torch.inference_mode()
     def line(self, gray: np.ndarray) -> tuple[np.ndarray, int]:
         img = Image.fromarray(np.asarray(gray, np.uint8)).convert("RGB")
-        x = self.transforms(img).unsqueeze(0)
-        _, _, h, w = x.shape
+        dev = next(self.backbone.model.parameters()).device   # the official HWDScore moves the backbone to cuda if present
+        x = self.transforms(img).unsqueeze(0).to(dev)
         tokens = self.backbone.model(x)[0]                    # (H'*W', 512): official AdjustDims flattening
-        return tokens.sum(0).numpy().astype(np.float64), int(tokens.shape[0])
+        return tokens.sum(0).cpu().numpy().astype(np.float64), int(tokens.shape[0])
 
 
 def set_mean(entries) -> np.ndarray:

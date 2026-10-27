@@ -88,7 +88,7 @@ def run_protocol_cli(args) -> int:
                         r = P.run_writer(scorer, backend, dataset, by_writer[w], K, pcfg, pc["seed"], w)
                         break
                     except Exception as e:           # noqa: BLE001 -- recorded, never silently dropped
-                        logger.warning("writer %s failed (attempt %d): %r", w, attempt + 1, e)
+                        logger.warning("writer %s failed (attempt %d): %r", w, attempt + 1, e, exc_info=True)
                         writer_errors.setdefault(w, []).append(f"{type(e).__name__}: {e}")
                         if not P.is_out_of_memory(e):
                             break

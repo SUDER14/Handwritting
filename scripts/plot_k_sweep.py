@@ -82,7 +82,8 @@ def main() -> int:
             x, y = [r[f"cer_{suffix}"] for r in rows], [r[f"hwd_{suffix}"] for r in rows]
             ax.plot(x, y, "-o", color=color, label=backend)
             for r, xi, yi in zip(rows, x, y):
-                ax.annotate(f"K={r['K']}" + (f" (n={r['writers_scored']})" if suffix == "all_writers" else ""),
+                n = r["writers_scored"] if suffix == "all_writers" else r["common_writers"]
+                ax.annotate(f"K={r['K']} (n={n})",
                             (xi, yi), textcoords="offset points", xytext=(5, 5), fontsize=8)
             ax.set_xlabel("CER (legibility, lower = better)")
             ax.set_ylabel("HWD (style fidelity, lower = better)")

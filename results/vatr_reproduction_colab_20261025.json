@@ -1,0 +1,12 @@
+{
+  "provenance": "transcribed from Colab console output; original file lost with the runtime",
+  "task": "3.2",
+  "reported_by_user_on": "2026-10-25",
+  "hwd": 0.6069005370510291,
+  "published_hwd": 0.828,
+  "n_fake": 25766,
+  "n_real": 25766,
+  "n_writers": 161,
+  "git": {"sha": "39d1bf38"},
+  "gate3_status": "OPEN (not passed); this file changes no threshold"
+}
